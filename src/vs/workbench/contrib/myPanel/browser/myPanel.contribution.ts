@@ -23,6 +23,9 @@ import { IContextKeyService } from '../../../../platform/contextkey/common/conte
 import { IOpenerService } from '../../../../platform/opener/common/opener.js';
 import { IThemeService } from '../../../../platform/theme/common/themeService.js';
 import { IHoverService } from '../../../../platform/hover/browser/hover.js';
+import { ISecretStorageService } from '../../../../platform/secrets/common/secrets.js';
+import { IQuickInputService } from '../../../../platform/quickinput/common/quickInput.js';
+import { INotificationService } from '../../../../platform/notification/common/notification.js';
 
 // Import CSS
 import './media/myPanel.css';
@@ -33,6 +36,7 @@ class MyPanelView extends ViewPane {
 	private container: HTMLElement | undefined;
 	private messagesContainerSelector: HTMLElement | undefined;
 	private inputElement: HTMLInputElement | undefined;
+	private readonly OPENAI_API_KEY_SECRET_KEY = 'openai.api.key';
 
 	constructor(
 		options: IViewPaneOptions,
@@ -45,6 +49,9 @@ class MyPanelView extends ViewPane {
 		@IOpenerService openerService: IOpenerService,
 		@IThemeService themeService: IThemeService,
 		@IHoverService hoverService: IHoverService,
+		@ISecretStorageService private readonly secretStorageService: ISecretStorageService,
+		@IQuickInputService private readonly quickInputService: IQuickInputService,
+		@INotificationService private readonly notificationService: INotificationService,
 	) {
 		super(options, keybindingService, contextMenuService, configurationService, contextKeyService, viewDescriptorService, instantiationService, openerService, themeService, hoverService);
 	}
@@ -146,16 +153,31 @@ class MyPanelView extends ViewPane {
 		}
 	}
 
-	private async appendImage(imageUrl: string): Promise<void> {
+	private async appendAIResponse(response: string): Promise<void> {
 		// Create a container for the API response
 		const apiResponseContainer = document.createElement('div');
-		apiResponseContainer.classList.add('my-panel-text', 'my-panel-text-api');
+		apiResponseContainer.classList.add('my-panel-text', 'my-panel-text-assistant');
 
-		// Create and append the image
-		const image = document.createElement('img');
-		image.src = imageUrl;
-		image.classList.add('my-panel-image');
-		apiResponseContainer.appendChild(image);
+		// Create a header with assistant icon/avatar
+		const headerDiv = document.createElement('div');
+		headerDiv.classList.add('my-panel-message-header');
+
+		const assistantLabel = document.createElement('span');
+		assistantLabel.classList.add('my-panel-assistant-label');
+		assistantLabel.textContent = 'Assistant';
+		headerDiv.appendChild(assistantLabel);
+
+		apiResponseContainer.appendChild(headerDiv);
+
+		// Create content container
+		const contentDiv = document.createElement('div');
+		contentDiv.classList.add('my-panel-message-content');
+
+		// Create and append the formatted content to the content container
+		this.appendFormattedContent(contentDiv, response);
+
+		// Add content to the main container
+		apiResponseContainer.appendChild(contentDiv);
 
 		// Append to the messages container and scroll to bottom
 		if (this.messagesContainerSelector) {
@@ -171,8 +193,7 @@ class MyPanelView extends ViewPane {
 	}
 
 	private async fetchApiResponse(text: string): Promise<void> {
-		// TODO: Implement API response fetching
-		console.log('Fetching API response for:', text);
+		console.log('Sending text to OpenAI API:', text);
 		try {
 			// disable input and button
 			const input = this.container?.querySelector('input');
@@ -183,13 +204,60 @@ class MyPanelView extends ViewPane {
 			if (button) {
 				button.disabled = true;
 			}
-			const response = await fetch('https://dog.ceo/api/breeds/image/random');
 
-			const data = await response.json();
-			console.log('API response:', JSON.stringify(data));
-			if (this.messagesContainerSelector) {
-				this.appendImage(data.message);
+			// Append a loading message
+			const loadingMessage = document.createElement('div');
+			loadingMessage.classList.add('my-panel-text', 'my-panel-text-loading');
+			loadingMessage.textContent = 'Loading response...';
+			this.messagesContainerSelector?.appendChild(loadingMessage);
+			this.scrollToBottom();
+
+			// OpenAI API call
+			const apiKey = await this.getOpenAIAPIKey();
+			if (!apiKey) {
+				this.notificationService.error('No API key available. Please set your OpenAI API key first.');
+				return;
 			}
+
+			const response = await fetch('https://api.openai.com/v1/chat/completions', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': 'Bearer ' + apiKey
+				},
+				body: JSON.stringify({
+					model: 'gpt-4o-mini',
+					messages: [
+						{
+							role: 'user',
+							content: text
+						}
+					],
+					max_tokens: 500
+				})
+			});
+
+			// Remove the loading message
+			if (this.messagesContainerSelector && loadingMessage.parentNode === this.messagesContainerSelector) {
+				this.messagesContainerSelector.removeChild(loadingMessage);
+			}
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => null);
+				console.error('OpenAI API error:', errorData);
+				this.appendAIResponse(`**Error**: ${response.status} - ${response.statusText}\n\n${errorData ? JSON.stringify(errorData, null, 2) : 'No additional error information'}`);
+			} else {
+				const data = await response.json();
+				console.log('OpenAI API response:', data);
+
+				if (data.choices && data.choices.length > 0) {
+					const responseContent = data.choices[0].message.content;
+					this.appendAIResponse(responseContent);
+				} else {
+					this.appendAIResponse('**Error**: Unable to parse response from API.');
+				}
+			}
+
 			// enable input and button
 			if (input) {
 				input.disabled = false;
@@ -200,6 +268,64 @@ class MyPanelView extends ViewPane {
 			}
 		} catch (error) {
 			console.error('Error fetching API response:', error);
+			this.appendAIResponse(`**Error**: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+
+			// Make sure to re-enable input and button in case of error
+			const input = this.container?.querySelector('input');
+			const button = this.container?.querySelector('button');
+			if (input) {
+				input.disabled = false;
+				input.focus();
+			}
+			if (button) {
+				button.disabled = false;
+			}
+		}
+	}
+
+	// Get OpenAI API key from secure storage or prompt user to input it
+	private async getOpenAIAPIKey(): Promise<string | undefined> {
+		// Try to get the key from secret storage
+		let key = await this.secretStorageService.get(this.OPENAI_API_KEY_SECRET_KEY);
+
+		// If the key doesn't exist in storage, prompt the user to enter it
+		if (!key) {
+			key = await this.promptForAPIKey();
+		}
+
+		return key;
+	}
+
+	// Prompt the user to enter their API key
+	private async promptForAPIKey(): Promise<string | undefined> {
+		const result = await this.quickInputService.input({
+			title: 'Enter your OpenAI API Key',
+			placeHolder: 'sk-...',
+			password: true,
+			ignoreFocusLost: true,
+			validateInput: async (value: string) => {
+				if (!value || !value.trim().startsWith('sk-')) {
+					return 'Please enter a valid OpenAI API key starting with "sk-"';
+				}
+				return null;
+			}
+		});
+
+		if (result) {
+			// Store the API key in the secret storage
+			await this.secretStorageService.set(this.OPENAI_API_KEY_SECRET_KEY, result);
+			this.notificationService.info('API key saved securely.');
+			return result;
+		}
+
+		return undefined;
+	}
+
+	// Method to explicitly set or update the API key
+	public async updateAPIKey(): Promise<void> {
+		const newKey = await this.promptForAPIKey();
+		if (newKey) {
+			this.notificationService.info('API key updated successfully.');
 		}
 	}
 
@@ -284,8 +410,26 @@ class MyPanelView extends ViewPane {
 		const messageElement = document.createElement('div');
 		messageElement.classList.add('my-panel-text', 'my-panel-text-user');
 
+		// Create a header with user icon/avatar
+		const headerDiv = document.createElement('div');
+		headerDiv.classList.add('my-panel-message-header');
+
+		const userLabel = document.createElement('span');
+		userLabel.classList.add('my-panel-user-label');
+		userLabel.textContent = 'You';
+		headerDiv.appendChild(userLabel);
+
+		messageElement.appendChild(headerDiv);
+
+		// Create content container
+		const contentDiv = document.createElement('div');
+		contentDiv.classList.add('my-panel-message-content');
+
 		// Create and append content securely using DOM manipulation
-		this.appendFormattedContent(messageElement, text);
+		this.appendFormattedContent(contentDiv, text);
+
+		// Add content to the main container
+		messageElement.appendChild(contentDiv);
 
 		// Append the message and scroll to bottom
 		this.messagesContainerSelector.appendChild(messageElement);
@@ -334,6 +478,52 @@ registerAction2(class extends Action2 {
 
 			// Then focus the specific view
 			viewsService.openView(viewDescriptor.id, true);
+		}
+	}
+});
+
+// Register a command to update the API key
+registerAction2(class extends Action2 {
+	constructor() {
+		super({
+			id: 'workbench.action.updateOpenAIAPIKey',
+			title: { value: localize('updateOpenAIAPIKey', "Update OpenAI API Key"), original: 'Update OpenAI API Key' },
+			category: Categories.View,
+			f1: true
+		});
+	}
+
+	async run(accessor: ServicesAccessor): Promise<void> {
+		const viewsService = accessor.get(IViewsService);
+		const view = viewsService.getActiveViewWithId('myPanelView') as MyPanelView | undefined;
+
+		if (view) {
+			await view.updateAPIKey();
+		} else {
+			const instantiationService = accessor.get(IInstantiationService);
+			const notificationService = accessor.get(INotificationService);
+
+			// If the view is not active, we need to get access to secretStorageService differently
+			const secretStorageService = accessor.get(ISecretStorageService);
+			const quickInputService = accessor.get(IQuickInputService);
+
+			const result = await quickInputService.input({
+				title: 'Enter your OpenAI API Key',
+				placeHolder: 'sk-...',
+				password: true,
+				ignoreFocusLost: true,
+				validateInput: async (value: string) => {
+					if (!value || !value.trim().startsWith('sk-')) {
+						return 'Please enter a valid OpenAI API key starting with "sk-"';
+					}
+					return null;
+				}
+			});
+
+			if (result) {
+				await secretStorageService.set('openai.api.key', result);
+				notificationService.info('API key saved securely.');
+			}
 		}
 	}
 });
