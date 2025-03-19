@@ -1,5 +1,5 @@
-/* My Panel Styles */
-.my-panel-container {
+/* DevSphere Styles */
+.dev-sphere-container {
     display: flex;
     flex-direction: column;
     background-color: var(--vscode-editor-background);
@@ -11,7 +11,7 @@
 }
 
 /* Messages container */
-.my-panel-messages {
+.dev-sphere-messages {
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -24,7 +24,7 @@
 }
 
 /* Text content (individual messages) */
-.my-panel-text {
+.dev-sphere-text {
     line-height: 1.6;
     padding: 16px;
     border-radius: 6px;
@@ -37,7 +37,7 @@
 }
 
 /* User message styling */
-.my-panel-text-user {
+.dev-sphere-text-user {
     background-color: var(--vscode-tab-activeBackground, var(--vscode-editor-background));
     color: var(--vscode-editor-foreground);
     border-top-right-radius: 2px;
@@ -50,7 +50,7 @@
     border-right: 3px solid var(--vscode-activityBarBadge-background);
 }
 
-.my-panel-text-user::before {
+.dev-sphere-text-user::before {
     content: "";
     position: absolute;
     top: 0;
@@ -62,7 +62,7 @@
 }
 
 /* Assistant message styling */
-.my-panel-text-assistant {
+.dev-sphere-text-assistant {
     background-color: var(--vscode-editor-background);
     color: var(--vscode-editor-foreground);
     border-top-left-radius: 2px;
@@ -76,7 +76,7 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.my-panel-text-assistant::before {
+.dev-sphere-text-assistant::before {
     content: "";
     position: absolute;
     top: 0;
@@ -88,21 +88,21 @@
 }
 
 /* Code blocks in assistant messages - make softer */
-.my-panel-text-assistant pre {
+.dev-sphere-text-assistant pre {
     background-color: var(--vscode-notebook-cellEditorBackground, var(--vscode-editor-background));
     border: 1px solid var(--vscode-notebook-cellBorderColor, var(--vscode-dropdown-border));
     box-shadow: none;
 }
 
 /* Inline code in assistant messages */
-.my-panel-text-assistant code {
+.dev-sphere-text-assistant code {
     background-color: var(--vscode-notebook-cellEditorBackground, var(--vscode-editor-background));
     color: var(--vscode-editor-foreground);
     opacity: 0.9;
 }
 
 /* Input section - fixed at the bottom */
-.my-panel-section {
+.dev-sphere-section {
     display: flex;
     gap: 10px;
     padding: 12px 20px;
@@ -118,7 +118,7 @@
     margin-top: auto; /* Push to bottom if not enough content */
 }
 
-.my-panel-section input {
+.dev-sphere-section input {
     flex: 1;
     padding: 8px 12px;
     background-color: var(--vscode-input-background);
@@ -129,17 +129,17 @@
     height: 32px;
 }
 
-.my-panel-section input:focus {
+.dev-sphere-section input:focus {
     border-color: var(--vscode-focusBorder);
     outline: none;
 }
 
-.my-panel-section input::placeholder {
+.dev-sphere-section input::placeholder {
     color: var(--vscode-input-placeholderForeground);
     opacity: 0.8;
 }
 
-.my-panel-section button {
+.dev-sphere-section button {
     background-color: var(--vscode-button-background);
     color: var(--vscode-button-foreground);
     border: none;
@@ -153,16 +153,16 @@
     transition: background-color 0.2s;
 }
 
-.my-panel-section button:hover {
+.dev-sphere-section button:hover {
     background-color: var(--vscode-button-hoverBackground);
 }
 
-.my-panel-section button:active {
+.dev-sphere-section button:active {
     transform: translateY(1px);
 }
 
 /* Enhanced code blocks styling */
-.my-panel-text pre {
+.dev-sphere-text pre {
     background-color: var(--vscode-textCodeBlock-background);
     border-radius: 4px;
     padding: 12px;
@@ -174,27 +174,27 @@
 }
 
 /* Code block scrollbars */
-.my-panel-text pre::-webkit-scrollbar {
+.dev-sphere-text pre::-webkit-scrollbar {
     height: 6px;
     width: 6px;
 }
 
-.my-panel-text pre::-webkit-scrollbar-track {
+.dev-sphere-text pre::-webkit-scrollbar-track {
     background: var(--vscode-scrollbarSlider-background, rgba(100, 100, 100, 0.2));
     border-radius: 3px;
 }
 
-.my-panel-text pre::-webkit-scrollbar-thumb {
+.dev-sphere-text pre::-webkit-scrollbar-thumb {
     background-color: var(--vscode-scrollbarSlider-hoverBackground, rgba(100, 100, 100, 0.5));
     border-radius: 3px;
 }
 
-.my-panel-text pre::-webkit-scrollbar-thumb:hover {
+.dev-sphere-text pre::-webkit-scrollbar-thumb:hover {
     background-color: var(--vscode-scrollbarSlider-activeBackground, rgba(100, 100, 100, 0.7));
 }
 
 /* Inline code styling */
-.my-panel-text code {
+.dev-sphere-text code {
     font-family: var(--monaco-monospace-font);
     background-color: var(--vscode-textCodeBlock-background);
     padding: 2px 4px;
@@ -203,22 +203,22 @@
 }
 
 /* Code in user messages */
-.my-panel-text-user code,
-.my-panel-text-user pre {
+.dev-sphere-text-user code,
+.dev-sphere-text-user pre {
     background-color: var(--vscode-notebook-cellEditorBackground, var(--vscode-editor-background));
     border-color: var(--vscode-notebook-cellBorderColor, var(--vscode-dropdown-border));
     color: var(--vscode-editor-foreground);
 }
 
 /* Enhance user message hover */
-.my-panel-text-user:hover {
+.dev-sphere-text-user:hover {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
     transform: translateY(-1px);
     transition: all 0.2s ease;
 }
 
 /* Bold text */
-.my-panel-text strong {
+.dev-sphere-text strong {
     font-weight: 600;
 }
 
@@ -229,7 +229,7 @@
 }
 
 /* Empty state when no messages */
-.my-panel-messages:empty::after {
+.dev-sphere-messages:empty::after {
     content: "No messages yet. Type something below to get started.";
     display: block;
     text-align: center;
@@ -239,32 +239,25 @@
 }
 
 /* Scrollbar styling */
-.my-panel-messages::-webkit-scrollbar {
+.dev-sphere-messages::-webkit-scrollbar {
     width: 8px;
 }
 
-.my-panel-messages::-webkit-scrollbar-track {
+.dev-sphere-messages::-webkit-scrollbar-track {
     background: transparent;
 }
 
-.my-panel-messages::-webkit-scrollbar-thumb {
+.dev-sphere-messages::-webkit-scrollbar-thumb {
     background-color: var(--vscode-scrollbarSlider-background);
     border-radius: 4px;
 }
 
-.my-panel-messages::-webkit-scrollbar-thumb:hover {
+.dev-sphere-messages::-webkit-scrollbar-thumb:hover {
     background-color: var(--vscode-scrollbarSlider-hoverBackground);
 }
 
 /* Add subtle hover effect to assistant messages too */
-.my-panel-text-assistant:hover {
+.dev-sphere-text-assistant:hover {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
     transition: all 0.2s ease;
-}
-
-.my-panel-image {
-    width: 400px;
-    height: 400px;
-    object-fit: cover;
-	border-radius: 4px;
 }

@@ -28,11 +28,11 @@ import { IQuickInputService } from '../../../../platform/quickinput/common/quick
 import { INotificationService } from '../../../../platform/notification/common/notification.js';
 
 // Import CSS
-import './media/myPanel.css';
+import './media/DevSphere.css';
 
 // Define your panel view class
-class MyPanelView extends ViewPane {
-	static readonly ID = 'myPanelView';
+class DevSphereView extends ViewPane {
+	static readonly ID = 'devSphereView';
 	private container: HTMLElement | undefined;
 	private messagesContainerSelector: HTMLElement | undefined;
 	private inputElement: HTMLInputElement | undefined;
@@ -61,11 +61,11 @@ class MyPanelView extends ViewPane {
 		this.container = container;
 
 		// Add CSS class to the container
-		container.classList.add('my-panel-container');
+		container.classList.add('dev-sphere-container');
 
 		// Create a messages container
 		const messagesContainer = document.createElement('div');
-		messagesContainer.classList.add('my-panel-messages');
+		messagesContainer.classList.add('dev-sphere-messages');
 		container.appendChild(messagesContainer);
 
 		// Set the reference AFTER we've created and appended the element
@@ -77,8 +77,8 @@ class MyPanelView extends ViewPane {
 		// Add each message as a separate element with sender class
 		messages.forEach(message => {
 			const messageElement = document.createElement('div');
-			messageElement.classList.add('my-panel-text');
-			messageElement.classList.add(`my-panel-text-${message.sender}`);
+			messageElement.classList.add('dev-sphere-text');
+			messageElement.classList.add(`dev-sphere-text-${message.sender}`);
 
 			// Create and append content securely using DOM manipulation
 			this.appendFormattedContent(messageElement, message.text);
@@ -96,7 +96,7 @@ class MyPanelView extends ViewPane {
 	private createInputSection(container: HTMLElement): void {
 		// Create a section with a title
 		const section = document.createElement('div');
-		section.classList.add('my-panel-section');
+		section.classList.add('dev-sphere-section');
 
 		const input = document.createElement('input');
 		input.type = 'text';
@@ -156,14 +156,14 @@ class MyPanelView extends ViewPane {
 	private async appendAIResponse(response: string): Promise<void> {
 		// Create a container for the API response
 		const apiResponseContainer = document.createElement('div');
-		apiResponseContainer.classList.add('my-panel-text', 'my-panel-text-assistant');
+		apiResponseContainer.classList.add('dev-sphere-text', 'dev-sphere-text-assistant');
 
 		// Create a header with assistant icon/avatar
 		const headerDiv = document.createElement('div');
-		headerDiv.classList.add('my-panel-message-header');
+		headerDiv.classList.add('dev-sphere-message-header');
 
 		const assistantLabel = document.createElement('span');
-		assistantLabel.classList.add('my-panel-assistant-label');
+		assistantLabel.classList.add('dev-sphere-assistant-label');
 		assistantLabel.textContent = 'Assistant';
 		headerDiv.appendChild(assistantLabel);
 
@@ -171,7 +171,7 @@ class MyPanelView extends ViewPane {
 
 		// Create content container
 		const contentDiv = document.createElement('div');
-		contentDiv.classList.add('my-panel-message-content');
+		contentDiv.classList.add('dev-sphere-message-content');
 
 		// Create and append the formatted content to the content container
 		this.appendFormattedContent(contentDiv, response);
@@ -207,7 +207,7 @@ class MyPanelView extends ViewPane {
 
 			// Append a loading message
 			const loadingMessage = document.createElement('div');
-			loadingMessage.classList.add('my-panel-text', 'my-panel-text-loading');
+			loadingMessage.classList.add('dev-sphere-text', 'dev-sphere-text-loading');
 			loadingMessage.textContent = 'Loading response...';
 			this.messagesContainerSelector?.appendChild(loadingMessage);
 			this.scrollToBottom();
@@ -408,14 +408,14 @@ class MyPanelView extends ViewPane {
 
 		// Create a new message element
 		const messageElement = document.createElement('div');
-		messageElement.classList.add('my-panel-text', 'my-panel-text-user');
+		messageElement.classList.add('dev-sphere-text', 'dev-sphere-text-user');
 
 		// Create a header with user icon/avatar
 		const headerDiv = document.createElement('div');
-		headerDiv.classList.add('my-panel-message-header');
+		headerDiv.classList.add('dev-sphere-message-header');
 
 		const userLabel = document.createElement('span');
-		userLabel.classList.add('my-panel-user-label');
+		userLabel.classList.add('dev-sphere-user-label');
 		userLabel.textContent = 'You';
 		headerDiv.appendChild(userLabel);
 
@@ -423,7 +423,7 @@ class MyPanelView extends ViewPane {
 
 		// Create content container
 		const contentDiv = document.createElement('div');
-		contentDiv.classList.add('my-panel-message-content');
+		contentDiv.classList.add('dev-sphere-message-content');
 
 		// Create and append content securely using DOM manipulation
 		this.appendFormattedContent(contentDiv, text);
@@ -438,30 +438,30 @@ class MyPanelView extends ViewPane {
 }
 
 // Register the view container
-const MY_PANEL_CONTAINER_ID = 'myPanel';
-const MY_PANEL_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainerExtensions.ViewContainersRegistry).registerViewContainer({
-	id: MY_PANEL_CONTAINER_ID,
-	title: { value: localize('myPanel', "My Panel"), original: 'My Panel' },
+const DEV_SPHERE_CONTAINER_ID = 'devSphere';
+const DEV_SPHERE_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainerExtensions.ViewContainersRegistry).registerViewContainer({
+	id: DEV_SPHERE_CONTAINER_ID,
+	title: { value: localize('devSphere', "DevSphere"), original: 'DevSphere' },
 	icon: Codicon.window,
-	ctorDescriptor: new SyncDescriptor(ViewPaneContainer, [MY_PANEL_CONTAINER_ID, { mergeViewWithContainerWhenSingleView: true }]),
-	storageId: MY_PANEL_CONTAINER_ID,
+	ctorDescriptor: new SyncDescriptor(ViewPaneContainer, [DEV_SPHERE_CONTAINER_ID, { mergeViewWithContainerWhenSingleView: true }]),
+	storageId: DEV_SPHERE_CONTAINER_ID,
 }, ViewContainerLocation.AuxiliaryBar);
 
 // Register the view
 Registry.as<IViewsRegistry>(ViewContainerExtensions.ViewsRegistry).registerViews([{
-	id: 'myPanelView',
-	name: { value: localize('myPanelView', "My Panel View"), original: 'My Panel View' },
-	ctorDescriptor: new SyncDescriptor(MyPanelView),
+	id: 'devSphereView',
+	name: { value: localize('devSphereView', "DevSphere"), original: 'DevSphere' },
+	ctorDescriptor: new SyncDescriptor(DevSphereView),
 	canToggleVisibility: true,
 	canMoveView: true,
-}], MY_PANEL_CONTAINER);
+}], DEV_SPHERE_CONTAINER);
 
 // Register a command to show the panel
 registerAction2(class extends Action2 {
 	constructor() {
 		super({
-			id: 'workbench.action.showMyPanel',
-			title: { value: localize('showMyPanel', "Show My Panel"), original: 'Show My Panel' },
+			id: 'workbench.action.showDevSphere',
+			title: { value: localize('showDevSphere', "Show DevSphere"), original: 'Show DevSphere' },
 			category: Categories.View,
 			f1: true
 		});
@@ -470,11 +470,11 @@ registerAction2(class extends Action2 {
 	run(accessor: ServicesAccessor): void {
 		const viewsService = accessor.get(IViewsService);
 		const viewDescriptorService = accessor.get(IViewDescriptorService);
-		const viewDescriptor = viewDescriptorService.getViewDescriptorById('myPanelView');
+		const viewDescriptor = viewDescriptorService.getViewDescriptorById('devSphereView');
 
 		if (viewDescriptor) {
 			// First ensure the view container is visible
-			viewsService.openViewContainer(MY_PANEL_CONTAINER_ID, true);
+			viewsService.openViewContainer(DEV_SPHERE_CONTAINER_ID, true);
 
 			// Then focus the specific view
 			viewsService.openView(viewDescriptor.id, true);
@@ -495,12 +495,11 @@ registerAction2(class extends Action2 {
 
 	async run(accessor: ServicesAccessor): Promise<void> {
 		const viewsService = accessor.get(IViewsService);
-		const view = viewsService.getActiveViewWithId('myPanelView') as MyPanelView | undefined;
+		const view = viewsService.getActiveViewWithId('devSphereView') as DevSphereView | undefined;
 
 		if (view) {
 			await view.updateAPIKey();
 		} else {
-			const instantiationService = accessor.get(IInstantiationService);
 			const notificationService = accessor.get(INotificationService);
 
 			// If the view is not active, we need to get access to secretStorageService differently
@@ -529,13 +528,13 @@ registerAction2(class extends Action2 {
 });
 
 // Register your contribution
-class MyPanelContribution implements IWorkbenchContribution {
+class DevSphereContribution implements IWorkbenchContribution {
 	constructor(@IInstantiationService instantiationService: IInstantiationService) {
 		// Initialize your panel
 	}
 }
 
 Registry.as<IWorkbenchContributionsRegistry>(WorkbenchExtensions.Workbench).registerWorkbenchContribution(
-	MyPanelContribution,
+	DevSphereContribution,
 	LifecyclePhase.Restored
 );
