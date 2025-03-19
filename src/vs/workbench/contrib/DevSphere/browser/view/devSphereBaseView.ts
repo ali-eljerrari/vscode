@@ -107,7 +107,6 @@ export class DevSphereView extends ViewPane {
 			mainContent,
 			this.devSphereService,
 			this.viewModel,
-			() => this.chatSelectorComponent?.showChatSelector()
 		);
 
 		// Create chat content container (will be shown/hidden based on active tab)

@@ -16,7 +16,6 @@ export class DevSphereHeader extends Disposable {
 		private readonly container: HTMLElement,
 		private readonly devSphereService: IDevSphereService,
 		private readonly viewModel: DevSphereViewModel,
-		private readonly onShowChatsClicked: () => void
 	) {
 		super();
 
@@ -92,25 +91,6 @@ export class DevSphereHeader extends Disposable {
 		});
 		headerActions.appendChild(this.chatActionsButton);
 
-		// Browse chats button
-		const browseButton = document.createElement('button');
-		browseButton.className = 'dev-sphere-action-button dev-sphere-browse-chats-button';
-
-		// Get chat count
-		const chatCount = this.viewModel.allChats.length;
-		const browseButtonHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span>All Chats</span>
-            ${chatCount > 0 ? `<span class="dev-sphere-chat-count">${chatCount}</span>` : ''}
-        `;
-		DOM.safeInnerHtml(browseButton, browseButtonHTML);
-		browseButton.title = 'Browse and manage chats';
-		browseButton.addEventListener('click', () => {
-			this.onShowChatsClicked();
-		});
-		headerActions.appendChild(browseButton);
 
 		this.headerElement.appendChild(headerActions);
 	}
@@ -132,11 +112,6 @@ export class DevSphereHeader extends Disposable {
 		// Create the dropdown menu
 		dropdownMenu = mainWindow.document.createElement('div');
 		dropdownMenu.className = 'dev-sphere-chat-actions-dropdown';
-
-		// Add menu items
-		this.addDropdownMenuItem(dropdownMenu, 'New Chat', () => {
-			this.viewModel.createNewChat();
-		}, 'plus');
 
 		this.addDropdownMenuItem(dropdownMenu, 'Clear Chat', () => {
 			this.viewModel.clearMessages();

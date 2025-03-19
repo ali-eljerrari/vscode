@@ -10,11 +10,39 @@
 /* Extra small devices (phones, less than 640px) */
 @media (max-width: var(--dev-sphere-breakpoint-sm)) {
     .dev-sphere-container {
-        padding: var(--dev-sphere-spacing-xs);
+        padding: var(--dev-sphere-spacing-sm);
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+    }
+
+    .dev-sphere-main-layout {
+        flex-direction: column;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dev-sphere-main-content {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dev-sphere-sidebar {
+        width: 100%;
+        min-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dev-sphere-message {
+        max-width: 100%;
     }
 
     .dev-sphere-header {
-        padding: var(--dev-sphere-spacing-xs);
+        padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-sm);
     }
 
     .dev-sphere-header-title {
@@ -23,6 +51,15 @@
 
     .dev-sphere-model-selector {
         max-width: 120px;
+        padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-xs);
+    }
+
+    .dev-sphere-action-button {
+        padding: var(--dev-sphere-spacing-xs);
+    }
+
+    .dev-sphere-action-button span {
+        display: none;
     }
 
     .dev-sphere-message {
@@ -55,10 +92,34 @@
 @media (min-width: var(--dev-sphere-breakpoint-sm)) {
     .dev-sphere-container {
         padding: var(--dev-sphere-spacing-sm);
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
     }
 
-    .dev-sphere-header {
-        padding: var(--dev-sphere-spacing-sm);
+    .dev-sphere-main-layout {
+        flex-direction: column;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dev-sphere-main-content {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dev-sphere-sidebar {
+        width: 100%;
+        min-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dev-sphere-message {
+        max-width: 90%;
     }
 
     .dev-sphere-model-selector {
@@ -78,15 +139,30 @@
 @media (min-width: var(--dev-sphere-breakpoint-md)) {
     .dev-sphere-container {
         padding: var(--dev-sphere-spacing-md);
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
     }
 
     .dev-sphere-main-layout {
         flex-direction: row;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dev-sphere-main-content {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
     }
 
     .dev-sphere-sidebar {
         width: 280px;
         min-width: 280px;
+        margin: 0;
+        padding: 0;
     }
 
     .dev-sphere-message {
@@ -106,11 +182,16 @@
 @media (min-width: var(--dev-sphere-breakpoint-lg)) {
     .dev-sphere-container {
         padding: var(--dev-sphere-spacing-lg);
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
     }
 
     .dev-sphere-sidebar {
         width: 320px;
         min-width: 320px;
+        margin: 0;
+        padding: 0;
     }
 
     .dev-sphere-message {
@@ -130,11 +211,16 @@
 @media (min-width: var(--dev-sphere-breakpoint-xl)) {
     .dev-sphere-container {
         padding: var(--dev-sphere-spacing-xl);
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
     }
 
     .dev-sphere-sidebar {
         width: 360px;
         min-width: 360px;
+        margin: 0;
+        padding: 0;
     }
 
     .dev-sphere-message {

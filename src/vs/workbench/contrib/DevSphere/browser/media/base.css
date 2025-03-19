@@ -11,11 +11,11 @@
     color: var(--vscode-editor-foreground);
     font-family: var(--dev-sphere-font-family);
     height: 100%;
+    width: 100%;
     overflow: hidden;
     position: relative;
-    max-width: var(--dev-sphere-container-max-width);
-    margin: 0 auto;
-    padding: var(--dev-sphere-container-padding);
+    margin: 0;
+    padding: 0;
 }
 
 /* Main layout with sidebar */
@@ -24,6 +24,8 @@
     width: 100%;
     height: 100%;
     gap: var(--dev-sphere-spacing-md);
+    margin: 0;
+    padding: 0;
 }
 
 .dev-sphere-main-content {
@@ -32,11 +34,26 @@
     flex: 1;
     min-width: 0;
     height: 100%;
+    width: 100%;
     overflow: hidden;
     position: relative;
     background-color: var(--vscode-editor-background);
     border-radius: var(--dev-sphere-radius-lg);
     box-shadow: var(--dev-sphere-shadow-md);
+    margin: 0;
+    padding: 0;
+}
+
+.dev-sphere-sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--vscode-editor-background);
+    border-radius: var(--dev-sphere-radius-lg);
+    box-shadow: var(--dev-sphere-shadow-md);
+    margin: 0;
+    padding: 0;
 }
 
 /* Button styles */

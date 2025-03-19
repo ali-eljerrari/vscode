@@ -9,7 +9,6 @@ import { Disposable } from '../../../../../base/common/lifecycle.js';
 import * as DOM from '../../../../../base/browser/dom.js';
 
 export class DevSphereChatSelector extends Disposable {
-	private chatSelectorDialog: HTMLDivElement;
 	private dialogOverlay: HTMLDivElement;
 	private chatListContainer: HTMLDivElement;
 
@@ -27,18 +26,10 @@ export class DevSphereChatSelector extends Disposable {
 		this.container.appendChild(this.dialogOverlay);
 
 		// Create chat selector dialog
-		this.chatSelectorDialog = document.createElement('div');
-		this.chatSelectorDialog.classList.add('dev-sphere-chat-selector');
-		this.container.appendChild(this.chatSelectorDialog);
 
 		// Create header
 		const header = document.createElement('div');
 		header.classList.add('dev-sphere-chat-selector-header');
-
-		const title = document.createElement('div');
-		title.classList.add('dev-sphere-chat-selector-title');
-		title.textContent = 'All Chats';
-		header.appendChild(title);
 
 		const closeButton = document.createElement('div');
 		closeButton.classList.add('dev-sphere-chat-selector-close');
@@ -49,7 +40,6 @@ export class DevSphereChatSelector extends Disposable {
 		});
 		header.appendChild(closeButton);
 
-		this.chatSelectorDialog.appendChild(header);
 
 		// Create search box
 		const searchContainer = document.createElement('div');
@@ -63,12 +53,10 @@ export class DevSphereChatSelector extends Disposable {
 		});
 		searchContainer.appendChild(searchInput);
 
-		this.chatSelectorDialog.appendChild(searchContainer);
 
 		// Create chat list container
 		this.chatListContainer = document.createElement('div');
 		this.chatListContainer.classList.add('dev-sphere-chat-selector-list');
-		this.chatSelectorDialog.appendChild(this.chatListContainer);
 
 		// Add event listener to close dialog when clicking outside
 		this.dialogOverlay.addEventListener('click', () => {
@@ -83,11 +71,10 @@ export class DevSphereChatSelector extends Disposable {
 	 * Shows the chat selector dialog
 	 */
 	public showChatSelector(): void {
-		this.chatSelectorDialog.classList.add('show');
 		this.dialogOverlay.classList.add('show');
 
 		// Focus search input
-		const searchInput = this.chatSelectorDialog.querySelector('input');
+		const searchInput = this.chatListContainer.querySelector('input');
 		if (searchInput) {
 			searchInput.focus();
 		}
@@ -97,7 +84,6 @@ export class DevSphereChatSelector extends Disposable {
 	 * Hides the chat selector dialog
 	 */
 	public hideChatSelector(): void {
-		this.chatSelectorDialog.classList.remove('show');
 		this.dialogOverlay.classList.remove('show');
 	}
 
