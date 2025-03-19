@@ -95,6 +95,9 @@ export class DevSphereMessages extends Disposable {
 			}
 		});
 
+		// Check for scrollable code blocks
+		this.updateCodeBlocksScrollState();
+
 		// If previously at bottom, scroll to bottom again
 		if (wasScrolledToBottom) {
 			this.scrollToBottom();
@@ -102,6 +105,24 @@ export class DevSphereMessages extends Disposable {
 
 		// Update scrollable class
 		this.updateScrollableClass();
+	}
+
+	/**
+	 * Updates the scrollable state of code blocks
+	 */
+	private updateCodeBlocksScrollState(): void {
+		// Find all pre elements
+		const preElements = this.messagesContainer.querySelectorAll('pre');
+
+		// Check each pre element
+		preElements.forEach(pre => {
+			// Check if content is taller than visible area
+			if (pre.scrollHeight > pre.clientHeight) {
+				pre.classList.add('scrollable');
+			} else {
+				pre.classList.remove('scrollable');
+			}
+		});
 	}
 
 	/**
@@ -198,7 +219,17 @@ export class DevSphereMessages extends Disposable {
 		content.className = 'dev-sphere-message-content';
 
 		// Use renderMarkdown to get the content
-		const htmlContent = this.renderMarkdown(message.content);
+		const htmlContent = `
+			<div class="dev-sphere-message-content-container">
+				<div class="dev-sphere-message-role">
+					${message.role === 'user' ? 'You' : 'AI Assistant'}
+				</div>
+				<div class="dev-sphere-message-text">
+					${this.renderMarkdown(message.content)}
+				</div>
+			</div>
+		`;
+
 		DOM.safeInnerHtml(content, htmlContent);
 
 		messageElement.appendChild(content);
@@ -301,7 +332,130 @@ export class DevSphereMessages extends Disposable {
 
 	// Simple markdown renderer - would be replaced with a proper markdown formatting module
 	private renderMarkdown(text: string): string {
-		// A simple placeholder implementation
-		return text.replace(/\n/g, '<br/>');
+		// A more advanced placeholder implementation with code block handling
+		let formattedText = text.replace(/\n/g, '<br/>');
+
+		// Process code blocks with triple backticks
+		formattedText = formattedText.replace(/```(.*?)<br\/>(.*?)<br\/>```/gs, (match, language, codeContent) => {
+			// Split the code into lines
+			const lines = codeContent.split('<br/>');
+			let codeWithLines = '';
+
+			// Store raw content for the copy button (without HTML escaping)
+			const rawCodeContent = lines.join('\n');
+
+			// Wrap each line with a span to enable line numbering via CSS
+			lines.forEach((line: string) => {
+				// Escape HTML to prevent rendering issues
+				const escapedLine = this.escapeHTML(line);
+				codeWithLines += `<span>${escapedLine}</span>\n`;
+			});
+
+			// Determine language class if specified
+			const langClass = language ? ` class="language-${language.trim()}"` : '';
+
+			// Create unique ID for this code block
+			const blockId = `code-block-${Math.random().toString(36).substring(2, 9)}`;
+
+			// Prepare language label for toolbar
+			const langLabel = language && language.trim() ?
+				`<span class="dev-sphere-code-language">${this.escapeHTML(language.trim())}</span>` : '';
+
+			// Include copy button with data attributes
+			const copyButton = `<button class="dev-sphere-copy-button" title="Copy code" data-code-content="${this.escapeHTML(rawCodeContent)}" data-block-id="${blockId}">
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+					<path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+				</svg>
+			</button>`;
+
+			// Ensure copy functionality is initialized only once
+			if (!this.hasCopyHandlersAdded) {
+				this.initializeCopyFunctionality();
+			}
+
+			// Return the formatted code block with copy button and language indicator
+			return `<pre id="${blockId}">${langLabel}${copyButton}<code${langClass}>${codeWithLines}</code></pre>`;
+		});
+
+		return formattedText;
+	}
+
+	// Track if we've added the event handlers
+	private hasCopyHandlersAdded: boolean = false;
+
+	/**
+	 * Initialize copy button functionality using DOM events instead of script injection
+	 */
+	private initializeCopyFunctionality(): void {
+		// Use event delegation for efficiency
+		this.messagesContainer.addEventListener('click', (e) => {
+			const target = e.target as HTMLElement;
+
+			// Find the clicked button or its ancestor
+			const copyButton = target.closest('.dev-sphere-copy-button') as HTMLButtonElement | null;
+
+			if (copyButton) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				// Get content from data attribute
+				const content = copyButton.getAttribute('data-code-content') || '';
+
+				// Copy to clipboard
+				navigator.clipboard.writeText(content).then(() => {
+					// Show copied state
+					copyButton.classList.add('copied');
+
+					// Store original SVG
+					const originalSvg = copyButton.innerHTML;
+
+					// Show checkmark
+					copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+					// Reset after 2 seconds
+					setTimeout(() => {
+						copyButton.classList.remove('copied');
+						copyButton.innerHTML = originalSvg;
+					}, 2000);
+				}).catch(() => {
+					// Handle errors silently
+				});
+			}
+		});
+
+		// Add scrollability detection for code blocks
+		this.messagesContainer.addEventListener('DOMNodeInserted', (e) => {
+			if (e.target instanceof HTMLElement) {
+				// Check for pre elements
+				const preElements = e.target.tagName === 'PRE' ? [e.target] :
+					Array.from(e.target.querySelectorAll('pre'));
+
+				if (preElements.length > 0) {
+					// Use setTimeout to wait for content to render properly
+					setTimeout(() => {
+						preElements.forEach(pre => {
+							if (pre.scrollHeight > pre.clientHeight) {
+								pre.classList.add('scrollable');
+							}
+						});
+					}, 100);
+				}
+			}
+		});
+
+		this.hasCopyHandlersAdded = true;
+	}
+
+	/**
+	 * Helper to escape HTML special characters
+	 */
+	private escapeHTML(text: string): string {
+		return text
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
 	}
 }

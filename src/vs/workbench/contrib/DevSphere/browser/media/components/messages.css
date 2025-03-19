@@ -196,35 +196,228 @@
 }
 
 .dev-sphere-message-content pre {
-    background-color: var(--vscode-editor-inactiveSelectionBackground);
-    border-radius: var(--dev-sphere-radius-lg);
-    padding: var(--dev-sphere-spacing-md);
-    margin: var(--dev-sphere-spacing-md) 0;
+    position: relative;
+    background-color: var(--vscode-editor-background);
+    border-radius: var(--dev-sphere-radius-md);
+    padding: var(--dev-sphere-spacing-xl) var(--dev-sphere-spacing-md) var(--dev-sphere-spacing-md);
+    margin: var(--dev-sphere-spacing-lg) 0;
     overflow-x: auto;
     font-family: var(--dev-sphere-font-family);
     font-size: var(--dev-sphere-font-size-sm);
-    line-height: var(--dev-sphere-line-height);
+    line-height: 1.5;
     border: 1px solid var(--vscode-editorWidget-border);
-    position: relative;
+    box-shadow: var(--dev-sphere-shadow-sm);
+    counter-reset: line;
+    max-height: 400px;
 }
 
+/* Add a subtle inner shadow to indicate scrollability */
+.dev-sphere-message-content pre.scrollable {
+    box-shadow: var(--dev-sphere-shadow-sm), inset 0 -8px 8px -8px rgba(0, 0, 0, 0.15);
+}
+
+/* Add a scroll indicator at the bottom of scrollable code blocks */
+.dev-sphere-message-content pre.scrollable::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 12px;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.1));
+    pointer-events: none;
+    border-radius: 0 0 var(--dev-sphere-radius-md) var(--dev-sphere-radius-md);
+    animation: pulse-opacity 2s ease-in-out infinite;
+}
+
+@keyframes pulse-opacity {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 0.3; }
+}
+
+/* Optional: Line numbers effect */
+.dev-sphere-message-content pre code {
+    background-color: transparent;
+    padding: 0 1em 1em 3.5em;
+    border-radius: 0;
+    font-size: 1em;
+    white-space: pre;
+    display: block;
+    tab-size: 2;
+    position: relative;
+    padding-top: 0.75em;
+}
+
+/* Line number appearance */
+.dev-sphere-message-content pre code::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2.5em;
+    height: 100%;
+    border-right: 1px solid var(--vscode-editorWidget-border);
+    background-color: var(--vscode-editorWidget-background);
+    opacity: 0.8;
+    border-radius: 0 0 0 var(--dev-sphere-radius-sm);
+}
+
+/* Each line gets a line number using CSS counters */
+.dev-sphere-message-content pre code > span {
+    display: inline-block;
+    width: 100%;
+    position: relative;
+    padding-left: 0.5em;
+    min-height: 1.5em;
+    transition: background-color 0.1s ease;
+}
+
+.dev-sphere-message-content pre code > span::before {
+    counter-increment: line;
+    content: counter(line);
+    position: absolute;
+    left: -3em;
+    width: 2.5em;
+    color: var(--vscode-editorLineNumber-foreground);
+    opacity: 0.7;
+    font-size: 0.85em;
+    text-align: right;
+    padding-right: 0.75em;
+    user-select: none;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Line hover effect with subtle animation */
+.dev-sphere-message-content pre code > span:hover {
+    background-color: var(--vscode-editor-hoverHighlightBackground);
+    border-radius: var(--dev-sphere-radius-sm);
+    animation: line-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes line-pulse {
+    from {
+        background-color: var(--vscode-editor-hoverHighlightBackground);
+    }
+    to {
+        background-color: var(--vscode-editor-selectionBackground);
+    }
+}
+
+/* Improve line number hover effect */
+.dev-sphere-message-content pre code > span:hover::before {
+    color: var(--vscode-editorLineNumber-activeForeground);
+    opacity: 1;
+}
+
+/* Code block toolbar/header */
 .dev-sphere-message-content pre::before {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 3px;
-    background: linear-gradient(to right, var(--dev-sphere-primary), transparent);
-    border-radius: var(--dev-sphere-radius-lg) var(--dev-sphere-radius-lg) 0 0;
+    right: 0;
+    height: 30px;
+    background-color: var(--vscode-editorWidget-background);
+    border-bottom: 1px solid var(--vscode-editorWidget-border);
+    border-radius: var(--dev-sphere-radius-md) var(--dev-sphere-radius-md) 0 0;
 }
 
-.dev-sphere-message-content pre code {
+/* Language indicator in toolbar */
+.dev-sphere-code-language {
+    position: absolute;
+    top: 0;
+    right: 42px;
+    font-size: 11px;
+    padding: 2px 8px;
+    margin: 5px 0;
+    color: var(--vscode-descriptionForeground);
+    background-color: var(--vscode-badge-background);
+    border-radius: var(--dev-sphere-radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    opacity: 0.7;
+    z-index: 1;
+    transition: opacity 0.2s ease;
+}
+
+.dev-sphere-code-language:hover {
+    opacity: 1;
+}
+
+/* Copy button for code blocks */
+.dev-sphere-message-content pre {
+    position: relative;
+}
+
+.dev-sphere-copy-button {
+    position: absolute;
+    top: 2px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--dev-sphere-radius-sm);
     background-color: transparent;
-    padding: 0;
-    border-radius: 0;
-    font-size: 1em;
-    white-space: pre;
+    border: none;
+    color: var(--vscode-descriptionForeground);
+    cursor: pointer;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity var(--dev-sphere-transition-base), background-color var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-message-content pre:hover .dev-sphere-copy-button {
+    opacity: 0.8;
+}
+
+.dev-sphere-copy-button:hover {
+    opacity: 1 !important;
+    background-color: var(--vscode-button-hoverBackground);
+    color: var(--vscode-button-foreground);
+}
+
+.dev-sphere-copy-button:active {
+    transform: translateY(1px);
+}
+
+.dev-sphere-copy-button.copied {
+    background-color: var(--dev-sphere-success);
+    color: var(--vscode-button-foreground);
+    opacity: 1;
+}
+
+/* Toolbar fake buttons */
+.dev-sphere-message-content pre::after {
+    content: "• • •";
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 7px 12px;
+    font-size: 15px;
+    color: var(--vscode-descriptionForeground);
+    letter-spacing: 2px;
+}
+
+/* Syntax highlighting simulation (for code that isn't actually highlighted) */
+.dev-sphere-message-content pre .keyword {
+    color: var(--vscode-editorToken-keywordForeground);
+}
+
+.dev-sphere-message-content pre .string {
+    color: var(--vscode-editorToken-stringForeground);
+}
+
+.dev-sphere-message-content pre .comment {
+    color: var(--vscode-editorComment-foreground);
+    font-style: italic;
+}
+
+.dev-sphere-message-content pre .type {
+    color: var(--vscode-editorToken-typeNameForeground);
+}
+
+.dev-sphere-message-content pre .function {
+    color: var(--vscode-editorToken-functionForeground);
 }
 
 /* Tables */
