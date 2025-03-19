@@ -11,27 +11,104 @@ import { IStorageService, StorageScope, StorageTarget } from '../../../../platfo
 
 // Define available OpenAI models
 export interface OpenAIModel {
-	id: string;
-	name: string;
-	description: string;
+	ChatgptModels: {
+		models: {
+			id: string;
+			name: string;
+			description: string;
+		}[];
+		endPoint: string;
+	};
+	AnthropicModels: {
+		models: {
+			id: string;
+			name: string;
+			description: string;
+		}[];
+		endPoint: string;
+	};
+	GoogleModels: {
+		models: {
+			id: string;
+			name: string;
+			description: string;
+		}[];
+		endPoint: string;
+	};
 }
 
 export const OPENAI_MODELS: OpenAIModel[] = [
-	// Low cost models
-	{ id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo, Cheapest option for basic tasks', description: 'Cheapest option for basic tasks' },
-	{ id: 'gpt-4o-mini', name: 'GPT-4o mini, Affordable small model with good capabilities', description: 'Affordable small model with good capabilities' },
-	{ id: 'o1-mini', name: 'o1-mini, Affordable reasoning model', description: 'Affordable reasoning model' },
+	{
+		ChatgptModels: {
+			models: [
+				// Low cost models
+				{ id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo, Cheapest option for basic tasks', description: 'Cheapest option for basic tasks' },
+				{ id: 'gpt-4o-mini', name: 'GPT-4o mini, Affordable small model with good capabilities', description: 'Affordable small model with good capabilities' },
+				{ id: 'o1-mini', name: 'o1-mini, Affordable reasoning model', description: 'Affordable reasoning model' },
 
-	// Mid-range models
-	{ id: 'o3-mini', name: 'o3-mini, Mid-range reasoning model', description: 'Mid-range reasoning model' },
-	{ id: 'gpt-4-turbo', name: 'GPT-4 Turbo, Mid-range versatile model', description: 'Mid-range versatile model' },
-	{ id: 'gpt-4o', name: 'GPT-4o, High-quality versatile model', description: 'High-quality versatile model' },
+				// Mid-range models
+				{ id: 'o3-mini', name: 'o3-mini, Mid-range reasoning model', description: 'Mid-range reasoning model' },
+				{ id: 'gpt-4-turbo', name: 'GPT-4 Turbo, Mid-range versatile model', description: 'Mid-range versatile model' },
+				{ id: 'gpt-4o', name: 'GPT-4o, High-quality versatile model', description: 'High-quality versatile model' },
 
-	// Premium models
-	{ id: 'gpt-4', name: 'GPT-4, Premium model for complex tasks', description: 'Premium model for complex tasks' },
-	{ id: 'o1', name: 'o1, Premium reasoning model', description: 'Premium reasoning model' },
-	{ id: 'gpt-4.5-preview', name: 'GPT-4.5 Preview, Most expensive, most capable GPT model', description: 'Most expensive, most capable GPT model' }
+				// Premium models
+				{ id: 'gpt-4', name: 'GPT-4, Premium model for complex tasks', description: 'Premium model for complex tasks' },
+				{ id: 'o1', name: 'o1, Premium reasoning model', description: 'Premium reasoning model' },
+				{ id: 'gpt-4.5-preview', name: 'GPT-4.5 Preview, Most expensive, most capable GPT model', description: 'Most expensive, most capable GPT model' },
+			],
+			endPoint: 'https://api.openai.com/v1/chat/completions'
+		},
+		// Anthropic Models
+		AnthropicModels: {
+			models: [
+				// Fast models
+				{ id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', description: 'Intelligence at blazing speeds' },
+
+				// High performance models
+				{ id: 'claude-3-opus-20240229', name: 'Claude 3 Opus', description: 'Powerful model for complex tasks' },
+				{ id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', description: 'High intelligence and capability' },
+				{ id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', description: 'Most intelligent model with extended thinking' },
+			],
+			endPoint: 'https://api.anthropic.com/v1/messages'
+		},
+
+		// Google Models
+		GoogleModels: {
+			models: [
+				// Gemini 2.0 models
+				{ id: 'gemini-2.0-pro-experimental', name: 'Gemini 2.0 Pro Experimental', description: 'Top model for coding and complex prompts' },
+
+				// Gemini 2.0 models
+				{ id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', description: 'Powerful workhorse with low latency' },
+				{ id: 'gemini-2.0-flash-thinking', name: 'Gemini 2.0 Flash Thinking', description: 'Enhanced reasoning with visible thought process' },
+				{ id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash-Lite', description: 'Most cost-efficient model' },
+
+			],
+			endPoint: 'https://generativelanguage.googleapis.com/v1beta/models'
+		}
+	}
+
+
+
 ];
+
+export interface Message {
+	id: string;
+	role: 'user' | 'assistant' | 'system' | 'loading';
+	content: string;
+	timestamp: number;
+
+	// Optional model-specific features
+	thinking?: string;       // For models that support showing reasoning steps (e.g. Google "thinking" models)
+	toolCalls?: any[];       // For models that support tool calls (Function Calling)
+	followUpQuestions?: string[]; // Suggested follow-up questions
+	attachments?: {          // For messages with attachments like code snippets or images
+		type: 'code' | 'image' | 'file';
+		content: string;     // Content or URL
+		language?: string;   // For code snippets
+		name?: string;       // For files
+	}[];
+}
 
 export interface Chat {
 	id: string;
@@ -39,13 +116,17 @@ export interface Chat {
 	messages: Message[];
 	lastModified: number;
 	modelId: string;
-}
+	provider?: 'ChatgptModels' | 'AnthropicModels' | 'GoogleModels';
 
-export interface Message {
-	id: string;
-	role: 'user' | 'assistant' | 'system' | 'loading';
-	content: string;
-	timestamp: number;
+	// Additional metadata to enhance UI
+	modelCapabilities?: {
+		supportsImages?: boolean;
+		supportsCode?: boolean;
+		supportsThinking?: boolean;
+		supportsFunctionCalling?: boolean;
+	};
+	pinnedMessages?: string[]; // IDs of pinned messages
+	tags?: string[];           // User-defined tags for organization
 }
 
 export interface IDevSphereService {
@@ -58,6 +139,18 @@ export interface IDevSphereService {
 	getCurrentModel(): OpenAIModel;
 	setCurrentModel(modelId: string): void;
 
+	// Model info and provider switching
+	getCurrentModelId(): string;
+	getCurrentModelType(): string;
+	getCurrentModelName(): string;
+	getCurrentProviderName(): string;
+	getAvailableModelsByProvider(providerType: 'ChatgptModels' | 'AnthropicModels' | 'GoogleModels'): { id: string; name: string; description: string; provider: string }[];
+	findModelsByCapability(capability: 'coding' | 'reasoning' | 'speed' | 'cost-effective'): { id: string; name: string; description: string; provider: string }[];
+
+	// Helper methods
+	getModelInfoById(modelId: string): { provider: 'ChatgptModels' | 'AnthropicModels' | 'GoogleModels'; info: { id: string; name: string; description: string } } | null;
+	getProviderNameFromType(providerType: 'ChatgptModels' | 'AnthropicModels' | 'GoogleModels'): string;
+
 	// Chat persistence
 	saveChat(chat: Chat): Promise<void>;
 	loadChat(chatId: string): Promise<Chat | undefined>;
@@ -69,14 +162,19 @@ export interface IDevSphereService {
 export const IDevSphereService = createDecorator<IDevSphereService>('devSphereService');
 
 export class DevSphereService implements IDevSphereService {
+	// API key storage keys for different providers
 	private readonly OPENAI_API_KEY_SECRET_KEY = 'openai.api.key';
-	private readonly API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+	private readonly ANTHROPIC_API_KEY_SECRET_KEY = 'anthropic.api.key';
+	private readonly GOOGLE_API_KEY_SECRET_KEY = 'google.api.key';
+
 	private readonly MODEL_STORAGE_KEY = 'openai.model.id';
 	private readonly CHATS_STORAGE_KEY = 'devSphere.chats';
 	private readonly MAX_TOKENS = 500;
 
-	// Current model, default to gpt-4o-mini
-	private currentModel: OpenAIModel = OPENAI_MODELS[1];
+	// Current model, default to first model in OPENAI_MODELS
+	private currentModel: OpenAIModel = OPENAI_MODELS[0];
+	private currentModelId: string = 'gpt-4o-mini'; // Default model ID
+	private currentModelType: 'ChatgptModels' | 'AnthropicModels' | 'GoogleModels' = 'ChatgptModels'; // Default model type
 
 	constructor(
 		@ISecretStorageService private readonly secretStorageService: ISecretStorageService,
@@ -92,9 +190,34 @@ export class DevSphereService implements IDevSphereService {
 		// Try to get the saved model ID from storage service
 		const savedModelId = this.storageService.get(this.MODEL_STORAGE_KEY, StorageScope.PROFILE);
 		if (savedModelId) {
-			const matchedModel = OPENAI_MODELS.find(model => model.id === savedModelId);
-			if (matchedModel) {
-				this.currentModel = matchedModel;
+			// Find the model with the saved ID across all provider models
+			for (const model of OPENAI_MODELS) {
+				// Check ChatGPT models
+				const chatgptMatch = model.ChatgptModels.models.find(m => m.id === savedModelId);
+				if (chatgptMatch) {
+					this.currentModel = model;
+					this.currentModelId = savedModelId;
+					this.currentModelType = 'ChatgptModels';
+					return;
+				}
+
+				// Check Anthropic models
+				const anthropicMatch = model.AnthropicModels.models.find(m => m.id === savedModelId);
+				if (anthropicMatch) {
+					this.currentModel = model;
+					this.currentModelId = savedModelId;
+					this.currentModelType = 'AnthropicModels';
+					return;
+				}
+
+				// Check Google models
+				const googleMatch = model.GoogleModels.models.find(m => m.id === savedModelId);
+				if (googleMatch) {
+					this.currentModel = model;
+					this.currentModelId = savedModelId;
+					this.currentModelType = 'GoogleModels';
+					return;
+				}
 			}
 		}
 	}
@@ -107,43 +230,253 @@ export class DevSphereService implements IDevSphereService {
 		return this.currentModel;
 	}
 
-	public setCurrentModel(modelId: string): void {
-		const model = OPENAI_MODELS.find(m => m.id === modelId);
-		if (model) {
-			this.currentModel = model;
-			// Save preference to storage service
-			this.storageService.store(this.MODEL_STORAGE_KEY, modelId, StorageScope.PROFILE, StorageTarget.USER);
+	public getCurrentModelId(): string {
+		return this.currentModelId;
+	}
+
+	public getCurrentModelType(): string {
+		return this.currentModelType;
+	}
+
+	public getCurrentModelName(): string {
+		const models = this.currentModel[this.currentModelType].models;
+		const model = models.find(m => m.id === this.currentModelId);
+		return model ? model.name : this.currentModelId;
+	}
+
+	public getCurrentProviderName(): string {
+		return this.getProviderNameFromType(this.currentModelType);
+	}
+
+	public getAvailableModelsByProvider(providerType: 'ChatgptModels' | 'AnthropicModels' | 'GoogleModels'): { id: string; name: string; description: string; provider: string }[] {
+		// Get all models for a specific provider from all model definitions
+		const modelsForProvider: { id: string; name: string; description: string; provider: string }[] = [];
+
+		// Get provider name for the type
+		const providerName = this.getProviderNameFromType(providerType);
+
+		for (const model of OPENAI_MODELS) {
+			if (model[providerType] && model[providerType].models) {
+				// Add the provider name to each model
+				const modelsWithProvider = model[providerType].models.map(m => ({
+					...m,
+					provider: providerName
+				}));
+				modelsForProvider.push(...modelsWithProvider);
+			}
+		}
+
+		return modelsForProvider;
+	}
+
+	// Helper to get provider name from type
+	public getProviderNameFromType(providerType: 'ChatgptModels' | 'AnthropicModels' | 'GoogleModels'): string {
+		switch (providerType) {
+			case 'ChatgptModels':
+				return 'OpenAI';
+			case 'AnthropicModels':
+				return 'Anthropic';
+			case 'GoogleModels':
+				return 'Google';
+			default:
+				return 'AI';
 		}
 	}
 
+	public setCurrentModel(modelId: string): void {
+		// Find the model with the given ID across all provider models
+		for (const model of OPENAI_MODELS) {
+			// Check ChatGPT models
+			const chatgptMatch = model.ChatgptModels.models.find(m => m.id === modelId);
+			if (chatgptMatch) {
+				this.currentModel = model;
+				this.currentModelId = modelId;
+				this.currentModelType = 'ChatgptModels';
+				this.storageService.store(this.MODEL_STORAGE_KEY, modelId, StorageScope.PROFILE, StorageTarget.USER);
+				return;
+			}
+
+			// Check Anthropic models
+			const anthropicMatch = model.AnthropicModels.models.find(m => m.id === modelId);
+			if (anthropicMatch) {
+				this.currentModel = model;
+				this.currentModelId = modelId;
+				this.currentModelType = 'AnthropicModels';
+				this.storageService.store(this.MODEL_STORAGE_KEY, modelId, StorageScope.PROFILE, StorageTarget.USER);
+				return;
+			}
+
+			// Check Google models
+			const googleMatch = model.GoogleModels.models.find(m => m.id === modelId);
+			if (googleMatch) {
+				this.currentModel = model;
+				this.currentModelId = modelId;
+				this.currentModelType = 'GoogleModels';
+				this.storageService.store(this.MODEL_STORAGE_KEY, modelId, StorageScope.PROFILE, StorageTarget.USER);
+				return;
+			}
+		}
+	}
+
+	// Helper to get the current API endpoint based on model type
+	private getCurrentEndpoint(): string {
+		return this.currentModel[this.currentModelType].endPoint;
+	}
+
+	// Helper method to get information about a specific model by ID
+	public getModelInfoById(modelId: string): { provider: 'ChatgptModels' | 'AnthropicModels' | 'GoogleModels'; info: { id: string; name: string; description: string } } | null {
+		for (const model of OPENAI_MODELS) {
+			// Check ChatGPT models
+			const chatgptMatch = model.ChatgptModels.models.find(m => m.id === modelId);
+			if (chatgptMatch) {
+				return { provider: 'ChatgptModels', info: chatgptMatch };
+			}
+
+			// Check Anthropic models
+			const anthropicMatch = model.AnthropicModels.models.find(m => m.id === modelId);
+			if (anthropicMatch) {
+				return { provider: 'AnthropicModels', info: anthropicMatch };
+			}
+
+			// Check Google models
+			const googleMatch = model.GoogleModels.models.find(m => m.id === modelId);
+			if (googleMatch) {
+				return { provider: 'GoogleModels', info: googleMatch };
+			}
+		}
+
+		return null;
+	}
+
+	// Helper to format the request body based on the provider
+	private formatRequestBody(prompt: string): any {
+		switch (this.currentModelType) {
+			case 'ChatgptModels':
+				return {
+					model: this.currentModelId,
+					messages: [
+						{
+							role: 'user',
+							content: prompt
+						}
+					],
+					max_tokens: this.MAX_TOKENS
+				};
+			case 'AnthropicModels':
+				return {
+					model: this.currentModelId,
+					messages: [
+						{
+							role: 'user',
+							content: prompt
+						}
+					],
+					max_tokens: this.MAX_TOKENS
+				};
+			case 'GoogleModels':
+				return {
+					model: this.currentModelId,
+					contents: [
+						{
+							role: 'user',
+							parts: [{ text: prompt }]
+						}
+					],
+					maxTokens: this.MAX_TOKENS
+				};
+			default:
+				throw new Error(`Unsupported model type: ${this.currentModelType}`);
+		}
+	}
+
+	// Helper to extract response content based on the provider
+	private extractResponseContent(data: any): string {
+		switch (this.currentModelType) {
+			case 'ChatgptModels':
+				if (data.choices && data.choices.length > 0) {
+					return data.choices[0].message.content;
+				}
+				break;
+			case 'AnthropicModels':
+				if (data.content && data.content.length > 0) {
+					return data.content[0].text;
+				}
+				break;
+			case 'GoogleModels':
+				if (data.candidates && data.candidates.length > 0 &&
+					data.candidates[0].content &&
+					data.candidates[0].content.parts &&
+					data.candidates[0].content.parts.length > 0) {
+					return data.candidates[0].content.parts[0].text;
+				}
+				break;
+		}
+		throw new Error('Unable to parse response from API.');
+	}
+
+	// Get the appropriate API key for the current model provider
 	public async getOpenAIAPIKey(): Promise<string | undefined> {
+		let keySecretKey = this.OPENAI_API_KEY_SECRET_KEY;
+
+		// Determine which key to use based on the current model type
+		switch (this.currentModelType) {
+			case 'ChatgptModels':
+				keySecretKey = this.OPENAI_API_KEY_SECRET_KEY;
+				break;
+			case 'AnthropicModels':
+				keySecretKey = this.ANTHROPIC_API_KEY_SECRET_KEY;
+				break;
+			case 'GoogleModels':
+				keySecretKey = this.GOOGLE_API_KEY_SECRET_KEY;
+				break;
+		}
+
 		// Try to get the key from secret storage
-		let key = await this.secretStorageService.get(this.OPENAI_API_KEY_SECRET_KEY);
+		let key = await this.secretStorageService.get(keySecretKey);
 
 		// If the key doesn't exist in storage, prompt the user to enter it
 		if (!key) {
-			key = await this.promptForAPIKey();
+			key = await this.promptForAPIKey(this.currentModelType);
 		}
 
 		return key;
 	}
 
 	public async updateAPIKey(): Promise<void> {
-		const newKey = await this.promptForAPIKey();
+		const newKey = await this.promptForAPIKey(this.currentModelType);
 		if (newKey) {
-			this.notificationService.info('API key updated successfully.');
+			this.notificationService.info(`${this.getCurrentProviderName()} API key updated successfully.`);
 		}
 	}
 
-	private async promptForAPIKey(): Promise<string | undefined> {
+	private async promptForAPIKey(modelType: 'ChatgptModels' | 'AnthropicModels' | 'GoogleModels'): Promise<string | undefined> {
+		const providerName = this.getCurrentProviderName();
+		let keyPattern = '';
+		let secretKey = '';
+
+		switch (modelType) {
+			case 'ChatgptModels':
+				keyPattern = 'sk-';
+				secretKey = this.OPENAI_API_KEY_SECRET_KEY;
+				break;
+			case 'AnthropicModels':
+				keyPattern = 'sk-';  // Anthropic also uses sk- prefix
+				secretKey = this.ANTHROPIC_API_KEY_SECRET_KEY;
+				break;
+			case 'GoogleModels':
+				keyPattern = '';  // Google keys don't have a specific prefix
+				secretKey = this.GOOGLE_API_KEY_SECRET_KEY;
+				break;
+		}
+
 		const result = await this.quickInputService.input({
-			title: 'Enter your OpenAI API Key',
-			placeHolder: 'sk-...',
+			title: `Enter your ${providerName} API Key`,
+			placeHolder: keyPattern ? `${keyPattern}...` : 'Enter API key...',
 			password: true,
 			ignoreFocusLost: true,
 			validateInput: async (value: string) => {
-				if (!value || !value.trim().startsWith('sk-')) {
-					return 'Please enter a valid OpenAI API key starting with "sk-"';
+				if (!value || (keyPattern && !value.trim().startsWith(keyPattern))) {
+					return `Please enter a valid ${providerName} API key${keyPattern ? ` starting with "${keyPattern}"` : ''}`;
 				}
 				return null;
 			}
@@ -151,7 +484,7 @@ export class DevSphereService implements IDevSphereService {
 
 		if (result) {
 			// Store the API key in the secret storage
-			await this.secretStorageService.set(this.OPENAI_API_KEY_SECRET_KEY, result);
+			await this.secretStorageService.set(secretKey, result);
 			this.notificationService.info('API key saved securely.');
 			return result;
 		}
@@ -166,22 +499,31 @@ export class DevSphereService implements IDevSphereService {
 		}
 
 		try {
-			const response = await fetch(this.API_ENDPOINT, {
+			const endpoint = this.getCurrentEndpoint();
+			const requestBody = this.formatRequestBody(prompt);
+
+			// Add appropriate authentication headers based on the model provider
+			const headers: Record<string, string> = {
+				'Content-Type': 'application/json',
+			};
+
+			switch (this.currentModelType) {
+				case 'ChatgptModels':
+					headers['Authorization'] = `Bearer ${apiKey}`;
+					break;
+				case 'AnthropicModels':
+					headers['x-api-key'] = apiKey;
+					headers['anthropic-version'] = '2023-06-01';
+					break;
+				case 'GoogleModels':
+					headers['Authorization'] = `Bearer ${apiKey}`;
+					break;
+			}
+
+			const response = await fetch(endpoint, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${apiKey}`
-				},
-				body: JSON.stringify({
-					model: this.currentModel.id,
-					messages: [
-						{
-							role: 'user',
-							content: prompt
-						}
-					],
-					max_tokens: this.MAX_TOKENS
-				})
+				headers,
+				body: JSON.stringify(requestBody)
 			});
 
 			if (!response.ok) {
@@ -192,11 +534,7 @@ export class DevSphereService implements IDevSphereService {
 			}
 
 			const data = await response.json();
-			if (data.choices && data.choices.length > 0) {
-				return data.choices[0].message.content;
-			} else {
-				throw new Error('Unable to parse response from API.');
-			}
+			return this.extractResponseContent(data);
 		} catch (error) {
 			if (error instanceof Error) {
 				throw error;
@@ -209,6 +547,18 @@ export class DevSphereService implements IDevSphereService {
 	public async saveChat(chat: Chat): Promise<void> {
 		// Update last modified time
 		chat.lastModified = Date.now();
+
+		// If the chat doesn't have a provider field, add it
+		if (!chat.provider) {
+			// Find the provider for the model ID
+			const modelInfo = this.getModelInfoById(chat.modelId);
+			if (modelInfo) {
+				chat.provider = modelInfo.provider;
+			} else {
+				// Default to current provider if model can't be found
+				chat.provider = this.currentModelType;
+			}
+		}
 
 		// Get existing chats
 		const chats = await this.getAllChats();
@@ -262,12 +612,114 @@ export class DevSphereService implements IDevSphereService {
 	}
 
 	public createNewChat(): Chat {
+		const modelName = this.getCurrentModelName();
+		const providerName = this.getCurrentProviderName();
+
+		// Determine model capabilities based on model ID and provider
+		const modelCapabilities = this.getModelCapabilities(this.currentModelId, this.currentModelType);
+
 		return {
 			id: `chat-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-			title: 'New Chat',
+			title: `New ${providerName} ${modelName} Chat`,
 			messages: [],
 			lastModified: Date.now(),
-			modelId: this.currentModel.id
+			modelId: this.currentModelId,
+			provider: this.currentModelType,
+			modelCapabilities,
+			tags: []
 		};
+	}
+
+	// Helper to determine model capabilities based on model ID and provider
+	private getModelCapabilities(modelId: string, providerType: 'ChatgptModels' | 'AnthropicModels' | 'GoogleModels'): Chat['modelCapabilities'] {
+		// Base capabilities - conservative defaults
+		const capabilities: Chat['modelCapabilities'] = {
+			supportsImages: false,
+			supportsCode: true,
+			supportsThinking: false,
+			supportsFunctionCalling: false
+		};
+
+		// Enhance based on provider
+		switch (providerType) {
+			case 'ChatgptModels':
+				// Most OpenAI models support function calling
+				capabilities.supportsFunctionCalling = true;
+
+				// GPT-4 models support images
+				if (modelId.includes('gpt-4')) {
+					capabilities.supportsImages = true;
+				}
+				break;
+
+			case 'AnthropicModels':
+				// Claude models support images
+				capabilities.supportsImages = true;
+				break;
+
+			case 'GoogleModels':
+				// Gemini models with "thinking" in the name support thinking
+				if (modelId.includes('thinking')) {
+					capabilities.supportsThinking = true;
+				}
+
+				// Most Gemini models support images
+				capabilities.supportsImages = true;
+				break;
+		}
+
+		return capabilities;
+	}
+
+	public findModelsByCapability(capability: 'coding' | 'reasoning' | 'speed' | 'cost-effective'): { id: string; name: string; description: string; provider: string }[] {
+		const result: { id: string; name: string; description: string; provider: string }[] = [];
+
+		// Define keywords to search for in model names and descriptions
+		const keywordMap: Record<string, string[]> = {
+			'coding': ['code', 'programming', 'developer'],
+			'reasoning': ['reasoning', 'think', 'thinking', 'smart'],
+			'speed': ['fast', 'speed', 'quick', 'haiku', 'flash', 'turbo'],
+			'cost-effective': ['cheap', 'affordable', 'cost', 'mini']
+		};
+
+		const keywords = keywordMap[capability];
+
+		// Search all models across all providers
+		for (const model of OPENAI_MODELS) {
+			// OpenAI models
+			for (const m of model.ChatgptModels.models) {
+				const nameAndDesc = (m.name + ' ' + m.description).toLowerCase();
+				if (keywords.some(keyword => nameAndDesc.includes(keyword.toLowerCase()))) {
+					result.push({
+						...m,
+						provider: 'OpenAI'
+					});
+				}
+			}
+
+			// Anthropic models
+			for (const m of model.AnthropicModels.models) {
+				const nameAndDesc = (m.name + ' ' + m.description).toLowerCase();
+				if (keywords.some(keyword => nameAndDesc.includes(keyword.toLowerCase()))) {
+					result.push({
+						...m,
+						provider: 'Anthropic'
+					});
+				}
+			}
+
+			// Google models
+			for (const m of model.GoogleModels.models) {
+				const nameAndDesc = (m.name + ' ' + m.description).toLowerCase();
+				if (keywords.some(keyword => nameAndDesc.includes(keyword.toLowerCase()))) {
+					result.push({
+						...m,
+						provider: 'Google'
+					});
+				}
+			}
+		}
+
+		return result;
 	}
 }

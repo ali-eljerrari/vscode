@@ -30,7 +30,6 @@ import { DevSphereHistory } from './devSphereHistory.js';
 export class DevSphereView extends ViewPane {
 	static readonly ID = 'devSphereView';
 
-	private container: HTMLElement | undefined;
 	private viewModel: DevSphereViewModel;
 	private chatSelectorComponent: DevSphereChatSelector | undefined;
 	private messagesComponent: DevSphereMessages | undefined;
@@ -87,7 +86,6 @@ export class DevSphereView extends ViewPane {
 	}
 
 	protected override renderBody(container: HTMLElement): void {
-		this.container = container;
 		container.classList.add('dev-sphere-container');
 
 		// Add view tabs at the top
@@ -145,23 +143,6 @@ export class DevSphereView extends ViewPane {
 			this.quickInputService,
 			() => this.focusInput()
 		);
-
-		// Add keyboard shortcuts
-		this.addKeyboardShortcuts();
-
-		// Create chat tabs at bottom of header (for new chat creation within Chat view)
-		this.createChatTabs();
-
-		// Initialize view
-		this.messagesComponent.updateMessages();
-	}
-
-	/**
-	 * Creates the chat tabs for new chat creation
-	 */
-	private createChatTabs(): void {
-		// New Chat button has been moved to the header
-		// Empty function as we no longer need tabs or buttons here
 	}
 
 	/**
@@ -183,43 +164,6 @@ export class DevSphereView extends ViewPane {
 			}
 			this.historyComponent?.setVisible(true);
 		}
-	}
-
-	/**
-	 * Add keyboard shortcuts for common actions
-	 */
-	private addKeyboardShortcuts(): void {
-		// Listen for keyboard shortcuts on the container
-		this.container?.addEventListener('keydown', (e) => {
-			// Ctrl/Cmd+N for new chat
-			if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-				e.preventDefault();
-				this.viewModel.createNewChat();
-			}
-
-			// Ctrl/Cmd+O to open chat selector
-			if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
-				e.preventDefault();
-				this.chatSelectorComponent?.showChatSelector();
-			}
-
-			// Escape to close dialogs
-			if (e.key === 'Escape') {
-				this.chatSelectorComponent?.hideChatSelector();
-			}
-
-			// Ctrl/Cmd+1 to switch to Chat tab
-			if ((e.ctrlKey || e.metaKey) && e.key === '1') {
-				e.preventDefault();
-				this.viewTabsComponent?.switchView(DevSphereViewType.Chat);
-			}
-
-			// Ctrl/Cmd+2 to switch to History tab
-			if ((e.ctrlKey || e.metaKey) && e.key === '2') {
-				e.preventDefault();
-				this.viewTabsComponent?.switchView(DevSphereViewType.History);
-			}
-		});
 	}
 
 	// Method to focus the input
@@ -252,9 +196,12 @@ export class DevSphereView extends ViewPane {
 	 * Adds a system message indicating the model has been changed
 	 */
 	public addModelChangeMessage(modelId: string): void {
-		const model = this.devSphereService.getAvailableModels().find(m => m.id === modelId);
-		if (model) {
-			this.viewModel.addSystemMessage(`Model changed to **${model.name}** (${model.description})`);
+		// Get model info using the service's helper method
+		const modelInfo = this.devSphereService.getModelInfoById(modelId);
+		if (modelInfo) {
+			const { info, provider } = modelInfo;
+			const providerName = this.devSphereService.getProviderNameFromType(provider);
+			this.viewModel.addSystemMessage(`Model changed to **${info.name}** (${providerName})`);
 		}
 	}
 

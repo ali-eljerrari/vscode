@@ -49,18 +49,45 @@ export class DevSphereHeader extends Disposable {
 		const modelSelector = document.createElement('select');
 		modelSelector.className = 'dev-sphere-model-selector';
 
-		// Get available models
-		const availableModels = this.devSphereService.getAvailableModels();
-		const currentModel = this.devSphereService.getCurrentModel();
+		// Get current model ID
+		const currentModelId = this.devSphereService.getCurrentModelId();
 
-		// Add options for each model
-		availableModels.forEach(model => {
-			const option = document.createElement('option');
-			option.value = model.id;
-			option.text = model.name;
-			option.selected = model.id === currentModel.id;
-			modelSelector.appendChild(option);
-		});
+		// Get all models from all providers
+		const openaiModels = this.devSphereService.getAvailableModelsByProvider('ChatgptModels');
+		const anthropicModels = this.devSphereService.getAvailableModelsByProvider('AnthropicModels');
+		const googleModels = this.devSphereService.getAvailableModelsByProvider('GoogleModels');
+
+		// Create option groups for each provider
+		const createOptionGroup = (label: string, models: { id: string; name: string; description: string; provider: string }[]) => {
+			const group = document.createElement('optgroup');
+			group.label = label;
+
+			for (const model of models) {
+				const option = document.createElement('option');
+				option.value = model.id;
+				option.text = model.name;
+				option.title = model.description;
+				option.selected = model.id === currentModelId;
+				group.appendChild(option);
+			}
+
+			return group;
+		};
+
+		// Add OpenAI models
+		if (openaiModels.length > 0) {
+			modelSelector.appendChild(createOptionGroup('OpenAI', openaiModels));
+		}
+
+		// Add Anthropic models
+		if (anthropicModels.length > 0) {
+			modelSelector.appendChild(createOptionGroup('Anthropic', anthropicModels));
+		}
+
+		// Add Google models
+		if (googleModels.length > 0) {
+			modelSelector.appendChild(createOptionGroup('Google', googleModels));
+		}
 
 		modelSelector.addEventListener('change', () => {
 			const selectedModelId = modelSelector.value;
@@ -129,9 +156,11 @@ export class DevSphereHeader extends Disposable {
 	 * Adds a system message indicating the model has been changed
 	 */
 	private addModelChangeMessage(modelId: string): void {
-		const model = this.devSphereService.getAvailableModels().find(m => m.id === modelId);
-		if (model) {
-			this.viewModel.addSystemMessage(`Model changed to **${model.name}** (${model.description})`);
+		const modelInfo = this.devSphereService.getModelInfoById(modelId);
+		if (modelInfo) {
+			const { info, provider } = modelInfo;
+			const providerName = this.devSphereService.getProviderNameFromType(provider);
+			this.viewModel.addSystemMessage(`Model changed to **${info.name}** (${providerName})`);
 		}
 	}
 }
