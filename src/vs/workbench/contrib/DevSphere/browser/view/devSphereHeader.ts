@@ -8,6 +8,157 @@ import { Disposable } from '../../../../../base/common/lifecycle.js';
 import * as DOM from '../../../../../base/browser/dom.js';
 import { IDevSphereService } from '../devSphereService.js';
 
+interface IDropdownMenuItem {
+	id: string;
+	label: string;
+	icon: string;
+	onClick: () => void;
+	separator?: boolean;
+}
+
+class DevSphereDropdownMenu extends Disposable {
+	private element: HTMLElement;
+	private isVisible = false;
+
+	constructor(
+		private readonly container: HTMLElement,
+		private readonly anchor: HTMLElement,
+		private readonly items: IDropdownMenuItem[]
+	) {
+		super();
+		this.element = this.createDropdownElement();
+		this.registerListeners();
+	}
+
+	private createDropdownElement(): HTMLElement {
+		const mainWindow = DOM.getWindow(this.container);
+		const dropdown = mainWindow.document.createElement('div');
+		dropdown.className = 'dev-sphere-chat-actions-dropdown';
+		dropdown.style.opacity = '0';
+		dropdown.style.transform = 'translateY(-10px)';
+		dropdown.style.transition = 'opacity 150ms ease-in-out, transform 150ms ease-in-out';
+
+		this.items.forEach((item, index) => {
+			if (item.separator && index > 0) {
+				const separator = mainWindow.document.createElement('div');
+				separator.className = 'dev-sphere-dropdown-separator';
+				dropdown.appendChild(separator);
+			}
+
+			const menuItem = this.createMenuItem(item);
+			dropdown.appendChild(menuItem);
+		});
+
+		return dropdown;
+	}
+
+	private createMenuItem(item: IDropdownMenuItem): HTMLElement {
+		const menuItem = document.createElement('div');
+		menuItem.className = 'dev-sphere-dropdown-item';
+		menuItem.setAttribute('role', 'menuitem');
+		menuItem.setAttribute('data-id', item.id);
+
+		const iconSvg = this.getIconSvg(item.icon);
+		const html = `
+			<span class="dev-sphere-dropdown-item-icon">${iconSvg}</span>
+			<span class="dev-sphere-dropdown-item-label">${item.label}</span>
+		`;
+
+		DOM.safeInnerHtml(menuItem, html);
+		menuItem.addEventListener('click', () => {
+			item.onClick();
+			this.hide();
+		});
+
+		return menuItem;
+	}
+
+	private getIconSvg(icon: string): string {
+		const icons = {
+			trash: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<polyline points="3 6 5 6 21 6"></polyline>
+				<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+			</svg>`,
+			edit: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M12 20h9"></path>
+				<path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+			</svg>`,
+			download: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+				<polyline points="7 10 12 15 17 10"></polyline>
+				<line x1="12" y1="15" x2="12" y2="3"></line>
+			</svg>`,
+			plus: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="12" y1="5" x2="12" y2="19"></line>
+				<line x1="5" y1="12" x2="19" y2="12"></line>
+			</svg>`
+		};
+
+		return icons[icon] || '';
+	}
+
+	private registerListeners(): void {
+		const mainWindow = DOM.getWindow(this.container);
+
+		// Close on outside click
+		this._register(DOM.addDisposableListener(mainWindow.document, 'click', (e: MouseEvent) => {
+			if (!this.element.contains(e.target as Node) &&
+				!this.anchor.contains(e.target as Node)) {
+				this.hide();
+			}
+		}));
+
+		// Close on Escape key
+		this._register(DOM.addDisposableListener(mainWindow.document, 'keydown', (e: KeyboardEvent) => {
+			if (e.key === 'Escape') {
+				this.hide();
+			}
+		}));
+	}
+
+	public toggle(): void {
+		this.isVisible ? this.hide() : this.show();
+	}
+
+	private show(): void {
+		if (this.isVisible) return;
+
+		const mainWindow = DOM.getWindow(this.container);
+		const buttonRect = this.anchor.getBoundingClientRect();
+
+		this.element.style.top = `${buttonRect.bottom + 5}px`;
+		this.element.style.right = '10px';
+
+		mainWindow.document.body.appendChild(this.element);
+
+		// Trigger animation
+		requestAnimationFrame(() => {
+			this.element.style.opacity = '1';
+			this.element.style.transform = 'translateY(0)';
+		});
+
+		this.isVisible = true;
+	}
+
+	private hide(): void {
+		if (!this.isVisible) return;
+
+		this.element.style.opacity = '0';
+		this.element.style.transform = 'translateY(-10px)';
+
+		setTimeout(() => {
+			this.element.remove();
+		}, 150);
+
+		this.isVisible = false;
+	}
+
+	public dispose(): void {
+		this.element.remove();
+		super.dispose();
+	}
+}
+
 export class DevSphereHeader extends Disposable {
 	private headerElement: HTMLElement;
 	private chatActionsButton: HTMLButtonElement | undefined;
@@ -99,113 +250,39 @@ export class DevSphereHeader extends Disposable {
 	 * Shows a dropdown menu for chat actions
 	 */
 	private showChatActionsMenu(event: MouseEvent): void {
-		// Create dropdown menu if it doesn't exist
-		const mainWindow = DOM.getWindow(this.container);
-		let dropdownMenu = mainWindow.document.querySelector('.dev-sphere-chat-actions-dropdown') as HTMLElement;
-
-		// If the menu already exists, toggle it
-		if (dropdownMenu) {
-			dropdownMenu.remove();
-			return;
-		}
-
-		// Create the dropdown menu
-		dropdownMenu = mainWindow.document.createElement('div');
-		dropdownMenu.className = 'dev-sphere-chat-actions-dropdown';
-
-		this.addDropdownMenuItem(dropdownMenu, 'Clear Chat', () => {
-			this.viewModel.clearMessages();
-		}, 'trash');
-
-		this.addDropdownMenuItem(dropdownMenu, 'Rename Chat', async () => {
-			// This would be implemented later
-			// Would prompt for a new name and rename current chat
-		}, 'edit');
-
-		this.addDropdownMenuItem(dropdownMenu, 'Export Chat', () => {
-			// This would be implemented later
-			// Would export chat to a file
-		}, 'download');
-
-		// Position the dropdown menu
-		const buttonRect = this.chatActionsButton?.getBoundingClientRect();
-		if (buttonRect) {
-			dropdownMenu.style.top = `${buttonRect.bottom + 5}px`;
-			dropdownMenu.style.right = '10px';
-		}
-
-		// Add the dropdown to the body
-		mainWindow.document.body.appendChild(dropdownMenu);
-
-		// Add event listener to close the dropdown when clicking outside
-		mainWindow.document.addEventListener('click', (e) => {
-			if (!dropdownMenu.contains(e.target as Node) &&
-				e.target !== this.chatActionsButton) {
-				dropdownMenu.remove();
+		const dropdownItems: IDropdownMenuItem[] = [
+			{
+				id: 'clear',
+				label: 'Clear Chat',
+				icon: 'trash',
+				onClick: () => this.viewModel.clearMessages()
+			},
+			{
+				id: 'rename',
+				label: 'Rename Chat',
+				icon: 'edit',
+				onClick: async () => {
+					// To be implemented
+				},
+				separator: true
+			},
+			{
+				id: 'export',
+				label: 'Export Chat',
+				icon: 'download',
+				onClick: () => {
+					// To be implemented
+				}
 			}
-		}, { once: true });
-	}
+		];
 
-	/**
-	 * Adds a menu item to the dropdown
-	 */
-	private addDropdownMenuItem(
-		dropdown: HTMLElement,
-		label: string,
-		onClick: () => void,
-		icon: string
-	): void {
-		const item = document.createElement('div');
-		item.className = 'dev-sphere-dropdown-item';
+		const dropdown = new DevSphereDropdownMenu(
+			this.container,
+			this.chatActionsButton!,
+			dropdownItems
+		);
 
-		let iconSvg = '';
-		switch (icon) {
-			case 'plus':
-				iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<line x1="12" y1="5" x2="12" y2="19"></line>
-					<line x1="5" y1="12" x2="19" y2="12"></line>
-				</svg>`;
-				break;
-			case 'trash':
-				iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<polyline points="3 6 5 6 21 6"></polyline>
-					<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-				</svg>`;
-				break;
-			case 'edit':
-				iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M12 20h9"></path>
-					<path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-				</svg>`;
-				break;
-			case 'download':
-				iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-					<polyline points="7 10 12 15 17 10"></polyline>
-					<line x1="12" y1="15" x2="12" y2="3"></line>
-				</svg>`;
-				break;
-		}
-
-		const html = `
-			<span class="dev-sphere-dropdown-item-icon">${iconSvg}</span>
-			<span class="dev-sphere-dropdown-item-label">${label}</span>
-		`;
-
-		// Use DOM.safeInnerHtml to set content
-		DOM.safeInnerHtml(item, html);
-
-		item.addEventListener('click', () => {
-			onClick();
-			// Remove the dropdown after clicking
-			const mainWindow = DOM.getWindow(dropdown);
-			const menu = mainWindow.document.querySelector('.dev-sphere-chat-actions-dropdown');
-			if (menu) {
-				menu.remove();
-			}
-		});
-
-		dropdown.appendChild(item);
+		dropdown.toggle();
 	}
 
 	/**
