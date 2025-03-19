@@ -261,3 +261,10 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
     transition: all 0.2s ease;
 }
+
+.my-panel-image {
+    width: 400px;
+    height: 400px;
+    object-fit: cover;
+	border-radius: 4px;
+}
