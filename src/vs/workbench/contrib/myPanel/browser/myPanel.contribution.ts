@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IViewsRegistry, ViewContainerLocation, IViewContainersRegistry, Extensions as ViewContainerExtensions, IViewDescriptorService } from '../../../common/views.js';
+import { IViewsService } from '../../../services/views/common/viewsService.js';
 import { localize } from '../../../../nls.js';
 import { SyncDescriptor } from '../../../../platform/instantiation/common/descriptors.js';
 import { Registry } from '../../../../platform/registry/common/platform.js';
@@ -21,9 +22,10 @@ import { IConfigurationService } from '../../../../platform/configuration/common
 import { IContextKeyService } from '../../../../platform/contextkey/common/contextkey.js';
 import { IOpenerService } from '../../../../platform/opener/common/opener.js';
 import { IThemeService } from '../../../../platform/theme/common/themeService.js';
-import { ITelemetryService } from '../../../../platform/telemetry/common/telemetry.js';
 import { IHoverService } from '../../../../platform/hover/browser/hover.js';
 
+// Import CSS
+import './media/myPanel.css';
 
 // Define your panel view class
 class MyPanelView extends ViewPane {
@@ -41,7 +43,6 @@ class MyPanelView extends ViewPane {
 		@IOpenerService openerService: IOpenerService,
 		@IThemeService themeService: IThemeService,
 		@IHoverService hoverService: IHoverService,
-		@ITelemetryService telemetryService: ITelemetryService,
 	) {
 		super(options, keybindingService, contextMenuService, configurationService, contextKeyService, viewDescriptorService, instantiationService, openerService, themeService, hoverService);
 	}
@@ -100,7 +101,7 @@ const MY_PANEL_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainerExt
 	icon: Codicon.window,
 	ctorDescriptor: new SyncDescriptor(ViewPaneContainer, [MY_PANEL_CONTAINER_ID, { mergeViewWithContainerWhenSingleView: true }]),
 	storageId: MY_PANEL_CONTAINER_ID,
-}, ViewContainerLocation.Panel);
+}, ViewContainerLocation.AuxiliaryBar);
 
 // Register the view
 Registry.as<IViewsRegistry>(ViewContainerExtensions.ViewsRegistry).registerViews([{
@@ -123,7 +124,17 @@ registerAction2(class extends Action2 {
 	}
 
 	run(accessor: ServicesAccessor): void {
-		// Show your panel
+		const viewsService = accessor.get(IViewsService);
+		const viewDescriptorService = accessor.get(IViewDescriptorService);
+		const viewDescriptor = viewDescriptorService.getViewDescriptorById('myPanelView');
+
+		if (viewDescriptor) {
+			// First ensure the view container is visible
+			viewsService.openViewContainer(MY_PANEL_CONTAINER_ID, true);
+
+			// Then focus the specific view
+			viewsService.openView(viewDescriptor.id, true);
+		}
 	}
 });
 
