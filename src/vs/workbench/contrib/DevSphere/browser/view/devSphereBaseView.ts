@@ -17,7 +17,6 @@ import { IDevSphereService } from '../devSphereService.js';
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { INotificationService } from '../../../../../platform/notification/common/notification.js';
 import { IQuickInputService } from '../../../../../platform/quickinput/common/quickInput.js';
-import * as DOM from '../../../../../base/browser/dom.js';
 
 // Import view components
 import { DevSphereTabs } from './devSphereTabs.js';
@@ -161,28 +160,8 @@ export class DevSphereView extends ViewPane {
 	 * Creates the chat tabs for new chat creation
 	 */
 	private createChatTabs(): void {
-		// Create new chat button that replaces the tabs in the simplified UI
-		const newChatButton = document.createElement('button');
-		newChatButton.className = 'dev-sphere-new-chat-button-inline';
-		newChatButton.title = 'Start a new chat';
-
-		// Use DOM.safeInnerHtml to safely set HTML content
-		const buttonHtml = `
-			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<line x1="12" y1="5" x2="12" y2="19"></line>
-				<line x1="5" y1="12" x2="19" y2="12"></line>
-			</svg>
-			<span>New Chat</span>
-		`;
-		DOM.safeInnerHtml(newChatButton, buttonHtml);
-
-		this.chatContentContainer?.appendChild(newChatButton);
-
-		// Add event listener for new chat creation
-		newChatButton.addEventListener('click', async () => {
-			await this.viewModel.createNewChat();
-			this.focusInput();
-		});
+		// New Chat button has been moved to the header
+		// Empty function as we no longer need tabs or buttons here
 	}
 
 	/**

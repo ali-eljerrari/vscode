@@ -273,65 +273,6 @@
     overflow: hidden;
 }
 
-/* New Chat inline button */
-.dev-sphere-new-chat-button-inline {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dev-sphere-spacing-sm);
-    height: calc(var(--dev-sphere-tab-height) - 4px);
-    margin: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
-    padding: 0 var(--dev-sphere-spacing-md);
-    background-color: var(--dev-sphere-primary);
-    color: var(--vscode-button-foreground);
-    border: none;
-    border-radius: var(--dev-sphere-radius-md);
-    cursor: pointer;
-    font-size: var(--dev-sphere-font-size-sm);
-    transition: all var(--dev-sphere-transition-base);
-    position: relative;
-    overflow: hidden;
-}
-
-.dev-sphere-new-chat-button-inline::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: var(--dev-sphere-radius-full);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s ease-out, height 0.6s ease-out;
-}
-
-.dev-sphere-new-chat-button-inline:hover {
-    background-color: var(--dev-sphere-primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--dev-sphere-shadow-sm);
-}
-
-.dev-sphere-new-chat-button-inline:hover::before {
-    width: 200px;
-    height: 200px;
-}
-
-.dev-sphere-new-chat-button-inline:active {
-    transform: translateY(0);
-    box-shadow: none;
-}
-
-.dev-sphere-new-chat-button-inline svg {
-    width: 14px;
-    height: 14px;
-    transition: transform var(--dev-sphere-transition-base);
-}
-
-.dev-sphere-new-chat-button-inline:hover svg {
-    transform: rotate(90deg);
-}
-
 /* Tab counter badge */
 .dev-sphere-tab-counter {
     display: inline-flex;

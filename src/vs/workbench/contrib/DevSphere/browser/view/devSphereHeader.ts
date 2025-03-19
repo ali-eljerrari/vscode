@@ -10,7 +10,6 @@ import { IDevSphereService } from '../devSphereService.js';
 
 export class DevSphereHeader extends Disposable {
 	private headerElement: HTMLElement;
-	private chatActionsButton: HTMLButtonElement | undefined;
 
 	constructor(
 		private readonly container: HTMLElement,
@@ -42,6 +41,10 @@ export class DevSphereHeader extends Disposable {
 		title.textContent = 'DevSphere AI';
 		headerLeft.appendChild(title);
 
+		// Model selector container
+		const modelSelectorContainer = document.createElement('div');
+		modelSelectorContainer.className = 'dev-sphere-model-selector-container';
+
 		// Model selector
 		const modelSelector = document.createElement('select');
 		modelSelector.className = 'dev-sphere-model-selector';
@@ -59,135 +62,42 @@ export class DevSphereHeader extends Disposable {
 			modelSelector.appendChild(option);
 		});
 
-		// Add event listener for model change
 		modelSelector.addEventListener('change', () => {
 			const selectedModelId = modelSelector.value;
 			this.devSphereService.setCurrentModel(selectedModelId);
 			this.addModelChangeMessage(selectedModelId);
 		});
 
-		headerLeft.appendChild(modelSelector);
+		modelSelectorContainer.appendChild(modelSelector);
+		headerLeft.appendChild(modelSelectorContainer);
 		this.headerElement.appendChild(headerLeft);
 
 		// Right side of header with actions
 		const headerActions = document.createElement('div');
 		headerActions.className = 'dev-sphere-header-actions';
 
-		// Chat actions dropdown button
-		this.chatActionsButton = document.createElement('button');
-		this.chatActionsButton.className = 'dev-sphere-action-button dev-sphere-chat-actions-button';
-		this.chatActionsButton.title = 'Chat options';
-		DOM.safeInnerHtml(this.chatActionsButton, 'Options <span class="dev-sphere-dropdown-caret">▾</span>');
-		this.chatActionsButton.addEventListener('click', (e) => {
-			// Show dropdown menu for chat actions
-			this.showChatActionsMenu(e);
+		// New Chat button
+		const newChatButton = document.createElement('button');
+		newChatButton.className = 'dev-sphere-action-button dev-sphere-new-chat-button';
+		newChatButton.title = 'New Chat';
+		DOM.safeInnerHtml(newChatButton, '<span>New Chat</span>');
+		newChatButton.addEventListener('click', () => {
+			// Create a new chat
+			this.viewModel.createNewChat();
 		});
-		headerActions.appendChild(this.chatActionsButton);
+		headerActions.appendChild(newChatButton);
 
+		// Clear Chat button
+		const clearChatButton = document.createElement('button');
+		clearChatButton.className = 'dev-sphere-action-button dev-sphere-clear-chat-button';
+		clearChatButton.title = 'Clear Chat';
+		DOM.safeInnerHtml(clearChatButton, '<span>Clear</span>');
+		clearChatButton.addEventListener('click', () => {
+			this.viewModel.clearMessages();
+		});
+		headerActions.appendChild(clearChatButton);
 
 		this.headerElement.appendChild(headerActions);
-	}
-
-	/**
-	 * Shows a dropdown menu for chat actions
-	 */
-	private showChatActionsMenu(event: MouseEvent): void {
-		// Create dropdown menu if it doesn't exist
-		const mainWindow = DOM.getWindow(this.container);
-		let dropdownMenu = mainWindow.document.querySelector('.dev-sphere-chat-actions-dropdown') as HTMLElement;
-
-		// If the menu already exists, toggle it
-		if (dropdownMenu) {
-			dropdownMenu.remove();
-			return;
-		}
-
-		// Create the dropdown menu
-		dropdownMenu = mainWindow.document.createElement('div');
-		dropdownMenu.className = 'dev-sphere-chat-actions-dropdown';
-
-		this.addDropdownMenuItem(dropdownMenu, 'Clear Chat', () => {
-			this.viewModel.clearMessages();
-		}, 'trash');
-
-		this.addDropdownMenuItem(dropdownMenu, 'Rename Chat', async () => {
-			// This would be implemented later
-			// Would prompt for a new name and rename current chat
-		}, 'edit');
-
-		this.addDropdownMenuItem(dropdownMenu, 'Export Chat', () => {
-			// This would be implemented later
-			// Would export chat to a file
-		}, 'download');
-
-		// Create a dropdown container to position the dropdown properly
-		const dropdownContainer = mainWindow.document.createElement('div');
-		dropdownContainer.style.position = 'relative';
-		dropdownContainer.appendChild(dropdownMenu);
-
-		// Append the dropdown container to the action button's parent
-		if (this.chatActionsButton) {
-			this.chatActionsButton.parentElement?.appendChild(dropdownContainer);
-		}
-
-		// Add event listener to close the dropdown when clicking outside
-		mainWindow.document.addEventListener('click', (e) => {
-			if (!dropdownMenu.contains(e.target as Node) &&
-				e.target !== this.chatActionsButton) {
-				dropdownMenu.remove();
-			}
-		}, { once: true });
-	}
-
-	/**
-	 * Adds a menu item to the dropdown
-	 */
-	private addDropdownMenuItem(
-		dropdown: HTMLElement,
-		label: string,
-		onClick: () => void,
-		icon: string
-	): void {
-		const item = document.createElement('div');
-		item.className = 'dev-sphere-dropdown-item';
-
-		let iconText = '';
-		switch (icon) {
-			case 'plus':
-				iconText = '+';
-				break;
-			case 'trash':
-				iconText = '🗑️';
-				break;
-			case 'edit':
-				iconText = '✏️';
-				break;
-			case 'download':
-				iconText = '⬇️';
-				break;
-			default:
-				iconText = '•';
-		}
-
-		const html = `
-			<span class="dev-sphere-dropdown-item-icon">${iconText}</span>
-			<span class="dev-sphere-dropdown-item-label">${label}</span>
-		`;
-
-		// Use DOM.safeInnerHtml to set content
-		DOM.safeInnerHtml(item, html);
-
-		item.addEventListener('click', () => {
-			onClick();
-			// Remove the dropdown after clicking
-			const mainWindow = DOM.getWindow(dropdown);
-			const menu = mainWindow.document.querySelector('.dev-sphere-chat-actions-dropdown');
-			if (menu) {
-				menu.remove();
-			}
-		});
-
-		dropdown.appendChild(item);
 	}
 
 	/**
@@ -196,6 +106,7 @@ export class DevSphereHeader extends Disposable {
 	public updateChatCount(): void {
 		const chatCount = this.viewModel.allChats.length;
 		const chatCountElement = this.headerElement.querySelector('.dev-sphere-chat-count');
+		const newChatButton = this.headerElement.querySelector('.dev-sphere-new-chat-button');
 
 		// If we have a chat count element already
 		if (chatCountElement) {
@@ -205,15 +116,12 @@ export class DevSphereHeader extends Disposable {
 				// Remove the chat count element if there are no chats
 				chatCountElement.remove();
 			}
-		} else if (chatCount > 0) {
+		} else if (chatCount > 0 && newChatButton) {
 			// If we don't have a chat count element but we need one
-			const browseButton = this.headerElement.querySelector('.dev-sphere-browse-chats-button');
-			if (browseButton) {
-				const countSpan = document.createElement('span');
-				countSpan.className = 'dev-sphere-chat-count';
-				countSpan.textContent = String(chatCount);
-				browseButton.appendChild(countSpan);
-			}
+			const countSpan = document.createElement('span');
+			countSpan.className = 'dev-sphere-chat-count';
+			countSpan.textContent = String(chatCount);
+			newChatButton.appendChild(countSpan);
 		}
 	}
 
