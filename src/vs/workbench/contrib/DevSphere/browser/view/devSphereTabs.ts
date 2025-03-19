@@ -12,7 +12,7 @@ export class DevSphereTabs extends Disposable {
 	private _tabsScrollListenerAdded = false;
 
 	constructor(
-		private readonly container: HTMLElement,
+		container: HTMLElement,
 		private readonly viewModel: DevSphereViewModel,
 		private readonly quickInputService: IQuickInputService,
 		private readonly onTabChange: () => void
