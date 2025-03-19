@@ -13,12 +13,10 @@ import { IInstantiationService } from '../../../../../platform/instantiation/com
 import { IOpenerService } from '../../../../../platform/opener/common/opener.js';
 import { IThemeService } from '../../../../../platform/theme/common/themeService.js';
 import { IHoverService } from '../../../../../platform/hover/browser/hover.js';
-import { IDevSphereService, Message } from '../devSphereService.js';
+import { IDevSphereService } from '../devSphereService.js';
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { INotificationService } from '../../../../../platform/notification/common/notification.js';
 import { IQuickInputService } from '../../../../../platform/quickinput/common/quickInput.js';
-import * as DOM from '../../../../../base/browser/dom.js';
-import { Disposable } from '../../../../../base/common/lifecycle.js';
 
 // Import view components
 import { DevSphereTabs } from './devSphereTabs.js';
