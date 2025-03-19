@@ -583,28 +583,6 @@
     animation: float 3s ease-in-out infinite;
 }
 
-/* Scroll to bottom button */
-.dev-sphere-scroll-button {
-    position: absolute;
-    bottom: 80px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--dev-sphere-radius-full);
-    background-color: var(--dev-sphere-primary);
-    color: var(--vscode-button-foreground);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: var(--dev-sphere-shadow-md);
-    z-index: var(--dev-sphere-z-tooltip);
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all var(--dev-sphere-transition-base);
-    border: none;
-}
-
 .dev-sphere-scroll-button.visible {
     opacity: 1;
     transform: translateY(0);

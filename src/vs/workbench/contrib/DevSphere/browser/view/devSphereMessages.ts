@@ -10,7 +10,6 @@ import { Message } from '../devSphereService.js';
 
 export class DevSphereMessages extends Disposable {
 	private messagesContainer: HTMLElement;
-	private scrollButton: HTMLButtonElement;
 	private resizeObserver: ResizeObserver;
 
 	constructor(
@@ -23,15 +22,6 @@ export class DevSphereMessages extends Disposable {
 		this.messagesContainer = document.createElement('div');
 		this.messagesContainer.className = 'dev-sphere-messages';
 		this.container.appendChild(this.messagesContainer);
-
-		// Add scroll-to-bottom button
-		this.scrollButton = this.createScrollToBottomButton();
-		this.container.appendChild(this.scrollButton);
-
-		// Add scroll event listener to messages container
-		this.messagesContainer.addEventListener('scroll', () => {
-			this.updateScrollButtonVisibility();
-		});
 
 		// Create resize observer to handle content changes
 		this.resizeObserver = new ResizeObserver(() => {
@@ -136,29 +126,6 @@ export class DevSphereMessages extends Disposable {
 				pre.classList.remove('scrollable-y');
 			}
 		});
-	}
-
-	/**
-	 * Creates and returns the scroll-to-bottom button
-	 */
-	private createScrollToBottomButton(): HTMLButtonElement {
-		const scrollButton = document.createElement('button');
-		scrollButton.className = 'dev-sphere-scroll-button';
-		scrollButton.title = 'Scroll to bottom';
-
-		const buttonHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-        `;
-		DOM.safeInnerHtml(scrollButton, buttonHTML);
-
-		// Add click event
-		scrollButton.addEventListener('click', () => {
-			this.scrollToBottom();
-		});
-
-		return scrollButton;
 	}
 
 	/**
@@ -296,7 +263,6 @@ export class DevSphereMessages extends Disposable {
 	private scrollToBottom(): void {
 		this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
 		this.updateScrollableClass();
-		this.updateScrollButtonVisibility();
 	}
 
 	/**
@@ -307,25 +273,6 @@ export class DevSphereMessages extends Disposable {
 		const scrollHeight = this.messagesContainer.scrollHeight;
 		// Consider "scrolled to bottom" if within 50px of actual bottom
 		return scrollHeight - scrollPosition < 50;
-	}
-
-	/**
-	 * Updates the visibility of the scroll to bottom button
-	 */
-	private updateScrollButtonVisibility(): void {
-		// Show button if not at the bottom
-		const scrollBottom = Math.abs(
-			(this.messagesContainer.scrollHeight - this.messagesContainer.scrollTop) -
-			this.messagesContainer.clientHeight
-		);
-
-		const isAtBottom = scrollBottom < 50; // Within 50px of bottom
-
-		if (isAtBottom) {
-			this.scrollButton.classList.remove('visible');
-		} else {
-			this.scrollButton.classList.add('visible');
-		}
 	}
 
 	/**
