@@ -1,0 +1,23 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* Override z-index for notifications to ensure they appear above DevSphere input section */
+.monaco-workbench > .notifications-toasts {
+    z-index: 9000; /* Much higher than the input section's z-index (var(--dev-sphere-z-tooltip) = 1200) */
+}
+
+.monaco-workbench > .notifications-center {
+    z-index: 9000; /* Ensure notifications center is also above input section */
+}
+
+/* Ensure notification actions are clickable */
+.monaco-workbench > .notifications-toasts .notification-toast-container > .notification-toast {
+    pointer-events: auto;
+}
+
+/* Fix positioning relative to DevSphere input section */
+.monaco-workbench > .part.auxiliarybar .notifications-toasts {
+    bottom: 50px; /* Ensure distance from input section */
+}

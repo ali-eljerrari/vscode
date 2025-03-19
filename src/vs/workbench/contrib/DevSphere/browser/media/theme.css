@@ -48,7 +48,8 @@
     /* Z-index */
     --dev-sphere-z-dropdown: 1000;
     --dev-sphere-z-modal: 1100;
-    --dev-sphere-z-tooltip: 1200;
+    --dev-sphere-z-tooltip: 5000;
+    --dev-sphere-z-notifications: 9000;
 
     /* Breakpoints */
     --dev-sphere-breakpoint-sm: 640px;

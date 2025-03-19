@@ -11,7 +11,7 @@
     border-top: 1px solid var(--vscode-widget-shadow);
     position: relative;
     bottom: 0;
-    z-index: var(--dev-sphere-z-tooltip);
+    z-index: 1000; /* Lower than notifications z-index */
     backdrop-filter: blur(8px);
     background-color: rgba(var(--vscode-editor-background), 0.95);
 }

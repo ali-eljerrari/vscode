@@ -19,6 +19,7 @@
 @import './components/history.css';
 @import './components/chatSelector.css';
 @import './components/dropdown.css';
+@import './components/notifications.css';
 
 /* Animations */
 @import './animations.css';
