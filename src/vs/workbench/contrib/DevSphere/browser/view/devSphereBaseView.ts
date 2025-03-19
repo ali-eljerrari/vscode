@@ -17,6 +17,7 @@ import { IDevSphereService } from '../devSphereService.js';
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { INotificationService } from '../../../../../platform/notification/common/notification.js';
 import { IQuickInputService } from '../../../../../platform/quickinput/common/quickInput.js';
+import * as DOM from '../../../../../base/browser/dom.js';
 
 // Import view components
 import { DevSphereTabs } from './devSphereTabs.js';
@@ -24,6 +25,8 @@ import { DevSphereChatSelector } from './devSphereChatSelector.js';
 import { DevSphereMessages } from './devSphereMessages.js';
 import { DevSphereInput } from './devSphereInput.js';
 import { DevSphereHeader } from './devSphereHeader.js';
+import { DevSphereViewTabs, DevSphereViewType } from './devSphereViewTabs.js';
+import { DevSphereHistory } from './devSphereHistory.js';
 
 export class DevSphereView extends ViewPane {
 	static readonly ID = 'devSphereView';
@@ -35,6 +38,9 @@ export class DevSphereView extends ViewPane {
 	private tabsComponent: DevSphereTabs | undefined;
 	private inputComponent: DevSphereInput | undefined;
 	private headerComponent: DevSphereHeader | undefined;
+	private viewTabsComponent: DevSphereViewTabs | undefined;
+	private historyComponent: DevSphereHistory | undefined;
+	private chatContentContainer: HTMLElement | undefined;
 
 	constructor(
 		options: IViewPaneOptions,
@@ -70,12 +76,14 @@ export class DevSphereView extends ViewPane {
 		this._register(this.viewModel.onChatsChanged(() => {
 			this.tabsComponent?.updateChatTabs();
 			this.chatSelectorComponent?.updateChatSelectorList();
+			this.historyComponent?.updateHistoryList();
 			this.updateChatCount();
 		}));
 
 		this._register(this.viewModel.onCurrentChatChanged(() => {
 			this.tabsComponent?.updateChatTabs();
 			this.chatSelectorComponent?.updateChatSelectorList();
+			this.historyComponent?.updateHistoryList();
 		}));
 	}
 
@@ -83,12 +91,10 @@ export class DevSphereView extends ViewPane {
 		this.container = container;
 		container.classList.add('dev-sphere-container');
 
-		// Create the tabs container
-		this.tabsComponent = new DevSphereTabs(
+		// Add view tabs at the top
+		this.viewTabsComponent = new DevSphereViewTabs(
 			container,
-			this.viewModel,
-			this.quickInputService,
-			() => this.focusInput()
+			(view) => this.onViewTabChanged(view)
 		);
 
 		// Create the main content area
@@ -104,17 +110,35 @@ export class DevSphereView extends ViewPane {
 			() => this.chatSelectorComponent?.showChatSelector()
 		);
 
+		// Create chat content container (will be shown/hidden based on active tab)
+		this.chatContentContainer = document.createElement('div');
+		this.chatContentContainer.classList.add('dev-sphere-chat-content');
+		mainContent.appendChild(this.chatContentContainer);
+
 		// Create messages component
 		this.messagesComponent = new DevSphereMessages(
-			mainContent,
+			this.chatContentContainer,
 			this.viewModel
 		);
 
 		// Create input component
 		this.inputComponent = new DevSphereInput(
-			mainContent,
+			this.chatContentContainer,
 			this.viewModel
 		);
+
+		// Create history component (initially hidden)
+		this.historyComponent = new DevSphereHistory(
+			mainContent,
+			this.viewModel,
+			this.quickInputService,
+			() => {
+				// Switch to chat view when a chat is selected from history
+				this.viewTabsComponent?.switchView(DevSphereViewType.Chat);
+				this.focusInput();
+			}
+		);
+		this.historyComponent.setVisible(false);
 
 		// Create chat selector dialog
 		this.chatSelectorComponent = new DevSphereChatSelector(
@@ -127,9 +151,60 @@ export class DevSphereView extends ViewPane {
 		// Add keyboard shortcuts
 		this.addKeyboardShortcuts();
 
+		// Create chat tabs at bottom of header (for new chat creation within Chat view)
+		this.createChatTabs();
+
 		// Initialize view
 		this.messagesComponent.updateMessages();
-		this.tabsComponent.updateChatTabs();
+	}
+
+	/**
+	 * Creates the chat tabs for new chat creation
+	 */
+	private createChatTabs(): void {
+		// Create new chat button that replaces the tabs in the simplified UI
+		const newChatButton = document.createElement('button');
+		newChatButton.className = 'dev-sphere-new-chat-button-inline';
+		newChatButton.title = 'Start a new chat';
+
+		// Use DOM.safeInnerHtml to safely set HTML content
+		const buttonHtml = `
+			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="12" y1="5" x2="12" y2="19"></line>
+				<line x1="5" y1="12" x2="19" y2="12"></line>
+			</svg>
+			<span>New Chat</span>
+		`;
+		DOM.safeInnerHtml(newChatButton, buttonHtml);
+
+		this.chatContentContainer?.appendChild(newChatButton);
+
+		// Add event listener for new chat creation
+		newChatButton.addEventListener('click', async () => {
+			await this.viewModel.createNewChat();
+			this.focusInput();
+		});
+	}
+
+	/**
+	 * Handle view tab change
+	 */
+	private onViewTabChanged(view: DevSphereViewType): void {
+		if (view === DevSphereViewType.Chat) {
+			// Show chat view, hide history view
+			if (this.chatContentContainer) {
+				this.chatContentContainer.style.display = 'flex';
+			}
+			this.historyComponent?.setVisible(false);
+			// Focus the input
+			setTimeout(() => this.focusInput(), 50);
+		} else {
+			// Show history view, hide chat view
+			if (this.chatContentContainer) {
+				this.chatContentContainer.style.display = 'none';
+			}
+			this.historyComponent?.setVisible(true);
+		}
 	}
 
 	/**
@@ -154,6 +229,18 @@ export class DevSphereView extends ViewPane {
 			if (e.key === 'Escape') {
 				this.chatSelectorComponent?.hideChatSelector();
 			}
+
+			// Ctrl/Cmd+1 to switch to Chat tab
+			if ((e.ctrlKey || e.metaKey) && e.key === '1') {
+				e.preventDefault();
+				this.viewTabsComponent?.switchView(DevSphereViewType.Chat);
+			}
+
+			// Ctrl/Cmd+2 to switch to History tab
+			if ((e.ctrlKey || e.metaKey) && e.key === '2') {
+				e.preventDefault();
+				this.viewTabsComponent?.switchView(DevSphereViewType.History);
+			}
 		});
 	}
 
@@ -166,8 +253,10 @@ export class DevSphereView extends ViewPane {
 	override setVisible(visible: boolean): void {
 		super.setVisible(visible);
 		if (visible) {
-			// Focus the input when the view becomes visible
-			setTimeout(() => this.focusInput(), 100);
+			// Focus the input when the view becomes visible (if in chat view)
+			if (this.viewTabsComponent?.getCurrentView() === DevSphereViewType.Chat) {
+				setTimeout(() => this.focusInput(), 100);
+			}
 		}
 	}
 
@@ -198,3 +287,4 @@ export class DevSphereView extends ViewPane {
 		this.headerComponent?.updateChatCount();
 	}
 }
+

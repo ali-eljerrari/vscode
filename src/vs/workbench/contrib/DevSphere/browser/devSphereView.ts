@@ -5,3 +5,6 @@
 
 // Re-export the view from the view folder
 export { DevSphereView } from './view/devSphereBaseView.js';
+
+// Export view-related components
+export { DevSphereViewType } from './view/devSphereViewTabs.js';

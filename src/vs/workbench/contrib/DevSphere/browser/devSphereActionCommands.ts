@@ -12,6 +12,8 @@ import { IViewDescriptorService } from '../../../common/views.js';
 import { DevSphereView } from './devSphereView.js';
 import { IDevSphereService } from './devSphereService.js';
 import { IQuickInputService, IQuickPickItem } from '../../../../platform/quickinput/common/quickInput.js';
+import { DevSphereViewType } from './view/devSphereViewTabs.js';
+import { ContextKeyExpr } from '../../../../platform/contextkey/common/contextkey.js';
 
 // Constants
 export const DEV_SPHERE_CONTAINER_ID = 'devSphere';
@@ -47,6 +49,60 @@ export function registerDevSphereActions(): void {
 
 				// Then focus the specific view
 				viewsService.openView(viewDescriptor.id, true);
+			}
+		}
+	});
+
+	// Register a command to switch to Chat tab
+	registerAction2(class extends Action2 {
+		constructor() {
+			super({
+				id: 'workbench.action.devSphere.showChatTab',
+				title: { value: localize('showDevSphereChatTab', "DevSphere: Show Chat Tab"), original: 'DevSphere: Show Chat Tab' },
+				category: Categories.View,
+				f1: true,
+				keybinding: {
+					primary: 2050, // Ctrl/Cmd+1
+					weight: 200,
+					when: ContextKeyExpr.equals('viewId', 'devSphereView')
+				}
+			});
+		}
+
+		run(accessor: ServicesAccessor): void {
+			const viewsService = accessor.get(IViewsService);
+			// Find the active DevSphere view
+			const view = viewsService.getActiveViewWithId('devSphereView') as DevSphereView | undefined;
+			if (view) {
+				// Get access to the underlying viewTabs component and switch to Chat tab
+				(view as any).viewTabsComponent?.switchView(DevSphereViewType.Chat);
+			}
+		}
+	});
+
+	// Register a command to switch to History tab
+	registerAction2(class extends Action2 {
+		constructor() {
+			super({
+				id: 'workbench.action.devSphere.showHistoryTab',
+				title: { value: localize('showDevSphereHistoryTab', "DevSphere: Show History Tab"), original: 'DevSphere: Show History Tab' },
+				category: Categories.View,
+				f1: true,
+				keybinding: {
+					primary: 2051, // Ctrl/Cmd+2
+					weight: 200,
+					when: ContextKeyExpr.equals('viewId', 'devSphereView')
+				}
+			});
+		}
+
+		run(accessor: ServicesAccessor): void {
+			const viewsService = accessor.get(IViewsService);
+			// Find the active DevSphere view
+			const view = viewsService.getActiveViewWithId('devSphereView') as DevSphereView | undefined;
+			if (view) {
+				// Get access to the underlying viewTabs component and switch to History tab
+				(view as any).viewTabsComponent?.switchView(DevSphereViewType.History);
 			}
 		}
 	});

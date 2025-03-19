@@ -1186,3 +1186,257 @@
     border-top: 1px solid var(--vscode-widget-shadow);
     position: relative;
 }
+
+/* Add styles for view tabs (Chat and History) */
+.dev-sphere-view-tabs {
+    display: flex;
+    height: 36px;
+    background-color: var(--vscode-editorGroupHeader-tabsBackground);
+    border-bottom: 1px solid var(--vscode-panelTitle-activeBorder);
+}
+
+.dev-sphere-view-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    height: 100%;
+    min-width: 80px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--vscode-tab-inactiveForeground);
+    background-color: var(--vscode-tab-inactiveBackground);
+    border-right: 1px solid var(--vscode-tab-border);
+    position: relative;
+}
+
+.dev-sphere-view-tab:hover {
+    background-color: var(--vscode-tab-hoverBackground);
+}
+
+.dev-sphere-view-tab-active {
+    color: var(--vscode-tab-activeForeground);
+    background-color: var(--vscode-tab-activeBackground);
+    border-bottom: 2px solid var(--vscode-tab-activeBorderTop);
+    font-weight: 600;
+}
+
+/* Chat content container */
+.dev-sphere-chat-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: calc(100% - 36px);
+    overflow: hidden;
+}
+
+/* History view styles */
+.dev-sphere-history-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 60px); /* Subtract header height */
+    padding: 10px;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.dev-sphere-history-search {
+    padding: 8px;
+    background-color: var(--vscode-input-background);
+    border-radius: 4px;
+    border: 1px solid var(--vscode-input-border);
+}
+
+.dev-sphere-history-search input {
+    width: 100%;
+    height: 24px;
+    background: transparent;
+    border: none;
+    color: var(--vscode-input-foreground);
+    outline: none;
+    font-size: 13px;
+}
+
+.dev-sphere-history-search input:focus {
+    outline: none;
+}
+
+.dev-sphere-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.dev-sphere-history-item {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    border-radius: 6px;
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-widget-border);
+    cursor: pointer;
+    position: relative;
+}
+
+.dev-sphere-history-item:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.dev-sphere-history-item-selected {
+    border-color: var(--vscode-focusBorder);
+    background-color: var(--vscode-list-activeSelectionBackground);
+}
+
+.dev-sphere-history-date {
+    font-size: 11px;
+    color: var(--vscode-descriptionForeground);
+    margin-bottom: 4px;
+}
+
+.dev-sphere-history-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--vscode-editor-foreground);
+}
+
+.dev-sphere-history-meta {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+}
+
+.dev-sphere-history-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.dev-sphere-history-item:hover .dev-sphere-history-actions {
+    opacity: 1;
+}
+
+.dev-sphere-history-action-button {
+    background: none;
+    border: none;
+    color: var(--vscode-editor-foreground);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+}
+
+.dev-sphere-history-action-button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.dev-sphere-history-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 10px;
+    padding: 20px;
+    color: var(--vscode-descriptionForeground);
+    text-align: center;
+}
+
+.dev-sphere-history-empty-icon {
+    color: var(--vscode-descriptionForeground);
+    opacity: 0.5;
+    margin-bottom: 10px;
+}
+
+.dev-sphere-history-empty-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.dev-sphere-history-empty-subtitle {
+    font-size: 13px;
+    max-width: 400px;
+}
+
+/* Adjust existing container to work with tabs */
+.dev-sphere-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* New Chat inline button */
+.dev-sphere-new-chat-button-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 32px;
+    margin: 8px 16px;
+    padding: 0 12px;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.dev-sphere-new-chat-button-inline:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.dev-sphere-new-chat-button-inline svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Chat actions dropdown styles */
+.dev-sphere-chat-actions-dropdown {
+    position: fixed;
+    z-index: 100;
+    background-color: var(--vscode-menu-background);
+    border: 1px solid var(--vscode-menu-border);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    width: 180px;
+    padding: 6px 0;
+    font-size: 13px;
+}
+
+.dev-sphere-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: var(--vscode-menu-foreground);
+    transition: background-color 0.1s;
+}
+
+.dev-sphere-dropdown-item:hover {
+    background-color: var(--vscode-menu-selectionBackground);
+    color: var(--vscode-menu-selectionForeground);
+}
+
+.dev-sphere-dropdown-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    width: 16px;
+    height: 16px;
+}
+
+.dev-sphere-dropdown-item-label {
+    flex: 1;
+}
