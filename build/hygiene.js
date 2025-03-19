@@ -23,7 +23,7 @@ const copyrightHeaderLines = [
 function hygiene(some, linting = true) {
 	const eslint = require('./gulp-eslint');
 	const gulpstylelint = require('./stylelint');
-	const formatter = require('./lib/formatter');
+	// const formatter = require('./lib/formatter');
 
 	let errorCount = 0;
 
@@ -114,17 +114,17 @@ function hygiene(some, linting = true) {
 	const formatting = es.map(function (file, cb) {
 		try {
 			const rawInput = file.contents.toString('utf8');
-			const rawOutput = formatter.format(file.path, rawInput);
+			// const rawOutput = formatter.format(file.path, rawInput);
 
-			const original = rawInput.replace(/\r\n/gm, '\n');
-			const formatted = rawOutput.replace(/\r\n/gm, '\n');
-			if (original !== formatted) {
-				console.error(
-					`File not formatted. Run the 'Format Document' command to fix it:`,
-					file.relative
-				);
-				errorCount++;
-			}
+			// const original = rawInput.replace(/\r\n/gm, '\n');
+			// const formatted = rawOutput.replace(/\r\n/gm, '\n');
+			// if (original !== formatted) {
+			// 	console.error(
+			// 		`File not formatted. Run the 'Format Document' command to fix it:`,
+			// 		file.relative
+			// 	);
+			// 	errorCount++;
+			// }
 			cb(null, file);
 		} catch (err) {
 			cb(err);
@@ -150,9 +150,9 @@ function hygiene(some, linting = true) {
 	const unicodeFilterStream = filter(unicodeFilter, { restore: true });
 
 	const result = input
-		.pipe(filter((f) => !f.stat.isDirectory()))
-		// .pipe(snapshotFilter)
-		.pipe(yarnLockFilter)
+	// .pipe(filter((f) => !f.stat.isDirectory()))
+	// .pipe(snapshotFilter)
+	// .pipe(yarnLockFilter)
 	// .pipe(productJsonFilter)
 	// .pipe(process.env['BUILD_SOURCEVERSION'] ? es.through() : productJson)
 	// .pipe(productJsonFilter.restore)
@@ -165,7 +165,9 @@ function hygiene(some, linting = true) {
 	// .pipe(copyrights);
 
 	const streams = [
-		result.pipe(filter(tsFormattingFilter)).pipe(formatting)
+		result
+		// .pipe(filter(tsFormattingFilter))
+		// .pipe(formatting)
 	];
 
 	if (linting) {

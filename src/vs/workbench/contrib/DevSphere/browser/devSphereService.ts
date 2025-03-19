@@ -33,15 +33,37 @@ export const OPENAI_MODELS: OpenAIModel[] = [
 	{ id: 'gpt-4.5-preview', name: 'GPT-4.5 Preview', description: '$$$$$ - Most expensive, most capable GPT model' }
 ];
 
+export interface Chat {
+	id: string;
+	title: string;
+	messages: Message[];
+	lastModified: number;
+	modelId: string;
+}
+
+export interface Message {
+	id: string;
+	role: 'user' | 'assistant' | 'system' | 'loading';
+	content: string;
+	timestamp: number;
+}
+
 export interface IDevSphereService {
 	getOpenAIAPIKey(): Promise<string | undefined>;
 	updateAPIKey(): Promise<void>;
 	fetchAIResponse(prompt: string): Promise<string>;
 
-	// New methods for model management
+	// Model management
 	getAvailableModels(): OpenAIModel[];
 	getCurrentModel(): OpenAIModel;
 	setCurrentModel(modelId: string): void;
+
+	// Chat persistence
+	saveChat(chat: Chat): Promise<void>;
+	loadChat(chatId: string): Promise<Chat | undefined>;
+	getAllChats(): Promise<Chat[]>;
+	deleteChat(chatId: string): Promise<void>;
+	createNewChat(): Chat;
 }
 
 export const IDevSphereService = createDecorator<IDevSphereService>('devSphereService');
@@ -50,6 +72,7 @@ export class DevSphereService implements IDevSphereService {
 	private readonly OPENAI_API_KEY_SECRET_KEY = 'openai.api.key';
 	private readonly API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
 	private readonly MODEL_STORAGE_KEY = 'openai.model.id';
+	private readonly CHATS_STORAGE_KEY = 'devSphere.chats';
 	private readonly MAX_TOKENS = 500;
 
 	// Current model, default to gpt-4o-mini
@@ -180,5 +203,71 @@ export class DevSphereService implements IDevSphereService {
 			}
 			throw new Error('Unknown error occurred while fetching AI response');
 		}
+	}
+
+	// Chat persistence methods
+	public async saveChat(chat: Chat): Promise<void> {
+		// Update last modified time
+		chat.lastModified = Date.now();
+
+		// Get existing chats
+		const chats = await this.getAllChats();
+
+		// Find and update the chat if it exists, otherwise add it
+		const existingChatIndex = chats.findIndex(c => c.id === chat.id);
+		if (existingChatIndex >= 0) {
+			chats[existingChatIndex] = chat;
+		} else {
+			chats.push(chat);
+		}
+
+		// Save to storage
+		await this.storageService.store(
+			this.CHATS_STORAGE_KEY,
+			JSON.stringify(chats),
+			StorageScope.PROFILE,
+			StorageTarget.USER
+		);
+	}
+
+	public async loadChat(chatId: string): Promise<Chat | undefined> {
+		const chats = await this.getAllChats();
+		return chats.find(chat => chat.id === chatId);
+	}
+
+	public async getAllChats(): Promise<Chat[]> {
+		const chatsJson = this.storageService.get(this.CHATS_STORAGE_KEY, StorageScope.PROFILE);
+		if (!chatsJson) {
+			return [];
+		}
+
+		try {
+			return JSON.parse(chatsJson);
+		} catch (e) {
+			this.notificationService.error('Failed to load chats: Invalid data format');
+			return [];
+		}
+	}
+
+	public async deleteChat(chatId: string): Promise<void> {
+		const chats = await this.getAllChats();
+		const filteredChats = chats.filter(chat => chat.id !== chatId);
+
+		await this.storageService.store(
+			this.CHATS_STORAGE_KEY,
+			JSON.stringify(filteredChats),
+			StorageScope.PROFILE,
+			StorageTarget.USER
+		);
+	}
+
+	public createNewChat(): Chat {
+		return {
+			id: `chat-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+			title: 'New Chat',
+			messages: [],
+			lastModified: Date.now(),
+			modelId: this.currentModel.id
+		};
 	}
 }
