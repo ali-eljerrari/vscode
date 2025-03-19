@@ -1,0 +1,76 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* ===== INPUT AREA ===== */
+.dev-sphere-input-section {
+    display: flex;
+    padding: 16px;
+    background-color: var(--vscode-editor-background);
+    border-top: 1px solid var(--vscode-widget-shadow);
+    position: relative;
+    bottom: 0;
+    z-index: 10;
+}
+
+.dev-sphere-input-container {
+    display: flex;
+    flex-grow: 1;
+    position: relative;
+    border-radius: 8px;
+    background-color: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dev-sphere-input-container:focus-within {
+    border-color: var(--vscode-focusBorder);
+    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+}
+
+.dev-sphere-input {
+    flex: 1;
+    min-height: 42px;
+    max-height: 200px;
+    padding: 10px 16px;
+    background-color: transparent;
+    color: var(--vscode-input-foreground);
+    border: none;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    font-family: var(--monaco-monospace-font);
+}
+
+.dev-sphere-input::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+    opacity: 0.7;
+}
+
+.dev-sphere-submit-button {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    padding: 6px 12px;
+    margin: 5px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dev-sphere-submit-button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.dev-sphere-submit-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

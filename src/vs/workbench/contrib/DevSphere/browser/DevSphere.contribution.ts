@@ -20,7 +20,7 @@ import { DEV_SPHERE_CONTAINER_ID, registerDevSphereActions } from './devSphereAc
 import { InstantiationType, registerSingleton } from '../../../../platform/instantiation/common/extensions.js';
 
 // Import CSS
-import './media/DevSphere.css';
+import './media/main.css';
 
 
 registerSingleton(IDevSphereService, DevSphereService, InstantiationType.Delayed);

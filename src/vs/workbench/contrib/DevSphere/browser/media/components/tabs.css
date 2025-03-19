@@ -1,0 +1,236 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* ===== CHAT TABS ===== */
+.dev-sphere-tabs-container {
+    display: flex;
+    align-items: center;
+    background-color: var(--vscode-tab-inactiveBackground);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    overflow-x: auto;
+    scrollbar-width: thin;
+    white-space: nowrap;
+    position: relative;
+    z-index: 10;
+    scroll-behavior: smooth;
+    scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+}
+
+.dev-sphere-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-right: 1px solid var(--vscode-panel-border);
+    font-size: 12px;
+    cursor: pointer;
+    min-width: 100px;
+    max-width: 200px;
+    position: relative;
+    background-color: var(--vscode-tab-inactiveBackground);
+    transition: background-color 0.2s ease;
+    border-top: 1px solid transparent;
+}
+
+.dev-sphere-tab-active {
+    background-color: var(--vscode-tab-activeBackground);
+    color: var(--vscode-tab-activeForeground);
+    border-top: 1px solid var(--vscode-focusBorder);
+    box-shadow: 0 -2px 0 var(--vscode-focusBorder);
+}
+
+.dev-sphere-tab-active::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--vscode-editor-background);
+    z-index: 1;
+}
+
+.dev-sphere-tab-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.dev-sphere-tab-close {
+    opacity: 0.6;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    border-radius: 3px;
+}
+
+.dev-sphere-tab:hover .dev-sphere-tab-close {
+    opacity: 1;
+}
+
+.dev-sphere-tab-close:hover {
+    background-color: var(--vscode-toolbar-hoverBackground);
+}
+
+.dev-sphere-new-chat-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: var(--vscode-tab-activeForeground);
+    opacity: 0.7;
+}
+
+.dev-sphere-new-chat-tab:hover {
+    opacity: 1;
+}
+
+.dev-sphere-new-chat-tab-icon {
+    margin-right: 6px;
+}
+
+/* Tab scrollbar styles */
+.dev-sphere-tabs-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.dev-sphere-tabs-container::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 2px 0;
+}
+
+.dev-sphere-tabs-container::-webkit-scrollbar-thumb {
+    background-color: var(--vscode-scrollbarSlider-background);
+    border-radius: 2px;
+    transition: background-color 0.2s ease;
+}
+
+.dev-sphere-tabs-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+.dev-sphere-tabs-container::-webkit-scrollbar-thumb:active {
+    background-color: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+/* Add subtle scroll shadows to indicate more content */
+.dev-sphere-tabs-container::before,
+.dev-sphere-tabs-container::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    z-index: 11;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.dev-sphere-tabs-container::before {
+    left: 0;
+    background: linear-gradient(to right, var(--vscode-tab-inactiveBackground), transparent);
+}
+
+.dev-sphere-tabs-container::after {
+    right: 0;
+    background: linear-gradient(to left, var(--vscode-tab-inactiveBackground), transparent);
+}
+
+.dev-sphere-tabs-container.scroll-start::before {
+    opacity: 0;
+}
+
+.dev-sphere-tabs-container.scroll-middle::before,
+.dev-sphere-tabs-container.scroll-middle::after {
+    opacity: 1;
+}
+
+.dev-sphere-tabs-container.scroll-end::after {
+    opacity: 0;
+}
+
+/* Empty state for tabs */
+.dev-sphere-tabs-container:empty::after {
+    content: "No active chats";
+    display: flex;
+    padding: 8px 16px;
+    color: var(--vscode-descriptionForeground);
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* ===== VIEW TABS ===== */
+.dev-sphere-view-tabs {
+    display: flex;
+    height: 36px;
+    background-color: var(--vscode-editorGroupHeader-tabsBackground);
+    border-bottom: 1px solid var(--vscode-panelTitle-activeBorder);
+}
+
+.dev-sphere-view-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    height: 100%;
+    min-width: 80px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--vscode-tab-inactiveForeground);
+    background-color: var(--vscode-tab-inactiveBackground);
+    border-right: 1px solid var(--vscode-tab-border);
+    position: relative;
+}
+
+.dev-sphere-view-tab:hover {
+    background-color: var(--vscode-tab-hoverBackground);
+}
+
+.dev-sphere-view-tab-active {
+    color: var(--vscode-tab-activeForeground);
+    background-color: var(--vscode-tab-activeBackground);
+    border-bottom: 2px solid var(--vscode-tab-activeBorderTop);
+    font-weight: 600;
+}
+
+/* Chat content container */
+.dev-sphere-chat-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: calc(100% - 36px);
+    overflow: hidden;
+}
+
+/* New Chat inline button */
+.dev-sphere-new-chat-button-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 32px;
+    margin: 8px 16px;
+    padding: 0 12px;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.dev-sphere-new-chat-button-inline:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.dev-sphere-new-chat-button-inline svg {
+    width: 14px;
+    height: 14px;
+}

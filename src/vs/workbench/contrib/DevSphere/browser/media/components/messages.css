@@ -1,0 +1,451 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* ===== CHAT AREA ===== */
+.dev-sphere-messages {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 16px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+}
+
+/* Message groups */
+.dev-sphere-message-group {
+    position: relative;
+    margin: 0;
+    width: 100%;
+    border-bottom: 1px solid var(--vscode-editorWidget-border, rgba(127, 127, 127, 0.1));
+    margin-bottom: 24px;
+    animation: fadeIn 0.3s ease forwards;
+    opacity: 0;
+}
+
+.dev-sphere-message-group-user {
+    background-color: var(--vscode-editor-background);
+}
+
+.dev-sphere-message-group-assistant {
+    background-color: var(--vscode-editorWidget-background, rgba(30, 30, 30, 0.4));
+}
+
+.dev-sphere-message-group-system {
+    background-color: var(--vscode-editor-background);
+    border-top: 1px dashed var(--vscode-editorWidget-border, rgba(127, 127, 127, 0.2));
+    border-bottom: 1px dashed var(--vscode-editorWidget-border, rgba(127, 127, 127, 0.2));
+    padding: 8px 0;
+}
+
+/* Improved Message Display */
+.dev-sphere-message {
+    position: relative;
+    padding: 16px 24px;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.dev-sphere-message:last-child {
+    margin-bottom: 0;
+}
+
+/* Text content */
+.dev-sphere-text {
+    line-height: 1.6;
+    padding: 16px 24px;
+    font-size: 14px;
+    word-wrap: break-word;
+    max-width: 100%;
+    white-space: pre-wrap;
+    border-left: none;
+}
+
+/* Avatar elements */
+.dev-sphere-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--vscode-editor-background);
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.dev-sphere-avatar-user {
+    background-color: var(--vscode-activityBarBadge-background);
+}
+
+.dev-sphere-avatar-assistant {
+    background-color: var(--vscode-statusBarItem-remoteBackground, var(--vscode-button-background));
+}
+
+.dev-sphere-avatar-system {
+    background-color: var(--vscode-statusBarItem-warningBackground);
+    font-size: 12px;
+}
+
+/* Message headers */
+.dev-sphere-message-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+/* Role Badge Styling */
+.dev-sphere-message-role-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+}
+
+.dev-sphere-message-group-user .dev-sphere-message-role-badge {
+    background-color: var(--vscode-activityBarBadge-background);
+}
+
+.dev-sphere-message-group-assistant .dev-sphere-message-role-badge {
+    background-color: var(--vscode-statusBarItem-remoteBackground, var(--vscode-button-background));
+}
+
+.dev-sphere-message-group-system .dev-sphere-message-role-badge {
+    background-color: var(--vscode-statusBarItem-warningBackground);
+}
+
+/* Message Content Styling */
+.dev-sphere-message-content {
+    font-size: 14px;
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.dev-sphere-message-content p {
+    margin: 0 0 16px 0;
+}
+
+.dev-sphere-message-content p:last-child {
+    margin-bottom: 0;
+}
+
+.dev-sphere-message-content a {
+    color: var(--vscode-textLink-foreground);
+    text-decoration: none;
+}
+
+.dev-sphere-message-content a:hover {
+    text-decoration: underline;
+    color: var(--vscode-textLink-activeForeground);
+}
+
+.dev-sphere-message-content ul,
+.dev-sphere-message-content ol {
+    margin: 0 0 16px 0;
+    padding-left: 24px;
+}
+
+.dev-sphere-message-content li {
+    margin-bottom: 4px;
+}
+
+.dev-sphere-message-content strong,
+.dev-sphere-message-content b {
+    font-weight: 600;
+}
+
+.dev-sphere-message-content em,
+.dev-sphere-message-content i {
+    font-style: italic;
+}
+
+/* Code formatting */
+.dev-sphere-message-content code {
+    font-family: var(--monaco-monospace-font);
+    background-color: var(--vscode-textCodeBlock-background, rgba(127, 127, 127, 0.15));
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.dev-sphere-message-content pre {
+    background-color: var(--vscode-editor-inactiveSelectionBackground, var(--vscode-editor-background));
+    border-radius: 6px;
+    padding: 16px;
+    margin: 16px 0;
+    overflow-x: auto;
+    font-family: var(--monaco-monospace-font);
+    font-size: 13px;
+    line-height: 1.5;
+    border: 1px solid var(--vscode-editorWidget-border, var(--vscode-editor-lineHighlightBorder));
+    position: relative;
+}
+
+.dev-sphere-message-content pre::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(to right, var(--vscode-activityBarBadge-background), transparent);
+    border-radius: 6px 6px 0 0;
+}
+
+.dev-sphere-message-content pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: 1em;
+    white-space: pre;
+}
+
+/* Tables */
+.dev-sphere-message-content table {
+    border-collapse: collapse;
+    margin: 16px 0;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.dev-sphere-message-content th,
+.dev-sphere-message-content td {
+    border: 1px solid var(--vscode-editorWidget-border);
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.dev-sphere-message-content th {
+    background-color: var(--vscode-editorWidget-background);
+    font-weight: 600;
+}
+
+/* Blockquotes */
+.dev-sphere-message-content blockquote {
+    margin: 16px 0;
+    padding: 8px 16px;
+    border-left: 4px solid var(--vscode-activityBarBadge-background);
+    background-color: var(--vscode-editorWidget-background, rgba(30, 30, 30, 0.2));
+    font-style: italic;
+    color: var(--vscode-foreground);
+    border-radius: 0 4px 4px 0;
+}
+
+/* Message types */
+.dev-sphere-text-user {
+    background-color: rgba(127, 127, 127, 0.03);
+    color: var(--vscode-editor-foreground);
+}
+
+.dev-sphere-text-assistant {
+    background-color: rgba(127, 127, 127, 0.1);
+    color: var(--vscode-editor-foreground);
+}
+
+.dev-sphere-text-system {
+    color: var(--vscode-editorInfo-foreground);
+    font-style: italic;
+    font-size: 13px;
+    padding: 12px 24px;
+    opacity: 0.85;
+}
+
+/* Loading Indicator Improvements */
+.dev-sphere-message-loading {
+    padding: 12px 24px;
+    display: flex;
+    justify-content: center;
+}
+
+.dev-sphere-loading-indicator {
+    display: inline-flex;
+    align-items: center;
+    color: var(--vscode-descriptionForeground);
+    font-size: 14px;
+}
+
+.dev-sphere-loading-dots {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+}
+
+/* Loading Indicator Animation */
+.dev-sphere-loading-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--vscode-descriptionForeground);
+    opacity: 0.7;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.dev-sphere-loading-dot:nth-child(2) {
+    opacity: 0.5;
+    animation-delay: 0.2s;
+}
+
+.dev-sphere-loading-dot:nth-child(3) {
+    opacity: 0.3;
+    animation-delay: 0.4s;
+}
+
+/* Code block styles */
+.dev-sphere-text pre {
+    background-color: var(--vscode-editor-inactiveSelectionBackground, var(--vscode-editor-background));
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+    overflow-x: auto;
+    font-family: var(--monaco-monospace-font);
+    font-size: 13px;
+    border: 1px solid var(--vscode-editorWidget-border, var(--vscode-editor-lineHighlightBorder));
+    position: relative;
+}
+
+.dev-sphere-text pre::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, var(--vscode-activityBarBadge-background), transparent);
+    border-radius: 8px 8px 0 0;
+}
+
+.dev-sphere-text code {
+    font-family: var(--monaco-monospace-font);
+    background-color: var(--vscode-textCodeBlock-background, rgba(127, 127, 127, 0.15));
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* Empty state message */
+.dev-sphere-messages:empty::after {
+    content: "Start a conversation with DevSphere";
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 40px;
+    color: var(--vscode-descriptionForeground);
+    font-style: italic;
+    font-size: 15px;
+    opacity: 0.7;
+    text-align: center;
+}
+
+.dev-sphere-messages:empty::before {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+    background-color: var(--vscode-descriptionForeground, rgba(127, 127, 127, 0.5));
+    mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>');
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    opacity: 0.5;
+}
+
+/* Webkit scrollbar styles for Chrome, Safari, Edge */
+.dev-sphere-messages::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.dev-sphere-messages::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 4px 0;
+}
+
+.dev-sphere-messages::-webkit-scrollbar-thumb {
+    background-color: var(--vscode-scrollbarSlider-background);
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.dev-sphere-messages::-webkit-scrollbar-thumb:hover {
+    background-color: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+.dev-sphere-messages::-webkit-scrollbar-thumb:active {
+    background-color: var(--vscode-scrollbarSlider-activeBackground);
+}
+
+/* Add a subtle fade effect to indicate scrollable content */
+.dev-sphere-messages::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(to top, var(--vscode-editor-background), transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.dev-sphere-messages.scrollable::after {
+    opacity: 1;
+}
+
+/* Message content indicators with subtle color bars */
+.dev-sphere-message-group-user .dev-sphere-message-content {
+    border-left: 3px solid var(--vscode-activityBarBadge-background);
+    padding-left: 12px;
+}
+
+.dev-sphere-message-group-assistant .dev-sphere-message-content {
+    border-left: 3px solid var(--vscode-terminal-ansiGreen, #3e9545);
+    padding-left: 12px;
+}
+
+.dev-sphere-message-group-system .dev-sphere-message-content {
+    border-left: 3px solid var(--vscode-terminal-ansiYellow, #dbd700);
+    padding-left: 12px;
+}
+
+/* Scroll to bottom button */
+.dev-sphere-scroll-button {
+    position: absolute;
+    bottom: 80px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    border: none;
+}
+
+.dev-sphere-scroll-button.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.dev-sphere-scroll-button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}

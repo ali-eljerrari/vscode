@@ -1,0 +1,21 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* Main CSS file that imports all DevSphere component styles */
+
+/* Base styles */
+@import './base.css';
+
+/* Components */
+@import './components/tabs.css';
+@import './components/header.css';
+@import './components/input.css';
+@import './components/messages.css';
+@import './components/history.css';
+@import './components/chatSelector.css';
+@import './components/dropdown.css';
+
+/* Animations */
+@import './animations.css';

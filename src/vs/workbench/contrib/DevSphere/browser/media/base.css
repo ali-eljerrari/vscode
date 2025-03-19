@@ -1,0 +1,157 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* DevSphere base styles */
+.dev-sphere-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+    font-family: var(--monaco-monospace-font);
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Main layout with sidebar */
+.dev-sphere-main-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.dev-sphere-main-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--vscode-editor-background);
+}
+
+/* Button styles without transitions or animations */
+.dev-sphere-section button {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 80px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dev-sphere-section button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+.dev-sphere-section button:active {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dev-sphere-section button svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+}
+
+/* Badge for chat count */
+.dev-sphere-chat-count {
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 10px;
+    margin-left: 8px;
+}
+
+/* Overlay for dialog background */
+.dev-sphere-dialog-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 99;
+    display: none;
+}
+
+.dev-sphere-dialog-overlay.show {
+    display: block;
+    animation: fadeInOverlay 0.2s ease forwards;
+}
+
+/* Enhanced Empty State */
+.dev-sphere-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.dev-sphere-empty-state-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    color: var(--vscode-descriptionForeground);
+    opacity: 0.5;
+}
+
+.dev-sphere-empty-state-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: var(--vscode-foreground);
+}
+
+.dev-sphere-empty-state-subtitle {
+    font-size: 14px;
+    margin-bottom: 24px;
+    color: var(--vscode-descriptionForeground);
+    max-width: 450px;
+    line-height: 1.5;
+}
+
+.dev-sphere-empty-state-shortcuts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.dev-sphere-shortcut {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.dev-sphere-shortcut-key {
+    display: inline-block;
+    padding: 3px 6px;
+    margin-right: 8px;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--monaco-monospace-font);
+}

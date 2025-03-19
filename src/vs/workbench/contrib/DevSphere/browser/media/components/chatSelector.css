@@ -1,0 +1,150 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* ===== CHAT SELECTOR DIALOG ===== */
+.dev-sphere-chat-selector {
+    position: fixed;
+    z-index: 100;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-widget-border);
+    border-radius: 6px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.dev-sphere-chat-selector.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.dev-sphere-chat-selector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.dev-sphere-chat-selector-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--vscode-foreground);
+}
+
+.dev-sphere-chat-selector-close {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--vscode-descriptionForeground);
+    transition: background-color 0.2s;
+}
+
+.dev-sphere-chat-selector-close:hover {
+    background-color: var(--vscode-toolbar-hoverBackground);
+    color: var(--vscode-foreground);
+}
+
+.dev-sphere-chat-selector-search {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.dev-sphere-chat-selector-search input {
+    width: 100%;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 4px;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    font-size: 13px;
+    outline: none;
+}
+
+.dev-sphere-chat-selector-search input:focus {
+    border-color: var(--vscode-focusBorder);
+}
+
+.dev-sphere-chat-selector-list {
+    flex: 1;
+    padding: 8px 0;
+    overflow-y: auto;
+    max-height: calc(80vh - 120px);
+}
+
+.dev-sphere-chat-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid var(--vscode-widget-shadow);
+    justify-content: space-between;
+}
+
+.dev-sphere-chat-item:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.dev-sphere-chat-item-selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+}
+
+.dev-sphere-chat-title {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 14px;
+}
+
+.dev-sphere-chat-actions {
+    display: none;
+    gap: 8px;
+}
+
+.dev-sphere-chat-item:hover .dev-sphere-chat-actions {
+    display: flex;
+}
+
+.dev-sphere-chat-action-button {
+    width: 24px;
+    height: 24px;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--vscode-descriptionForeground);
+    border-radius: 3px;
+}
+
+.dev-sphere-chat-action-button:hover {
+    background-color: var(--vscode-toolbar-hoverBackground);
+}
+
+.dev-sphere-chat-list-empty {
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--vscode-descriptionForeground);
+    font-style: italic;
+}
