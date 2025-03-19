@@ -116,11 +116,24 @@ export class DevSphereMessages extends Disposable {
 
 		// Check each pre element
 		preElements.forEach(pre => {
-			// Check if content is taller than visible area
+			// Add code-wrap class to enable word wrapping
+			pre.classList.add('code-wrap');
+
+			// Set appropriate max-height to avoid excessive vertical growth
+			const codeContent = pre.querySelector('code');
+			if (codeContent) {
+				const lineCount = codeContent.querySelectorAll('span').length;
+				// Limit very tall code blocks (more than 20 lines)
+				if (lineCount > 20) {
+					pre.classList.add('scrollable-y');
+				}
+			}
+
+			// Check only for vertical scrollability
 			if (pre.scrollHeight > pre.clientHeight) {
-				pre.classList.add('scrollable');
+				pre.classList.add('scrollable-y');
 			} else {
-				pre.classList.remove('scrollable');
+				pre.classList.remove('scrollable-y');
 			}
 		});
 	}
@@ -328,6 +341,9 @@ export class DevSphereMessages extends Disposable {
 		} else {
 			this.messagesContainer.classList.remove('scrollable');
 		}
+
+		// Also apply appropriate scrollable classes to code blocks
+		this.updateCodeBlocksScrollState();
 	}
 
 	// Simple markdown renderer - would be replaced with a proper markdown formatting module
@@ -420,8 +436,22 @@ export class DevSphereMessages extends Disposable {
 					// Use setTimeout to wait for content to render properly
 					setTimeout(() => {
 						preElements.forEach(pre => {
+							// Add word-wrap class to enable wrapping on x-axis instead of scrolling
+							pre.classList.add('code-wrap');
+
+							// Set appropriate max-height to avoid excessive vertical growth
+							const codeContent = pre.querySelector('code');
+							if (codeContent) {
+								const lineCount = codeContent.querySelectorAll('span').length;
+								// Limit very tall code blocks (more than 20 lines)
+								if (lineCount > 20) {
+									pre.classList.add('scrollable-y');
+								}
+							}
+
+							// Check for vertical overflow
 							if (pre.scrollHeight > pre.clientHeight) {
-								pre.classList.add('scrollable');
+								pre.classList.add('scrollable-y');
 							}
 						});
 					}, 100);

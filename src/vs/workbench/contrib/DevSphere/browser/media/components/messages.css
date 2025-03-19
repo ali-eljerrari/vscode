@@ -13,6 +13,9 @@
     scrollbar-width: thin;
     scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
     background: linear-gradient(180deg, var(--vscode-editor-background) 0%, var(--vscode-editorWidget-background) 100%);
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
 }
 
 /* Message groups */
@@ -142,6 +145,8 @@
     line-height: var(--dev-sphere-line-height);
     word-wrap: break-word;
     overflow-wrap: break-word;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .dev-sphere-message-content p {
@@ -211,13 +216,29 @@
     max-height: 400px;
 }
 
-/* Add a subtle inner shadow to indicate scrollability */
-.dev-sphere-message-content pre.scrollable {
+/* Style for code blocks that wrap horizontally instead of scrolling */
+.dev-sphere-message-content pre.code-wrap {
+    overflow-x: visible;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.dev-sphere-message-content pre.code-wrap code {
+    white-space: pre-wrap;
+    word-break: break-word;
+    height: auto;
+    max-height: none;
+}
+
+/* Add a subtle inner shadow to indicate vertical scrollability */
+.dev-sphere-message-content pre.scrollable-y {
     box-shadow: var(--dev-sphere-shadow-sm), inset 0 -8px 8px -8px rgba(0, 0, 0, 0.15);
 }
 
-/* Add a scroll indicator at the bottom of scrollable code blocks */
-.dev-sphere-message-content pre.scrollable::after {
+/* Add a scroll indicator at the bottom of vertically scrollable code blocks */
+.dev-sphere-message-content pre.scrollable-y::after {
     content: "";
     position: absolute;
     bottom: 0;
@@ -248,8 +269,14 @@
     padding-top: 0.75em;
 }
 
-/* Line number appearance */
-.dev-sphere-message-content pre code::before {
+/* Line number styling for wrapped code */
+.dev-sphere-message-content pre.code-wrap code {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Line number appearance for wrapped code */
+.dev-sphere-message-content pre.code-wrap code::before {
     content: "";
     position: absolute;
     left: 0;
@@ -260,6 +287,7 @@
     background-color: var(--vscode-editorWidget-background);
     opacity: 0.8;
     border-radius: 0 0 0 var(--dev-sphere-radius-sm);
+    z-index: 1;
 }
 
 /* Each line gets a line number using CSS counters */
@@ -272,11 +300,23 @@
     transition: background-color 0.1s ease;
 }
 
-.dev-sphere-message-content pre code > span::before {
+/* Adjust spans for wrapping code */
+.dev-sphere-message-content pre.code-wrap code > span {
+    display: block;
+    width: 100%;
+    position: relative;
+    padding-left: 0.5em;
+    min-height: 1.5em;
+    box-sizing: border-box;
+    word-break: break-word;
+    word-wrap: break-word;
+}
+
+.dev-sphere-message-content pre.code-wrap code > span::before {
     counter-increment: line;
     content: counter(line);
     position: absolute;
-    left: -3em;
+    left: -2.5em;
     width: 2.5em;
     color: var(--vscode-editorLineNumber-foreground);
     opacity: 0.7;
@@ -285,6 +325,7 @@
     padding-right: 0.75em;
     user-select: none;
     font-variant-numeric: tabular-nums;
+    z-index: 2;
 }
 
 /* Line hover effect with subtle animation */
