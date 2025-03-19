@@ -78,8 +78,6 @@ export const OPENAI_MODELS: OpenAIModel[] = [
 			models: [
 				// Gemini 2.0 models
 				{ id: 'gemini-2.0-pro-exp', name: 'Gemini 2.0 Pro Experimental', description: 'Top model for coding and complex prompts' },
-
-				// Gemini 2.0 models
 				{ id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', description: 'Powerful workhorse with low latency' },
 				{ id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Experimental', description: 'Powerful workhorse with low latency' },
 				{ id: 'gemini-2.0-flash-thinking-exp', name: 'Gemini 2.0 Flash Thinking Experimental', description: 'Enhanced reasoning with visible thought process' },
