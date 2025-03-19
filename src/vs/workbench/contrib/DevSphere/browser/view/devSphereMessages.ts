@@ -6,7 +6,7 @@
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { Disposable } from '../../../../../base/common/lifecycle.js';
 import * as DOM from '../../../../../base/browser/dom.js';
-import { Message } from '../devSphereService.js';
+import { Message } from '../models/devSphereModels.js';
 
 export class DevSphereMessages extends Disposable {
 	private messagesContainer: HTMLElement;
