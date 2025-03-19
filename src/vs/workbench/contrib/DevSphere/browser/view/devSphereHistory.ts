@@ -8,11 +8,14 @@ import { Disposable } from '../../../../../base/common/lifecycle.js';
 import { IQuickInputService } from '../../../../../platform/quickinput/common/quickInput.js';
 import { Chat } from '../devSphereService.js';
 import * as DOM from '../../../../../base/browser/dom.js';
+import { Codicon } from '../../../../../base/common/codicons.js';
+import { ThemeIcon } from '../../../../../base/common/themables.js';
 
 export class DevSphereHistory extends Disposable {
 	private container: HTMLDivElement;
 	private historyList: HTMLDivElement;
 	private searchInput: HTMLInputElement;
+	private searchContainer: HTMLDivElement;
 
 	constructor(
 		parentContainer: HTMLElement,
@@ -28,18 +31,48 @@ export class DevSphereHistory extends Disposable {
 		parentContainer.appendChild(this.container);
 
 		// Create search box
-		const searchContainer = document.createElement('div');
-		searchContainer.classList.add('dev-sphere-history-search');
+		this.searchContainer = document.createElement('div');
+		this.searchContainer.classList.add('dev-sphere-history-search');
 
+		// Add search icon
+		const searchIcon = document.createElement('div');
+		searchIcon.classList.add('dev-sphere-history-search-icon');
+		searchIcon.classList.add(...ThemeIcon.asClassNameArray(Codicon.search));
+		this.searchContainer.appendChild(searchIcon);
+
+		// Create search input
 		this.searchInput = document.createElement('input');
 		this.searchInput.type = 'text';
 		this.searchInput.placeholder = 'Search chat history...';
+		this.searchInput.classList.add('dev-sphere-history-search-input');
 		this.searchInput.addEventListener('input', () => {
 			this.filterChatList(this.searchInput.value);
+			// Show/hide clear button based on input
+			clearButton.style.display = this.searchInput.value.length > 0 ? 'flex' : 'none';
 		});
-		searchContainer.appendChild(this.searchInput);
+		this.searchContainer.appendChild(this.searchInput);
 
-		this.container.appendChild(searchContainer);
+		// Add clear button
+		const clearButton = document.createElement('div');
+		clearButton.classList.add('dev-sphere-history-search-clear');
+		clearButton.title = 'Clear search';
+		clearButton.classList.add(...ThemeIcon.asClassNameArray(Codicon.close));
+		clearButton.style.display = 'none'; // Hide initially
+		clearButton.addEventListener('click', () => {
+			this.searchInput.value = '';
+			this.filterChatList('');
+			clearButton.style.display = 'none';
+			this.searchInput.focus();
+		});
+		this.searchContainer.appendChild(clearButton);
+
+		this.container.appendChild(this.searchContainer);
+
+		// Create history header
+		const historyHeader = document.createElement('div');
+		historyHeader.classList.add('dev-sphere-history-header');
+		historyHeader.textContent = 'Recent Conversations';
+		this.container.appendChild(historyHeader);
 
 		// Create history list
 		this.historyList = document.createElement('div');
@@ -67,11 +100,77 @@ export class DevSphereHistory extends Disposable {
 			return;
 		}
 
-		// Create an item for each chat
+		// Group chats by date
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const yesterday = new Date(today);
+		yesterday.setDate(yesterday.getDate() - 1);
+		const lastWeek = new Date(today);
+		lastWeek.setDate(lastWeek.getDate() - 7);
+
+		const todayChats: Chat[] = [];
+		const yesterdayChats: Chat[] = [];
+		const lastWeekChats: Chat[] = [];
+		const olderChats: Chat[] = [];
+
+		chats.forEach(chat => {
+			const chatDate = new Date(chat.lastModified);
+			chatDate.setHours(0, 0, 0, 0);
+
+			if (chatDate.getTime() === today.getTime()) {
+				todayChats.push(chat);
+			} else if (chatDate.getTime() === yesterday.getTime()) {
+				yesterdayChats.push(chat);
+			} else if (chatDate >= lastWeek) {
+				lastWeekChats.push(chat);
+			} else {
+				olderChats.push(chat);
+			}
+		});
+
+		// Create sections for each time period
+		if (todayChats.length > 0) {
+			this.createDateSection('Today', todayChats);
+		}
+
+		if (yesterdayChats.length > 0) {
+			this.createDateSection('Yesterday', yesterdayChats);
+		}
+
+		if (lastWeekChats.length > 0) {
+			this.createDateSection('Last 7 Days', lastWeekChats);
+		}
+
+		if (olderChats.length > 0) {
+			this.createDateSection('Older', olderChats);
+		}
+	}
+
+	/**
+	 * Creates a date section with header and chat items
+	 */
+	private createDateSection(title: string, chats: Chat[]): void {
+		// Create section container
+		const sectionContainer = document.createElement('div');
+		sectionContainer.classList.add('dev-sphere-history-section');
+
+		// Add section header
+		const sectionHeader = document.createElement('div');
+		sectionHeader.classList.add('dev-sphere-history-section-header');
+		sectionHeader.textContent = title;
+		sectionContainer.appendChild(sectionHeader);
+
+		// Add chat items
+		const sectionItems = document.createElement('div');
+		sectionItems.classList.add('dev-sphere-history-section-items');
+
 		chats.forEach(chat => {
 			const chatItem = this.createChatHistoryItem(chat);
-			this.historyList.appendChild(chatItem);
+			sectionItems.appendChild(chatItem);
 		});
+
+		sectionContainer.appendChild(sectionItems);
+		this.historyList.appendChild(sectionContainer);
 	}
 
 	/**
@@ -80,38 +179,48 @@ export class DevSphereHistory extends Disposable {
 	private createChatHistoryItem(chat: Chat): HTMLDivElement {
 		const historyItem = document.createElement('div');
 		historyItem.classList.add('dev-sphere-history-item');
+		historyItem.setAttribute('data-chat-id', chat.id);
 
 		// Add selected class if this is the current chat
 		if (chat.id === this.viewModel?.currentChat?.id) {
 			historyItem.classList.add('dev-sphere-history-item-selected');
 		}
 
-		// Add date
-		const dateElement = document.createElement('div');
-		dateElement.classList.add('dev-sphere-history-date');
-		const date = new Date(chat.lastModified);
-		dateElement.textContent = date.toLocaleDateString(undefined, {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric'
-		});
-		historyItem.appendChild(dateElement);
+		// Add chat icon
+		const chatIcon = document.createElement('div');
+		chatIcon.classList.add('dev-sphere-history-item-icon');
+		chatIcon.classList.add(...ThemeIcon.asClassNameArray(Codicon.commentDiscussion));
+		historyItem.appendChild(chatIcon);
+
+		// Create content container
+		const contentContainer = document.createElement('div');
+		contentContainer.classList.add('dev-sphere-history-item-content');
 
 		// Chat title
 		const titleElement = document.createElement('div');
 		titleElement.classList.add('dev-sphere-history-title');
+		titleElement.title = chat.title;
 		titleElement.textContent = chat.title;
-		historyItem.appendChild(titleElement);
+		contentContainer.appendChild(titleElement);
 
-		// Message count and model
+		// Message count, time and model
 		const metaElement = document.createElement('div');
 		metaElement.classList.add('dev-sphere-history-meta');
 
 		const count = chat.messages.length;
 		const model = chat.modelId.split('-')[0].toUpperCase(); // Simplified model display
 
-		metaElement.textContent = `${count} message${count !== 1 ? 's' : ''} · ${model}`;
-		historyItem.appendChild(metaElement);
+		// Format time
+		const date = new Date(chat.lastModified);
+		const timeStr = date.toLocaleTimeString(undefined, {
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+
+		metaElement.textContent = `${count} message${count !== 1 ? 's' : ''} · ${timeStr} · ${model}`;
+		contentContainer.appendChild(metaElement);
+
+		historyItem.appendChild(contentContainer);
 
 		// Action buttons container
 		const actionButtons = document.createElement('div');
@@ -121,27 +230,14 @@ export class DevSphereHistory extends Disposable {
 		const openButton = document.createElement('button');
 		openButton.classList.add('dev-sphere-history-action-button');
 		openButton.title = 'Open chat';
-		const openButtonHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <line x1="10" y1="14" x2="21" y2="3"></line>
-            </svg>
-        `;
-		DOM.safeInnerHtml(openButton, openButtonHTML);
+		openButton.classList.add(...ThemeIcon.asClassNameArray(Codicon.goToFile));
 		actionButtons.appendChild(openButton);
 
 		// Delete button
 		const deleteButton = document.createElement('button');
 		deleteButton.classList.add('dev-sphere-history-action-button');
 		deleteButton.title = 'Delete chat';
-		const deleteButtonHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            </svg>
-        `;
-		DOM.safeInnerHtml(deleteButton, deleteButtonHTML);
+		deleteButton.classList.add(...ThemeIcon.asClassNameArray(Codicon.trash));
 		actionButtons.appendChild(deleteButton);
 
 		historyItem.appendChild(actionButtons);
@@ -153,6 +249,7 @@ export class DevSphereHistory extends Disposable {
 			if (e.target === historyItem || e.target === titleElement ||
 				(historyItem.contains(target) && !actionButtons.contains(target))) {
 				this.viewModel.switchToChat(chat.id);
+				this.updateSelectedItemStyle(chat.id);
 				this.onChatSelected();
 			}
 		});
@@ -161,6 +258,7 @@ export class DevSphereHistory extends Disposable {
 		openButton.addEventListener('click', (e) => {
 			e.stopPropagation();
 			this.viewModel.switchToChat(chat.id);
+			this.updateSelectedItemStyle(chat.id);
 			this.onChatSelected();
 		});
 
@@ -170,9 +268,13 @@ export class DevSphereHistory extends Disposable {
 
 			// Confirm deletion
 			const result = await this.quickInputService.pick(
-				[{ label: 'Cancel' }, { label: 'Delete' }],
+				[
+					{ label: 'Delete', iconClass: ThemeIcon.asClassName(Codicon.trash) },
+					{ label: 'Cancel', iconClass: ThemeIcon.asClassName(Codicon.close) }
+				],
 				{
-					placeHolder: `Delete chat "${chat.title}"?`
+					placeHolder: `Delete chat "${chat.title}"?`,
+					canPickMany: false
 				}
 			);
 
@@ -186,28 +288,91 @@ export class DevSphereHistory extends Disposable {
 	}
 
 	/**
-	 * Filters the history list based on search input
+	 * Updates the selected item style after switching chats
 	 */
-	private filterChatList(searchTerm: string): void {
-		const historyItems = this.historyList.querySelectorAll('.dev-sphere-history-item');
-		if (!historyItems) {
-			return;
-		}
-
-		const term = searchTerm.toLowerCase();
-
-		historyItems.forEach(item => {
-			const title = item.querySelector('.dev-sphere-history-title')?.textContent?.toLowerCase() || '';
-			if (title.includes(term)) {
-				if (DOM.isHTMLElement(item)) {
-					item.style.display = 'flex';
-				}
-			} else {
-				if (DOM.isHTMLElement(item)) {
-					item.style.display = 'none';
+	private updateSelectedItemStyle(selectedChatId: string): void {
+		const items = this.historyList.querySelectorAll('.dev-sphere-history-item');
+		items.forEach(item => {
+			if (DOM.isHTMLElement(item)) {
+				const chatId = item.getAttribute('data-chat-id');
+				if (chatId === selectedChatId) {
+					item.classList.add('dev-sphere-history-item-selected');
+				} else {
+					item.classList.remove('dev-sphere-history-item-selected');
 				}
 			}
 		});
+	}
+
+	/**
+	 * Filters the history list based on search input
+	 */
+	private filterChatList(searchTerm: string): void {
+		const sections = this.historyList.querySelectorAll('.dev-sphere-history-section');
+		if (!sections || sections.length === 0) {
+			return;
+		}
+
+		const term = searchTerm.toLowerCase().trim();
+		let totalVisibleItems = 0;
+
+		// Process each section
+		sections.forEach(section => {
+			if (!DOM.isHTMLElement(section)) {
+				return;
+			}
+
+			const items = section.querySelectorAll('.dev-sphere-history-item');
+			let visibleItemsInSection = 0;
+
+			// First, filter the items
+			items.forEach(item => {
+				if (!DOM.isHTMLElement(item)) {
+					return;
+				}
+
+				const title = item.querySelector('.dev-sphere-history-title')?.textContent?.toLowerCase() || '';
+
+				if (term === '' || title.includes(term)) {
+					item.style.display = 'flex';
+					visibleItemsInSection++;
+					totalVisibleItems++;
+				} else {
+					item.style.display = 'none';
+				}
+			});
+
+			// Then show/hide the section based on whether it has visible items
+			const sectionHeader = section.querySelector('.dev-sphere-history-section-header');
+			if (DOM.isHTMLElement(sectionHeader)) {
+				sectionHeader.style.display = visibleItemsInSection > 0 ? 'block' : 'none';
+			}
+
+			section.style.display = visibleItemsInSection > 0 ? 'block' : 'none';
+		});
+
+		// Show no results message if needed
+		let noResultsElement = this.historyList.querySelector('.dev-sphere-history-no-results');
+
+		if (totalVisibleItems === 0 && term !== '') {
+			if (!noResultsElement) {
+				noResultsElement = document.createElement('div');
+				noResultsElement.classList.add('dev-sphere-history-no-results');
+
+				const noResultsHTML = `
+					<div class="dev-sphere-history-no-results-icon">
+						<i class="${ThemeIcon.asClassName(Codicon.searchStop)}"></i>
+					</div>
+					<div class="dev-sphere-history-no-results-text">No results found</div>
+				`;
+				DOM.safeInnerHtml(noResultsElement as HTMLElement, noResultsHTML);
+				this.historyList.appendChild(noResultsElement);
+			} else {
+				(noResultsElement as HTMLElement).style.display = 'flex';
+			}
+		} else if (noResultsElement) {
+			(noResultsElement as HTMLElement).style.display = 'none';
+		}
 	}
 
 	/**
@@ -219,15 +384,25 @@ export class DevSphereHistory extends Disposable {
 
 		const emptyStateHTML = `
             <div class="dev-sphere-history-empty-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                </svg>
+                <i class="${ThemeIcon.asClassName(Codicon.comment)}"></i>
             </div>
-            <div class="dev-sphere-history-empty-title">No chat history</div>
-            <div class="dev-sphere-history-empty-subtitle">Start a new conversation to begin building your chat history</div>
+            <div class="dev-sphere-history-empty-title">No conversations yet</div>
+            <div class="dev-sphere-history-empty-subtitle">Start a new chat to begin building your history</div>
+            <button class="dev-sphere-history-empty-button">
+                <i class="${ThemeIcon.asClassName(Codicon.add)}"></i>
+                New Conversation
+            </button>
         `;
 		DOM.safeInnerHtml(emptyState, emptyStateHTML);
+
+		// Add event listener to the "New Conversation" button
+		const newChatButton = emptyState.querySelector('.dev-sphere-history-empty-button');
+		if (newChatButton) {
+			newChatButton.addEventListener('click', () => {
+				this.viewModel.createNewChat();
+				this.onChatSelected();
+			});
+		}
 
 		this.historyList.appendChild(emptyState);
 	}
