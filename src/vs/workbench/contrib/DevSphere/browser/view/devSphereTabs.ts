@@ -76,7 +76,7 @@ export class DevSphereTabs extends Disposable {
 			// Add event listeners
 			tabElement.addEventListener('click', (e) => {
 				if (e.target !== closeButton) {
-					this.viewModel.switchToChat(chat.id);
+					this.viewModel.loadChat(chat.id);
 					this.onTabChange();
 				}
 			});

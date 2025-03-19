@@ -152,19 +152,6 @@ export class DevSphereChatSelector extends Disposable {
 			const actionButtons = document.createElement('div');
 			actionButtons.classList.add('dev-sphere-chat-actions');
 
-			// Rename button
-			const renameButton = document.createElement('button');
-			renameButton.classList.add('dev-sphere-chat-action-button');
-			renameButton.title = 'Rename chat';
-			const renameButtonHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 20h9"></path>
-                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                </svg>
-            `;
-			DOM.safeInnerHtml(renameButton, renameButtonHTML);
-			actionButtons.appendChild(renameButton);
-
 			// Delete button
 			const deleteButton = document.createElement('button');
 			deleteButton.classList.add('dev-sphere-chat-action-button');
@@ -188,30 +175,12 @@ export class DevSphereChatSelector extends Disposable {
 				const target = e.target as Node;
 				// Only handle clicks on the item itself or the title, not on action buttons
 				if (e.target === chatItem || e.target === chatTitle || (chatItem.contains(target) && !actionButtons.contains(target))) {
-					this.viewModel.switchToChat(chat.id);
+					this.viewModel.loadChat(chat.id);
 					this.hideChatSelector();
 					this.onChatSelected();
 				}
 			});
 
-			// Rename chat
-			renameButton.addEventListener('click', async (e) => {
-				e.stopPropagation(); // Prevent triggering chatItem click
-
-				// Prompt for new title
-				const result = await this.quickInputService.input({
-					title: 'Rename Chat',
-					placeHolder: 'Enter new chat title',
-					value: chat.title,
-					validateInput: async (value: string) => {
-						return value.trim() ? null : 'Title cannot be empty';
-					}
-				});
-
-				if (result) {
-					await this.viewModel.renameChat(chat.id, result);
-				}
-			});
 
 			// Delete chat
 			deleteButton.addEventListener('click', async (e) => {

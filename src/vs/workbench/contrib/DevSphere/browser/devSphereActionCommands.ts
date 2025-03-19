@@ -123,14 +123,20 @@ export function registerDevSphereActions(): void {
 			const quickInputService = accessor.get(IQuickInputService);
 			const viewsService = accessor.get(IViewsService);
 
-			const availableModels = devSphereService.getAvailableModels();
-			const currentModel = devSphereService.getCurrentModel();
+			// Get all models from all providers
+			const openaiModels = devSphereService.getAvailableModelsByProvider('ChatgptModels');
+			const anthropicModels = devSphereService.getAvailableModelsByProvider('AnthropicModels');
+			const googleModels = devSphereService.getAvailableModelsByProvider('GoogleModels');
 
-			// Create quick pick items from models with explicit id property
-			const items: ModelQuickPickItem[] = availableModels.map(model => ({
+			// Combine all models
+			const allModels = [...openaiModels, ...anthropicModels, ...googleModels];
+			const currentModelId = devSphereService.getCurrentModelId();
+
+			// Create quick pick items from flattened model objects
+			const items: ModelQuickPickItem[] = allModels.map(model => ({
 				label: model.name,
 				description: model.description,
-				detail: model.id === currentModel.id ? 'Currently Selected' : undefined,
+				detail: model.id === currentModelId ? 'Currently Selected' : undefined,
 				id: model.id
 			}));
 
@@ -138,7 +144,7 @@ export function registerDevSphereActions(): void {
 			const selection = await quickInputService.pick<ModelQuickPickItem>(items, {
 				placeHolder: 'Select OpenAI Model',
 				title: 'Change AI Model',
-				activeItem: items.find(item => item.id === currentModel.id)
+				activeItem: items.find(item => item.id === currentModelId)
 			});
 
 			if (selection && selection.id) {

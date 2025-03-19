@@ -444,9 +444,11 @@ export class DevSphereService implements IDevSphereService {
 	}
 
 	public async updateAPIKey(): Promise<void> {
+		const providerName = this.getCurrentProviderName();
+		this.notificationService.info(`Please enter your ${providerName} API key.`);
 		const newKey = await this.promptForAPIKey(this.currentModelType);
 		if (newKey) {
-			this.notificationService.info(`${this.getCurrentProviderName()} API key updated successfully.`);
+			this.notificationService.info(`${providerName} API key updated successfully.`);
 		}
 	}
 
@@ -496,10 +498,10 @@ export class DevSphereService implements IDevSphereService {
 	public async fetchAIResponse(prompt: string): Promise<string> {
 		// Get the API key based on the current provider
 		let apiKey = await this.getOpenAIAPIKey();
+		const providerName = this.getCurrentProviderName();
 
 		// If no API key exists, prompt the user directly
 		if (!apiKey) {
-			const providerName = this.getCurrentProviderName();
 			this.notificationService.info(`No ${providerName} API key found. Please enter your API key.`);
 
 			// Directly prompt for the API key
@@ -507,9 +509,18 @@ export class DevSphereService implements IDevSphereService {
 
 			// If user still doesn't provide a key, return error message
 			if (!apiKey) {
+				const errorMessage = `**Error:** No ${providerName} API key provided.
+
+You need to set up an API key to use ${providerName} models. The API key allows secure communication with ${providerName}'s servers.
+
+To fix this:
+1. Click the "Add ${providerName} API Key" button below
+2. Enter your API key in the prompt
+3. Your messages will be processed once the key is set up`;
+
 				const error: DevSphereError = {
 					category: DevSphereErrorCategory.API_KEY,
-					message: `No ${providerName} API key provided. Please add your API key to use this model.`,
+					message: errorMessage,
 					provider: providerName,
 					modelId: this.getCurrentModelId(),
 					retryable: true,
@@ -568,30 +579,112 @@ export class DevSphereService implements IDevSphereService {
 					}
 
 					// If user cancelled, show error with action button
-					actionLabel = `Update ${this.getCurrentProviderName()} API Key`;
+					actionLabel = `Update ${providerName} API Key`;
 					actionFn = async () => {
 						await this.promptForAPIKey(this.currentModelType);
 					};
+
+					// Create detailed error message
+					const errorMessage = `**Invalid ${providerName} API Key**
+
+The API request failed with an authentication error (${statusCode}). This typically happens when:
+- The API key is incorrect or has been revoked
+- The API key doesn't have permission for the selected model
+- The API key has expired or reached its quota limit
+
+Please update your API key to continue using ${providerName} models.`;
+
+					// Return a formatted error message
+					const error: DevSphereError = {
+						category,
+						message: errorMessage,
+						provider: providerName,
+						modelId: this.getCurrentModelId(),
+						retryable: true,
+						actionLabel,
+						actionFn
+					};
+
+					return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
 				} else if (statusCode === 429) {
 					category = DevSphereErrorCategory.API_RATE_LIMIT;
+
+					const errorMessage = `**Rate Limit Exceeded for ${providerName}**
+
+The API request was rejected because you've reached the rate limit (${statusCode}). This typically happens when:
+- You've sent too many requests in a short period of time
+- You've exceeded your tier's usage quota or billing limits
+- The service is experiencing high demand
+
+Please wait a moment before trying again. If this persists, you may need to:
+- Upgrade your API tier if available
+- Implement request throttling
+- Contact ${providerName} support for assistance`;
+
+					// Return a formatted error message
+					const error: DevSphereError = {
+						category,
+						message: errorMessage,
+						provider: providerName,
+						modelId: this.getCurrentModelId(),
+						retryable: true
+					};
+
+					return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
 				} else if (statusCode >= 500) {
 					category = DevSphereErrorCategory.API_RESPONSE;
+
+					const errorMessage = `**${providerName} Server Error (${statusCode})**
+
+The API request failed due to a server error. This typically indicates:
+- ${providerName}'s servers might be experiencing issues
+- The service might be undergoing maintenance
+- There might be a temporary outage
+
+This is usually not related to your request or API key. Please try again after a few minutes. If the issue persists, you can:
+- Check ${providerName}'s status page for service announcements
+- Try a different model
+- Try again later when the service has recovered`;
+
+					// Return a formatted error message
+					const error: DevSphereError = {
+						category,
+						message: errorMessage,
+						provider: providerName,
+						modelId: this.getCurrentModelId(),
+						retryable: true
+					};
+
+					return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
 				} else {
 					category = DevSphereErrorCategory.UNKNOWN;
+
+					const errorReason = errorData.error?.message || `Unknown error (${statusCode})`;
+					const errorMessage = `**Unexpected ${providerName} Error**
+
+The API request failed with an unexpected error: ${errorReason}
+
+This could be due to:
+- An issue with the API request format
+- A temporary service disruption
+- Changes to the API requirements or endpoints
+
+Please try again later or try another model. If the issue persists, you might need to:
+- Check for updates to the application
+- Verify your API key permissions
+- Contact support for further assistance`;
+
+					// Return a formatted error message
+					const error: DevSphereError = {
+						category,
+						message: errorMessage,
+						provider: providerName,
+						modelId: this.getCurrentModelId(),
+						retryable: true
+					};
+
+					return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
 				}
-
-				// Return a formatted error message
-				const error: DevSphereError = {
-					category,
-					message: errorData.error?.message || 'Error connecting to API.',
-					provider: this.getCurrentProviderName(),
-					modelId: this.getCurrentModelId(),
-					retryable: true,
-					actionLabel,
-					actionFn
-				};
-
-				return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
 			}
 
 			const data = await response.json();
@@ -600,14 +693,25 @@ export class DevSphereService implements IDevSphereService {
 			console.error('Error fetching AI response:', error);
 
 			// Process the error
-			const providerName = this.getCurrentProviderName();
 			const modelId = this.getCurrentModelId();
 
 			// Check if it's an abort error (timeout)
 			if (error instanceof DOMException && error.name === 'AbortError') {
+				const errorMessage = `**Request Timeout for ${providerName}**
+
+Your request to ${providerName} timed out after 60 seconds. This could be due to:
+- Slow internet connection
+- High server load at ${providerName}
+- A complex query that requires more processing time
+
+Try again later or consider:
+- Checking your network connection
+- Using a shorter/simpler prompt
+- Trying a different model that might respond faster`;
+
 				const timeoutError: DevSphereError = {
 					category: DevSphereErrorCategory.NETWORK,
-					message: `Request to ${providerName} timed out after 60 seconds.`,
+					message: errorMessage,
 					provider: providerName,
 					modelId: modelId,
 					retryable: true
@@ -615,10 +719,80 @@ export class DevSphereService implements IDevSphereService {
 				return DevSphereErrorHandler.formatErrorAsSystemMessage(timeoutError);
 			}
 
-			// For other errors
+			// For failed fetch errors related to API key issues (like CORS, failed to fetch)
+			// These often happen when API keys are missing for non-OpenAI providers
+			if (error instanceof Error) {
+				const errorLowerCase = error.message.toLowerCase();
+				const isAuthError =
+					errorLowerCase.includes('unauthorized') ||
+					errorLowerCase.includes('authentication') ||
+					errorLowerCase.includes('forbidden') ||
+					errorLowerCase.includes('api key') ||
+					errorLowerCase.includes('failed to fetch') || // Common when API key is missing
+					errorLowerCase.includes('cors');              // Also common with API issues
+
+				if (isAuthError) {
+					// This is likely an authentication issue - prompt for API key
+					this.notificationService.info(`Network error connecting to ${providerName}. This may be due to a missing or invalid API key.`);
+
+					// Directly prompt for a new API key
+					const newKey = await this.promptForAPIKey(this.currentModelType);
+					if (newKey) {
+						// If user provided a key, retry the request
+						return this.fetchAIResponse(prompt);
+					}
+
+					// If user didn't provide a key, show authentication error
+					const errorMessage = `**Authentication Error Connecting to ${providerName}**
+
+A network error occurred that may be related to API authentication: ${error.message}
+
+This typically happens when:
+- The API key is missing or invalid
+- There are network connectivity issues to ${providerName}'s servers
+- The API endpoint is incorrect or has changed
+- CORS or browser security restrictions are blocking the request
+
+To fix this issue:
+1. Click the "Add ${providerName} API Key" button below
+2. Enter a valid API key in the prompt
+3. Your message will be processed automatically`;
+
+					const authError: DevSphereError = {
+						category: DevSphereErrorCategory.AUTHENTICATION,
+						message: errorMessage,
+						provider: providerName,
+						modelId: modelId,
+						retryable: true,
+						actionLabel: `Add ${providerName} API Key`,
+						actionFn: async () => {
+							await this.promptForAPIKey(this.currentModelType);
+						}
+					};
+					return DevSphereErrorHandler.formatErrorAsSystemMessage(authError);
+				}
+			}
+
+			// For other general network errors
+			const errorDetail = error instanceof Error ? error.message : 'Network error occurred';
+			const errorMessage = `**Network Error Connecting to ${providerName}**
+
+A network error occurred: ${errorDetail}
+
+This could be due to:
+- Internet connectivity issues
+- Firewall or network restrictions
+- ${providerName} service being temporarily unavailable
+- CORS or other browser security restrictions
+
+Try the following solutions:
+- Check your internet connection
+- Try again in a few moments
+- Verify there are no network restrictions blocking access`;
+
 			const networkError: DevSphereError = {
 				category: DevSphereErrorCategory.NETWORK,
-				message: error instanceof Error ? error.message : 'Network error occurred.',
+				message: errorMessage,
 				provider: providerName,
 				modelId: modelId,
 				retryable: true
