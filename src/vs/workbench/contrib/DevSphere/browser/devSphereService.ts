@@ -77,11 +77,12 @@ export const OPENAI_MODELS: OpenAIModel[] = [
 		GoogleModels: {
 			models: [
 				// Gemini 2.0 models
-				{ id: 'gemini-2.0-pro-experimental', name: 'Gemini 2.0 Pro Experimental', description: 'Top model for coding and complex prompts' },
+				{ id: 'gemini-2.0-pro-exp', name: 'Gemini 2.0 Pro Experimental', description: 'Top model for coding and complex prompts' },
 
 				// Gemini 2.0 models
 				{ id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', description: 'Powerful workhorse with low latency' },
-				{ id: 'gemini-2.0-flash-thinking', name: 'Gemini 2.0 Flash Thinking', description: 'Enhanced reasoning with visible thought process' },
+				{ id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Experimental', description: 'Powerful workhorse with low latency' },
+				{ id: 'gemini-2.0-flash-thinking-exp', name: 'Gemini 2.0 Flash Thinking Experimental', description: 'Enhanced reasoning with visible thought process' },
 				{ id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash-Lite', description: 'Most cost-efficient model' },
 
 			],
@@ -375,15 +376,18 @@ export class DevSphereService implements IDevSphereService {
 					max_tokens: this.MAX_TOKENS
 				};
 			case 'GoogleModels':
+				// Google API format is different when using the API key in the URL
+				// The model is specified in the URL, not in the request body
 				return {
-					model: this.currentModelId,
 					contents: [
 						{
 							role: 'user',
 							parts: [{ text: prompt }]
 						}
 					],
-					maxTokens: this.MAX_TOKENS
+					generationConfig: {
+						maxOutputTokens: this.MAX_TOKENS
+					}
 				};
 			default:
 				throw new Error(`Unsupported model type: ${this.currentModelType}`);
@@ -404,15 +408,42 @@ export class DevSphereService implements IDevSphereService {
 				}
 				break;
 			case 'GoogleModels':
+				// Handle Google API response with key in URL
 				if (data.candidates && data.candidates.length > 0 &&
 					data.candidates[0].content &&
 					data.candidates[0].content.parts &&
 					data.candidates[0].content.parts.length > 0) {
 					return data.candidates[0].content.parts[0].text;
 				}
+
+				// For cases where the response structure might be different
+				try {
+					// Try different parts of the response that might contain the content
+					if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+						return data.candidates[0].content.parts[0].text;
+					} else if (data.text) {
+						return data.text;
+					} else if (data.content?.parts?.[0]?.text) {
+						return data.content.parts[0].text;
+					} else if (data.message) {
+						return data.message; // For error messages
+					} else if (typeof data === 'string') {
+						return data; // For plain text responses
+					} else if (data.toString && typeof data.toString === 'function') {
+						return data.toString(); // Last resort
+					}
+				} catch (e) {
+					console.error('Error parsing Google API response:', e);
+				}
 				break;
 		}
-		throw new Error('Unable to parse response from API.');
+
+		// If we can't extract content in a structured way, try to stringify the entire response
+		try {
+			return JSON.stringify(data, null, 2);
+		} catch (e) {
+			throw new Error('Unable to parse response from API.');
+		}
 	}
 
 	// Get the appropriate API key for the current model provider
@@ -495,6 +526,22 @@ export class DevSphereService implements IDevSphereService {
 		return undefined;
 	}
 
+	// Helper to create a proxy URL for Google API requests
+	private getGoogleAPIProxyUrl(apiKey: string): string {
+		// Option 1: Use the API directly with the key in the URL
+		// This might still have CORS issues but is the most direct
+		const baseUrl = this.getCurrentEndpoint();
+		return `${baseUrl}/${this.currentModelId}:generateContent?key=${apiKey}`;
+
+		// Option 2: Use a CORS proxy (would need to be set up)
+		// Commented out as it requires an external service
+		// return `https://your-cors-proxy.example.com/v1beta/models/${this.currentModelId}:generateContent?key=${apiKey}`;
+
+		// Option 3: Use a service like cors-anywhere (for development only)
+		// Commented out as it's not recommended for production
+		// return `https://cors-anywhere.herokuapp.com/https://generativelanguage.googleapis.com/v1beta/models/${this.currentModelId}:generateContent?key=${apiKey}`;
+	}
+
 	public async fetchAIResponse(prompt: string): Promise<string> {
 		// Get the API key based on the current provider
 		let apiKey = await this.getOpenAIAPIKey();
@@ -545,14 +592,64 @@ To fix this:
 			};
 
 			const requestBody = this.formatRequestBody(prompt);
+			let response;
 
-			// Make the API request
-			const response = await fetch(this.getCurrentEndpoint(), {
-				method: 'POST',
-				headers,
-				body: JSON.stringify(requestBody),
-				signal: controller.signal
-			});
+			// Handle Google model requests differently due to CORS
+			if (this.currentModelType === 'GoogleModels') {
+				// For Google models, use the proxy URL approach to avoid CORS issues
+				const apiUrl = this.getGoogleAPIProxyUrl(apiKey);
+
+				// When making a call to the Google API, don't include the Authorization header
+				// as Google uses API keys in the URL for authentication
+				response = await fetch(apiUrl, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(requestBody),
+					signal: controller.signal
+				}).catch(async (error) => {
+					// If the direct call fails due to CORS, show a more specific error
+					if (error.message.includes('CORS') || error.name === 'TypeError') {
+						console.error('CORS error when accessing Google API directly:', error);
+
+						const corsErrorMessage = `**CORS Error Connecting to Google API**
+
+A CORS policy error occurred when trying to access the Google API. This is a common issue with browser-based applications.
+
+To use Google models with DevSphere, you'll need to:
+
+1. Option 1: Use a different model provider (OpenAI or Anthropic)
+2. Option 2: Add your Google API key with the "Add Google API Key" button and try again
+3. Option 3: If issues persist, consider using VS Code's proxy settings for API access
+
+The exact error was: ${error.message}`;
+
+						const corsError: DevSphereError = {
+							category: DevSphereErrorCategory.NETWORK,
+							message: corsErrorMessage,
+							provider: providerName,
+							modelId: this.getCurrentModelId(),
+							retryable: true,
+							actionLabel: `Add ${providerName} API Key`,
+							actionFn: async () => {
+								await this.promptForAPIKey(this.currentModelType);
+							}
+						};
+
+						throw corsError;
+					}
+					throw error;
+				});
+			} else {
+				// Standard request for OpenAI and Anthropic
+				response = await fetch(this.getCurrentEndpoint(), {
+					method: 'POST',
+					headers,
+					body: JSON.stringify(requestBody),
+					signal: controller.signal
+				});
+			}
 
 			clearTimeout(timeoutId);
 
@@ -695,6 +792,12 @@ Please try again later or try another model. If the issue persists, you might ne
 			// Process the error
 			const modelId = this.getCurrentModelId();
 
+			// Check if it's already a formatted DevSphereError
+			if (error && typeof error.message === 'string' && error.category) {
+				// If it's already a DevSphereError object, format it and return
+				return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
+			}
+
 			// Check if it's an abort error (timeout)
 			if (error instanceof DOMException && error.name === 'AbortError') {
 				const errorMessage = `**Request Timeout for ${providerName}**
@@ -723,6 +826,40 @@ Try again later or consider:
 			// These often happen when API keys are missing for non-OpenAI providers
 			if (error instanceof Error) {
 				const errorLowerCase = error.message.toLowerCase();
+				const isCorsError =
+					errorLowerCase.includes('cors') ||
+					(errorLowerCase.includes('failed to fetch') && this.currentModelType === 'GoogleModels');
+
+				if (isCorsError && this.currentModelType === 'GoogleModels') {
+					// Handle Google API CORS issues specifically
+					const corsErrorMessage = `**CORS Restriction with Google API**
+
+Your browser's security policy (CORS) is preventing direct access to the Google AI API.
+
+This is a common issue when using Google's AI models in browser-based applications. To resolve:
+
+1. Try a different model provider (OpenAI or Anthropic)
+2. If you need Google's models specifically:
+   - Verify your API key is correct
+   - Consider using VS Code with API access settings that can bypass CORS
+
+Technical details: ${error.message}`;
+
+					const corsError: DevSphereError = {
+						category: DevSphereErrorCategory.NETWORK,
+						message: corsErrorMessage,
+						provider: providerName,
+						modelId: modelId,
+						retryable: true,
+						actionLabel: `Switch to OpenAI Models`,
+						actionFn: () => {
+							this.setCurrentModel('gpt-4o-mini'); // Switch to an OpenAI model
+							this.notificationService.info(`Switched to OpenAI model to avoid CORS issues`);
+						}
+					};
+					return DevSphereErrorHandler.formatErrorAsSystemMessage(corsError);
+				}
+
 				const isAuthError =
 					errorLowerCase.includes('unauthorized') ||
 					errorLowerCase.includes('authentication') ||
