@@ -7,7 +7,7 @@
 .dev-sphere-chat-actions-dropdown {
     position: fixed;
     z-index: var(--dev-sphere-z-dropdown);
-    background-color: var(--vscode-menu-background);
+    background-color: var(--vscode-menu-background, var(--vscode-editor-background));
     border: 1px solid var(--vscode-widget-border);
     border-radius: var(--dev-sphere-radius-lg);
     box-shadow: var(--dev-sphere-shadow-lg);
@@ -17,6 +17,8 @@
     overflow: hidden;
     animation: slideUp var(--dev-sphere-transition-base) forwards;
     transform-origin: top center;
+    color: var(--vscode-menu-foreground, var(--vscode-editor-foreground));
+    backdrop-filter: blur(8px);
 }
 
 .dev-sphere-dropdown-item {
@@ -24,7 +26,7 @@
     align-items: center;
     padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
     cursor: pointer;
-    color: var(--vscode-menu-foreground);
+    color: var(--vscode-menu-foreground, var(--vscode-editor-foreground));
     transition: all var(--dev-sphere-transition-base);
     position: relative;
     overflow: hidden;
@@ -37,15 +39,15 @@
     left: 0;
     width: 0;
     height: 100%;
-    background: linear-gradient(to right, var(--vscode-menu-selectionBackground), transparent);
+    background: linear-gradient(to right, var(--dev-sphere-primary), transparent);
     opacity: 0;
     transform: translateY(-50%);
     transition: width var(--dev-sphere-transition-base), opacity var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-dropdown-item:hover {
-    background-color: var(--vscode-menu-selectionBackground);
-    color: var(--vscode-menu-selectionForeground);
+    background-color: var(--vscode-menu-selectionBackground, var(--vscode-list-hoverBackground));
+    color: var(--vscode-menu-selectionForeground, var(--vscode-list-activeSelectionForeground));
 }
 
 .dev-sphere-dropdown-item:hover::before {
@@ -54,7 +56,7 @@
 }
 
 .dev-sphere-dropdown-item:active {
-    background-color: var(--vscode-menu-selectionBackground);
+    background-color: var(--vscode-menu-selectionBackground, var(--vscode-list-activeSelectionBackground));
     transform: scale(0.98);
 }
 
@@ -65,13 +67,13 @@
     width: 16px;
     height: 16px;
     margin-right: var(--dev-sphere-spacing-sm);
-    color: var(--vscode-menu-foreground);
+    color: var(--vscode-menu-foreground, var(--vscode-editor-foreground));
     flex-shrink: 0;
     transition: transform var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-dropdown-item:hover .dev-sphere-dropdown-item-icon {
-    color: var(--vscode-menu-selectionForeground);
+    color: var(--vscode-menu-selectionForeground, var(--vscode-list-activeSelectionForeground));
     transform: scale(1.1);
 }
 
@@ -150,6 +152,7 @@
     right: 0;
     bottom: 0;
     z-index: calc(var(--dev-sphere-z-dropdown) - 1);
+    backdrop-filter: blur(2px);
 }
 
 /* Dropdown menus with sections */
@@ -160,6 +163,264 @@
     letter-spacing: 1px;
     color: var(--vscode-descriptionForeground);
     opacity: 0.7;
+}
+
+/* Chat options dropdown specific */
+.dev-sphere-chat-options-dropdown {
+    width: 250px;
+    border-radius: var(--dev-sphere-radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--vscode-widget-border);
+    box-shadow: var(--dev-sphere-shadow-lg);
+    background-color: var(--vscode-dropdown-background, var(--vscode-editor-background));
+}
+
+.dev-sphere-chat-option-group {
+    padding: var(--dev-sphere-spacing-sm) 0;
+    border-bottom: 1px solid var(--vscode-widget-border);
+}
+
+.dev-sphere-chat-option-group:last-child {
+    border-bottom: none;
+}
+
+.dev-sphere-chat-option-header {
+    padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-md);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--vscode-descriptionForeground);
+    font-weight: 600;
+    margin-bottom: var(--dev-sphere-spacing-xs);
+}
+
+.dev-sphere-chat-option-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    cursor: pointer;
+    transition: all var(--dev-sphere-transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.dev-sphere-chat-option-toggle::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(to right, var(--dev-sphere-primary), transparent);
+    opacity: 0;
+    transform: translateY(-50%);
+    transition: width var(--dev-sphere-transition-base), opacity var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-chat-option-toggle:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.dev-sphere-chat-option-toggle:hover::before {
+    width: 4px;
+    opacity: 1;
+}
+
+.dev-sphere-chat-option-label {
+    display: flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-chat-option-label-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--vscode-foreground);
+    opacity: 0.7;
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-chat-option-toggle:hover .dev-sphere-chat-option-label-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Toggle Switch Styles */
+.dev-sphere-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 18px;
+}
+
+.dev-sphere-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.dev-sphere-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--vscode-checkbox-background);
+    border: 1px solid var(--vscode-checkbox-border);
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.dev-sphere-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    left: 2px;
+    bottom: 2px;
+    background-color: var(--vscode-checkbox-foreground);
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .dev-sphere-toggle-slider {
+    background-color: var(--dev-sphere-primary);
+    border-color: var(--dev-sphere-primary);
+}
+
+input:focus + .dev-sphere-toggle-slider {
+    box-shadow: 0 0 0 2px rgba(var(--dev-sphere-accent), 0.2);
+}
+
+input:checked + .dev-sphere-toggle-slider:before {
+    transform: translateX(18px);
+    background-color: white;
+}
+
+/* Select dropdown styles */
+.dev-sphere-select-dropdown {
+    background-color: var(--vscode-dropdown-background);
+    color: var(--vscode-dropdown-foreground);
+    border: 1px solid var(--vscode-dropdown-border);
+    border-radius: var(--dev-sphere-radius-md);
+    width: 100%;
+    outline: none;
+    height: 32px;
+    font-size: var(--dev-sphere-font-size-sm);
+    padding: 0 var(--dev-sphere-spacing-md);
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    transition: all var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-select-dropdown:hover {
+    border-color: var(--dev-sphere-accent);
+}
+
+.dev-sphere-select-dropdown:focus {
+    border-color: var(--dev-sphere-accent);
+    box-shadow: 0 0 0 2px rgba(var(--dev-sphere-accent), 0.2);
+}
+
+/* Custom Select */
+.dev-sphere-custom-select {
+    position: relative;
+    width: 100%;
+}
+
+.dev-sphere-select-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    background-color: var(--vscode-dropdown-background);
+    color: var(--vscode-dropdown-foreground);
+    border: 1px solid var(--vscode-dropdown-border);
+    border-radius: var(--dev-sphere-radius-md);
+    cursor: pointer;
+    transition: all var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-select-header:hover {
+    border-color: var(--dev-sphere-accent);
+    background-color: var(--vscode-dropdown-hoverBackground, var(--vscode-list-hoverBackground));
+}
+
+.dev-sphere-select-header.open {
+    border-color: var(--dev-sphere-accent);
+    box-shadow: 0 0 0 2px rgba(var(--dev-sphere-accent), 0.2);
+    border-radius: var(--dev-sphere-radius-md) var(--dev-sphere-radius-md) 0 0;
+}
+
+.dev-sphere-select-value {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dev-sphere-select-arrow {
+    margin-left: var(--dev-sphere-spacing-sm);
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-select-header.open .dev-sphere-select-arrow {
+    transform: rotate(180deg);
+}
+
+.dev-sphere-select-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: var(--vscode-dropdown-background);
+    border: 1px solid var(--vscode-dropdown-border);
+    border-top: none;
+    border-radius: 0 0 var(--dev-sphere-radius-md) var(--dev-sphere-radius-md);
+    box-shadow: var(--dev-sphere-shadow-md);
+    z-index: var(--dev-sphere-z-dropdown);
+    display: none;
+}
+
+.dev-sphere-select-options.show {
+    display: block;
+    animation: slideUp var(--dev-sphere-transition-base) forwards;
+}
+
+.dev-sphere-select-option {
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    cursor: pointer;
+    transition: all var(--dev-sphere-transition-base);
+    position: relative;
+}
+
+.dev-sphere-select-option:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.dev-sphere-select-option.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+}
+
+.dev-sphere-select-option.selected::after {
+    content: "";
+    position: absolute;
+    right: var(--dev-sphere-spacing-md);
+    width: 12px;
+    height: 12px;
+    background-color: var(--dev-sphere-success);
+    mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+    mask-size: contain;
+    mask-position: center;
+    mask-repeat: no-repeat;
 }
 
 /* Dropdown animations */
@@ -194,5 +455,9 @@
 @media (max-width: var(--dev-sphere-breakpoint-sm)) {
     .dev-sphere-chat-actions-dropdown {
         width: 180px;
+    }
+
+    .dev-sphere-chat-options-dropdown {
+        width: 220px;
     }
 }
