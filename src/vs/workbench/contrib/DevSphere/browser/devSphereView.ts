@@ -388,9 +388,13 @@ export class DevSphereView extends ViewPane {
 		chatItems.forEach(item => {
 			const title = item.querySelector('.dev-sphere-chat-title')?.textContent?.toLowerCase() || '';
 			if (title.includes(term)) {
-				(item as HTMLElement).style.display = 'flex';
+				if (DOM.isHTMLElement(item)) {
+					item.style.display = 'flex';
+				}
 			} else {
-				(item as HTMLElement).style.display = 'none';
+				if (DOM.isHTMLElement(item)) {
+					item.style.display = 'none';
+				}
 			}
 		});
 	}
@@ -776,13 +780,13 @@ export class DevSphereView extends ViewPane {
 		}
 
 		// Update input state based on loading
-		const inputElement = this.container?.querySelector('.dev-sphere-input') as HTMLTextAreaElement | null;
-		if (inputElement) {
+		const inputElement = this.container?.querySelector('.dev-sphere-input');
+		if (DOM.isHTMLTextAreaElement(inputElement)) {
 			inputElement.disabled = isLoading;
 		}
 
-		const submitButton = this.container?.querySelector('.dev-sphere-submit-button') as HTMLButtonElement | null;
-		if (submitButton) {
+		const submitButton = this.container?.querySelector('.dev-sphere-submit-button');
+		if (DOM.isHTMLButtonElement(submitButton)) {
 			submitButton.disabled = isLoading;
 		}
 	}
