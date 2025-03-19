@@ -151,18 +151,18 @@ function hygiene(some, linting = true) {
 
 	const result = input
 		.pipe(filter((f) => !f.stat.isDirectory()))
-		.pipe(snapshotFilter)
+		// .pipe(snapshotFilter)
 		.pipe(yarnLockFilter)
-		.pipe(productJsonFilter)
-		.pipe(process.env['BUILD_SOURCEVERSION'] ? es.through() : productJson)
-		.pipe(productJsonFilter.restore)
-		.pipe(unicodeFilterStream)
-		.pipe(unicode)
-		.pipe(unicodeFilterStream.restore)
-		.pipe(filter(indentationFilter))
-		.pipe(indentation)
-		.pipe(filter(copyrightFilter))
-		.pipe(copyrights);
+	// .pipe(productJsonFilter)
+	// .pipe(process.env['BUILD_SOURCEVERSION'] ? es.through() : productJson)
+	// .pipe(productJsonFilter.restore)
+	// .pipe(unicodeFilterStream)
+	// .pipe(unicode)
+	// .pipe(unicodeFilterStream.restore)
+	// .pipe(filter(indentationFilter))
+	// .pipe(indentation)
+	// .pipe(filter(copyrightFilter))
+	// .pipe(copyrights);
 
 	const streams = [
 		result.pipe(filter(tsFormattingFilter)).pipe(formatting)
