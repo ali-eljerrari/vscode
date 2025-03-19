@@ -18,19 +18,19 @@ export interface OpenAIModel {
 
 export const OPENAI_MODELS: OpenAIModel[] = [
 	// Low cost models
-	{ id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: '$ - Cheapest option for basic tasks' },
-	{ id: 'gpt-4o-mini', name: 'GPT-4o mini', description: '$$ - Affordable small model with good capabilities' },
-	{ id: 'o1-mini', name: 'o1-mini', description: '$$ - Affordable reasoning model' },
+	{ id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo, Cheapest option for basic tasks', description: 'Cheapest option for basic tasks' },
+	{ id: 'gpt-4o-mini', name: 'GPT-4o mini, Affordable small model with good capabilities', description: 'Affordable small model with good capabilities' },
+	{ id: 'o1-mini', name: 'o1-mini, Affordable reasoning model', description: 'Affordable reasoning model' },
 
 	// Mid-range models
-	{ id: 'o3-mini', name: 'o3-mini', description: '$$$ - Mid-range reasoning model' },
-	{ id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: '$$$ - Mid-range versatile model' },
-	{ id: 'gpt-4o', name: 'GPT-4o', description: '$$$ - High-quality versatile model' },
+	{ id: 'o3-mini', name: 'o3-mini, Mid-range reasoning model', description: 'Mid-range reasoning model' },
+	{ id: 'gpt-4-turbo', name: 'GPT-4 Turbo, Mid-range versatile model', description: 'Mid-range versatile model' },
+	{ id: 'gpt-4o', name: 'GPT-4o, High-quality versatile model', description: 'High-quality versatile model' },
 
 	// Premium models
-	{ id: 'gpt-4', name: 'GPT-4', description: '$$$$ - Premium model for complex tasks' },
-	{ id: 'o1', name: 'o1', description: '$$$$ - Premium reasoning model' },
-	{ id: 'gpt-4.5-preview', name: 'GPT-4.5 Preview', description: '$$$$$ - Most expensive, most capable GPT model' }
+	{ id: 'gpt-4', name: 'GPT-4, Premium model for complex tasks', description: 'Premium model for complex tasks' },
+	{ id: 'o1', name: 'o1, Premium reasoning model', description: 'Premium reasoning model' },
+	{ id: 'gpt-4.5-preview', name: 'GPT-4.5 Preview, Most expensive, most capable GPT model', description: 'Most expensive, most capable GPT model' }
 ];
 
 export interface Chat {
