@@ -8,67 +8,222 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
-    background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    background-color: var(--vscode-editorGroupHeader-tabsBackground);
     border-bottom: 1px solid var(--vscode-widget-shadow);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    z-index: 5;
+    box-shadow: var(--dev-sphere-shadow-sm);
+    z-index: var(--dev-sphere-z-tooltip);
+    backdrop-filter: blur(8px);
+    background-color: rgba(var(--vscode-editorGroupHeader-tabsBackground), 0.95);
+    position: sticky;
+    top: 0;
 }
 
 .dev-sphere-header-left {
     display: flex;
     align-items: center;
+    gap: var(--dev-sphere-spacing-md);
 }
 
 .dev-sphere-header-title {
     font-weight: 600;
-    font-size: 14px;
-    margin-right: 12px;
+    font-size: var(--dev-sphere-font-size-lg);
     color: var(--vscode-foreground);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-header-title svg {
+    width: 20px;
+    height: 20px;
+    color: var(--dev-sphere-primary);
 }
 
 .dev-sphere-model-selector {
     background-color: var(--vscode-dropdown-background);
     color: var(--vscode-dropdown-foreground);
     border: 1px solid var(--vscode-dropdown-border);
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-size: 12px;
-    height: 28px;
+    border-radius: var(--dev-sphere-radius-md);
+    padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-sm);
+    font-size: var(--dev-sphere-font-size-sm);
+    height: 32px;
     outline: none;
     max-width: 180px;
     cursor: pointer;
+    transition: all var(--dev-sphere-transition-base);
+    display: flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-sm);
 }
 
 .dev-sphere-model-selector:hover {
-    border-color: var(--vscode-focusBorder);
+    border-color: var(--dev-sphere-accent);
+    background-color: var(--vscode-dropdown-hoverBackground);
+}
+
+.dev-sphere-model-selector:focus {
+    border-color: var(--dev-sphere-accent);
+    box-shadow: 0 0 0 2px rgba(var(--dev-sphere-accent), 0.2);
+}
+
+.dev-sphere-model-selector svg {
+    width: 14px;
+    height: 14px;
+    color: var(--vscode-descriptionForeground);
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-model-selector:focus svg {
+    transform: rotate(180deg);
 }
 
 .dev-sphere-header-actions {
     display: flex;
-    gap: 8px;
+    gap: var(--dev-sphere-spacing-sm);
 }
 
 .dev-sphere-action-button {
-    background-color: var(--vscode-button-secondaryBackground);
+    background-color: var(--dev-sphere-secondary);
     color: var(--vscode-button-secondaryForeground);
     border: none;
-    padding: 4px 10px;
-    height: 28px;
-    border-radius: 4px;
-    font-size: 12px;
+    padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-sm);
+    height: 32px;
+    border-radius: var(--dev-sphere-radius-md);
+    font-size: var(--dev-sphere-font-size-sm);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: var(--dev-sphere-spacing-xs);
+    transition: all var(--dev-sphere-transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.dev-sphere-action-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--dev-sphere-radius-full);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease-out, height 0.6s ease-out;
 }
 
 .dev-sphere-action-button:hover {
-    background-color: var(--vscode-button-secondaryHoverBackground);
+    background-color: var(--dev-sphere-secondary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--dev-sphere-shadow-sm);
+}
+
+.dev-sphere-action-button:hover::before {
+    width: 200px;
+    height: 200px;
+}
+
+.dev-sphere-action-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.dev-sphere-action-button svg {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-action-button:hover svg {
+    transform: scale(1.1);
 }
 
 .dev-sphere-browse-chats-button {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--dev-sphere-spacing-xs);
+}
+
+/* Header badges */
+.dev-sphere-header-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 6px;
+    background-color: var(--dev-sphere-primary);
+    color: var(--vscode-button-foreground);
+    border-radius: var(--dev-sphere-radius-full);
+    font-size: var(--dev-sphere-font-size-sm);
+    font-weight: 500;
+    margin-left: var(--dev-sphere-spacing-sm);
+}
+
+/* Header dropdown menu */
+.dev-sphere-header-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-dropdown-border);
+    border-radius: var(--dev-sphere-radius-md);
+    box-shadow: var(--dev-sphere-shadow-lg);
+    min-width: 200px;
+    z-index: var(--dev-sphere-z-dropdown);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all var(--dev-sphere-transition-base);
+    pointer-events: none;
+}
+
+.dev-sphere-header-dropdown.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.dev-sphere-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    cursor: pointer;
+    color: var(--vscode-menu-foreground);
+    transition: all var(--dev-sphere-transition-base);
+    gap: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-dropdown-item:hover {
+    background-color: var(--vscode-menu-selectionBackground);
+    color: var(--vscode-menu-selectionForeground);
+}
+
+.dev-sphere-dropdown-item svg {
+    width: 14px;
+    height: 14px;
+    color: var(--vscode-descriptionForeground);
+}
+
+/* Responsive adjustments */
+@media (max-width: var(--dev-sphere-breakpoint-sm)) {
+    .dev-sphere-header {
+        padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-header-title {
+        font-size: var(--dev-sphere-font-size-base);
+    }
+
+    .dev-sphere-model-selector {
+        max-width: 120px;
+        padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-xs);
+    }
+
+    .dev-sphere-action-button {
+        padding: var(--dev-sphere-spacing-xs);
+    }
+
+    .dev-sphere-action-button span {
+        display: none;
+    }
 }

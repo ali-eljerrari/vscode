@@ -1,0 +1,199 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Mobile First Approach */
+
+/* Extra small devices (phones, less than 640px) */
+@media (max-width: var(--dev-sphere-breakpoint-sm)) {
+    .dev-sphere-container {
+        padding: var(--dev-sphere-spacing-xs);
+    }
+
+    .dev-sphere-header {
+        padding: var(--dev-sphere-spacing-xs);
+    }
+
+    .dev-sphere-header-title {
+        font-size: var(--dev-sphere-font-size-base);
+    }
+
+    .dev-sphere-model-selector {
+        max-width: 120px;
+    }
+
+    .dev-sphere-message {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-input-section {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-empty-state {
+        padding: var(--dev-sphere-spacing-md);
+    }
+
+    .dev-sphere-empty-state-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .dev-sphere-empty-state-title {
+        font-size: var(--dev-sphere-font-size-base);
+    }
+
+    .dev-sphere-empty-state-subtitle {
+        font-size: var(--dev-sphere-font-size-sm);
+    }
+}
+
+/* Small devices (tablets, 640px and up) */
+@media (min-width: var(--dev-sphere-breakpoint-sm)) {
+    .dev-sphere-container {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-header {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-model-selector {
+        max-width: 150px;
+    }
+
+    .dev-sphere-message {
+        padding: var(--dev-sphere-spacing-md);
+    }
+
+    .dev-sphere-input-section {
+        padding: var(--dev-sphere-spacing-md);
+    }
+}
+
+/* Medium devices (laptops, 768px and up) */
+@media (min-width: var(--dev-sphere-breakpoint-md)) {
+    .dev-sphere-container {
+        padding: var(--dev-sphere-spacing-md);
+    }
+
+    .dev-sphere-main-layout {
+        flex-direction: row;
+    }
+
+    .dev-sphere-sidebar {
+        width: 280px;
+        min-width: 280px;
+    }
+
+    .dev-sphere-message {
+        max-width: 85%;
+    }
+
+    .dev-sphere-message-group-user .dev-sphere-message {
+        margin-left: auto;
+    }
+
+    .dev-sphere-message-group-assistant .dev-sphere-message {
+        margin-right: auto;
+    }
+}
+
+/* Large devices (desktops, 1024px and up) */
+@media (min-width: var(--dev-sphere-breakpoint-lg)) {
+    .dev-sphere-container {
+        padding: var(--dev-sphere-spacing-lg);
+    }
+
+    .dev-sphere-sidebar {
+        width: 320px;
+        min-width: 320px;
+    }
+
+    .dev-sphere-message {
+        max-width: 75%;
+    }
+
+    .dev-sphere-header-title {
+        font-size: var(--dev-sphere-font-size-lg);
+    }
+
+    .dev-sphere-model-selector {
+        max-width: 200px;
+    }
+}
+
+/* Extra large devices (large desktops, 1280px and up) */
+@media (min-width: var(--dev-sphere-breakpoint-xl)) {
+    .dev-sphere-container {
+        padding: var(--dev-sphere-spacing-xl);
+    }
+
+    .dev-sphere-sidebar {
+        width: 360px;
+        min-width: 360px;
+    }
+
+    .dev-sphere-message {
+        max-width: 70%;
+    }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .dev-sphere-section button,
+    .dev-sphere-input,
+    .dev-sphere-message-content {
+        font-smooth: always;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    .dev-sphere-container {
+        background-color: var(--vscode-editor-background);
+    }
+
+    .dev-sphere-message-group-assistant {
+        background-color: var(--vscode-editorWidget-background);
+    }
+}
+
+/* Print styles */
+@media print {
+    .dev-sphere-container {
+        background: white;
+        color: black;
+    }
+
+    .dev-sphere-input-section,
+    .dev-sphere-header-actions,
+    .dev-sphere-chat-actions {
+        display: none;
+    }
+
+    .dev-sphere-message {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .dev-sphere-message-content pre {
+        background-color: #f5f5f5;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

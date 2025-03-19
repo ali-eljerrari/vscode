@@ -6,28 +6,56 @@
 /* ===== DROPDOWN MENUS ===== */
 .dev-sphere-chat-actions-dropdown {
     position: fixed;
-    z-index: 100;
+    z-index: var(--dev-sphere-z-dropdown);
     background-color: var(--vscode-menu-background);
-    border: 1px solid var(--vscode-menu-border);
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-    width: 180px;
-    padding: 6px 0;
-    font-size: 13px;
+    border: 1px solid var(--vscode-widget-border);
+    border-radius: var(--dev-sphere-radius-lg);
+    box-shadow: var(--dev-sphere-shadow-lg);
+    width: 220px;
+    padding: var(--dev-sphere-spacing-xs) 0;
+    font-size: var(--dev-sphere-font-size-sm);
+    overflow: hidden;
+    animation: slideUp var(--dev-sphere-transition-base) forwards;
+    transform-origin: top center;
 }
 
 .dev-sphere-dropdown-item {
     display: flex;
     align-items: center;
-    padding: 8px 12px;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
     cursor: pointer;
     color: var(--vscode-menu-foreground);
-    transition: background-color 0.1s;
+    transition: all var(--dev-sphere-transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.dev-sphere-dropdown-item::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(to right, var(--vscode-menu-selectionBackground), transparent);
+    opacity: 0;
+    transform: translateY(-50%);
+    transition: width var(--dev-sphere-transition-base), opacity var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-dropdown-item:hover {
     background-color: var(--vscode-menu-selectionBackground);
     color: var(--vscode-menu-selectionForeground);
+}
+
+.dev-sphere-dropdown-item:hover::before {
+    width: 4px;
+    opacity: 1;
+}
+
+.dev-sphere-dropdown-item:active {
+    background-color: var(--vscode-menu-selectionBackground);
+    transform: scale(0.98);
 }
 
 .dev-sphere-dropdown-item-icon {
@@ -36,9 +64,15 @@
     justify-content: center;
     width: 16px;
     height: 16px;
-    margin-right: 8px;
+    margin-right: var(--dev-sphere-spacing-sm);
     color: var(--vscode-menu-foreground);
     flex-shrink: 0;
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-dropdown-item:hover .dev-sphere-dropdown-item-icon {
+    color: var(--vscode-menu-selectionForeground);
+    transform: scale(1.1);
 }
 
 .dev-sphere-dropdown-item-label {
@@ -46,4 +80,119 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Dropdown section dividers */
+.dev-sphere-dropdown-divider {
+    height: 1px;
+    background-color: var(--vscode-panel-border);
+    margin: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-sm);
+    opacity: 0.5;
+}
+
+/* Dropdown keyboard shortcuts */
+.dev-sphere-dropdown-shortcut {
+    color: var(--vscode-descriptionForeground);
+    margin-left: var(--dev-sphere-spacing-md);
+    font-size: 10px;
+    opacity: 0.7;
+    letter-spacing: 0.5px;
+}
+
+.dev-sphere-dropdown-item:hover .dev-sphere-dropdown-shortcut {
+    opacity: 1;
+}
+
+/* Dropdown item with checkmark */
+.dev-sphere-dropdown-item-checked {
+    position: relative;
+}
+
+.dev-sphere-dropdown-item-checked::after {
+    content: "";
+    position: absolute;
+    right: var(--dev-sphere-spacing-md);
+    width: 12px;
+    height: 12px;
+    background-color: var(--dev-sphere-success);
+    mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+    mask-size: contain;
+    mask-position: center;
+    mask-repeat: no-repeat;
+}
+
+/* Dropdown scroll area */
+.dev-sphere-dropdown-scroll {
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+}
+
+.dev-sphere-dropdown-scroll::-webkit-scrollbar {
+    width: var(--dev-sphere-scrollbar-width);
+}
+
+.dev-sphere-dropdown-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dev-sphere-dropdown-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--vscode-scrollbarSlider-background);
+    border-radius: var(--dev-sphere-scrollbar-thumb-radius);
+}
+
+/* Dropdown backdrop overlay */
+.dev-sphere-dropdown-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: calc(var(--dev-sphere-z-dropdown) - 1);
+}
+
+/* Dropdown menus with sections */
+.dev-sphere-dropdown-section-title {
+    padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-md);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--vscode-descriptionForeground);
+    opacity: 0.7;
+}
+
+/* Dropdown animations */
+.dev-sphere-dropdown-enter {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+}
+
+.dev-sphere-dropdown-enter-active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity var(--dev-sphere-transition-base), transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-dropdown-exit {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.dev-sphere-dropdown-exit-active {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    transition: opacity var(--dev-sphere-transition-fast), transform var(--dev-sphere-transition-fast);
+}
+
+/* Context menu variant */
+.dev-sphere-context-menu {
+    position: absolute;
+}
+
+/* Responsive adjustments */
+@media (max-width: var(--dev-sphere-breakpoint-sm)) {
+    .dev-sphere-chat-actions-dropdown {
+        width: 180px;
+    }
 }

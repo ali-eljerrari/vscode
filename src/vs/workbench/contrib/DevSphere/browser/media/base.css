@@ -9,10 +9,13 @@
     flex-direction: column;
     background-color: var(--vscode-editor-background);
     color: var(--vscode-editor-foreground);
-    font-family: var(--monaco-monospace-font);
+    font-family: var(--dev-sphere-font-family);
     height: 100%;
     overflow: hidden;
     position: relative;
+    max-width: var(--dev-sphere-container-max-width);
+    margin: 0 auto;
+    padding: var(--dev-sphere-container-padding);
 }
 
 /* Main layout with sidebar */
@@ -20,6 +23,7 @@
     display: flex;
     width: 100%;
     height: 100%;
+    gap: var(--dev-sphere-spacing-md);
 }
 
 .dev-sphere-main-content {
@@ -31,66 +35,73 @@
     overflow: hidden;
     position: relative;
     background-color: var(--vscode-editor-background);
+    border-radius: var(--dev-sphere-radius-lg);
+    box-shadow: var(--dev-sphere-shadow-md);
 }
 
-/* Button styles without transitions or animations */
+/* Button styles */
 .dev-sphere-section button {
-    background-color: var(--vscode-button-background);
+    background-color: var(--dev-sphere-primary);
     color: var(--vscode-button-foreground);
     border: none;
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-size: 14px;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    border-radius: var(--dev-sphere-radius-md);
+    font-size: var(--dev-sphere-font-size-base);
     font-weight: 500;
     cursor: pointer;
     min-width: 80px;
-    height: 42px;
+    height: var(--dev-sphere-input-height);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--dev-sphere-shadow-sm);
+    transition: all var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-section button:hover {
-    background-color: var(--vscode-button-hoverBackground);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+    background-color: var(--dev-sphere-primary-hover);
+    box-shadow: var(--dev-sphere-shadow-md);
+    transform: translateY(-1px);
 }
 
 .dev-sphere-section button:active {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    transform: translateY(0);
+    box-shadow: var(--dev-sphere-shadow-sm);
 }
 
 .dev-sphere-section button svg {
     width: 16px;
     height: 16px;
-    margin-right: 8px;
+    margin-right: var(--dev-sphere-spacing-sm);
 }
 
 /* Badge for chat count */
 .dev-sphere-chat-count {
-    background-color: var(--vscode-badge-background);
-    color: var(--vscode-badge-foreground);
-    border-radius: 10px;
+    background-color: var(--dev-sphere-primary);
+    color: var(--vscode-button-foreground);
+    border-radius: var(--dev-sphere-radius-full);
     padding: 2px 6px;
-    font-size: 10px;
-    margin-left: 8px;
+    font-size: var(--dev-sphere-font-size-sm);
+    margin-left: var(--dev-sphere-spacing-sm);
+    font-weight: 600;
 }
 
 /* Overlay for dialog background */
 .dev-sphere-dialog-overlay {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    z-index: 99;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: var(--dev-sphere-z-modal);
     display: none;
+    backdrop-filter: blur(4px);
 }
 
 .dev-sphere-dialog-overlay.show {
     display: block;
-    animation: fadeInOverlay 0.2s ease forwards;
+    animation: fadeInOverlay var(--dev-sphere-transition-base) forwards;
 }
 
 /* Enhanced Empty State */
@@ -100,58 +111,86 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    padding: 40px 20px;
+    padding: var(--dev-sphere-spacing-xl);
     text-align: center;
+    background: linear-gradient(135deg, var(--vscode-editor-background) 0%, var(--vscode-editorWidget-background) 100%);
 }
 
 .dev-sphere-empty-state-icon {
     width: 80px;
     height: 80px;
-    margin-bottom: 20px;
+    margin-bottom: var(--dev-sphere-spacing-lg);
     color: var(--vscode-descriptionForeground);
     opacity: 0.5;
+    animation: float 3s ease-in-out infinite;
 }
 
 .dev-sphere-empty-state-title {
-    font-size: 18px;
-    font-weight: 500;
-    margin-bottom: 12px;
+    font-size: var(--dev-sphere-font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--dev-sphere-spacing-sm);
     color: var(--vscode-foreground);
+    letter-spacing: -0.5px;
 }
 
 .dev-sphere-empty-state-subtitle {
-    font-size: 14px;
-    margin-bottom: 24px;
+    font-size: var(--dev-sphere-font-size-base);
+    margin-bottom: var(--dev-sphere-spacing-lg);
     color: var(--vscode-descriptionForeground);
     max-width: 450px;
-    line-height: 1.5;
+    line-height: var(--dev-sphere-line-height);
 }
 
 .dev-sphere-empty-state-shortcuts {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: var(--dev-sphere-spacing-md);
     justify-content: center;
-    margin-top: 10px;
+    margin-top: var(--dev-sphere-spacing-sm);
 }
 
 .dev-sphere-shortcut {
     display: flex;
     align-items: center;
-    padding: 8px 12px;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
     background-color: var(--vscode-editor-inactiveSelectionBackground);
-    border-radius: 4px;
-    font-size: 13px;
+    border-radius: var(--dev-sphere-radius-md);
+    font-size: var(--dev-sphere-font-size-sm);
+    transition: all var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-shortcut:hover {
+    background-color: var(--vscode-editor-selectionBackground);
+    transform: translateY(-1px);
 }
 
 .dev-sphere-shortcut-key {
     display: inline-block;
     padding: 3px 6px;
-    margin-right: 8px;
-    background-color: var(--vscode-button-secondaryBackground);
+    margin-right: var(--dev-sphere-spacing-sm);
+    background-color: var(--dev-sphere-secondary);
     color: var(--vscode-button-secondaryForeground);
-    border-radius: 3px;
-    font-size: 11px;
+    border-radius: var(--dev-sphere-radius-sm);
+    font-size: var(--dev-sphere-font-size-sm);
     font-weight: 600;
-    font-family: var(--monaco-monospace-font);
+    font-family: var(--dev-sphere-font-family);
+}
+
+/* Responsive adjustments */
+@media (max-width: var(--dev-sphere-breakpoint-md)) {
+    .dev-sphere-container {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-main-layout {
+        flex-direction: column;
+    }
+
+    .dev-sphere-empty-state {
+        padding: var(--dev-sphere-spacing-lg);
+    }
+
+    .dev-sphere-empty-state-subtitle {
+        max-width: 100%;
+    }
 }

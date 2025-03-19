@@ -13,31 +13,37 @@
     scrollbar-width: thin;
     white-space: nowrap;
     position: relative;
-    z-index: 10;
+    z-index: var(--dev-sphere-z-tooltip);
     scroll-behavior: smooth;
     scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+    height: var(--dev-sphere-tab-height);
 }
 
 .dev-sphere-tab {
     display: inline-flex;
     align-items: center;
-    padding: 8px 12px;
+    padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-md);
     border-right: 1px solid var(--vscode-panel-border);
-    font-size: 12px;
+    font-size: var(--dev-sphere-font-size-sm);
     cursor: pointer;
     min-width: 100px;
     max-width: 200px;
     position: relative;
     background-color: var(--vscode-tab-inactiveBackground);
-    transition: background-color 0.2s ease;
-    border-top: 1px solid transparent;
+    transition: all var(--dev-sphere-transition-base);
+    border-top: 2px solid transparent;
+    height: 100%;
+}
+
+.dev-sphere-tab:hover {
+    background-color: var(--vscode-tab-hoverBackground);
 }
 
 .dev-sphere-tab-active {
     background-color: var(--vscode-tab-activeBackground);
     color: var(--vscode-tab-activeForeground);
-    border-top: 1px solid var(--vscode-focusBorder);
-    box-shadow: 0 -2px 0 var(--vscode-focusBorder);
+    border-top: 2px solid var(--dev-sphere-accent);
+    font-weight: 500;
 }
 
 .dev-sphere-tab-active::after {
@@ -48,7 +54,7 @@
     width: 100%;
     height: 1px;
     background-color: var(--vscode-editor-background);
-    z-index: 1;
+    z-index: var(--dev-sphere-z-dropdown);
 }
 
 .dev-sphere-tab-title {
@@ -56,17 +62,19 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     flex: 1;
+    letter-spacing: -0.2px;
 }
 
 .dev-sphere-tab-close {
-    opacity: 0.6;
-    width: 16px;
-    height: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 6px;
-    border-radius: 3px;
+    width: 16px;
+    height: 16px;
+    margin-left: var(--dev-sphere-spacing-xs);
+    border-radius: var(--dev-sphere-radius-full);
+    opacity: 0.6;
+    transition: all var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-tab:hover .dev-sphere-tab-close {
@@ -75,28 +83,55 @@
 
 .dev-sphere-tab-close:hover {
     background-color: var(--vscode-toolbar-hoverBackground);
+    transform: scale(1.1);
+}
+
+.dev-sphere-tab-close:active {
+    transform: scale(0.9);
+}
+
+.dev-sphere-tab-close svg {
+    width: 12px;
+    height: 12px;
+    color: var(--vscode-icon-foreground);
 }
 
 .dev-sphere-new-chat-tab {
     display: inline-flex;
     align-items: center;
-    padding: 8px 12px;
+    padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-md);
     cursor: pointer;
     color: var(--vscode-tab-activeForeground);
     opacity: 0.7;
+    height: 100%;
+    transition: all var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-new-chat-tab:hover {
     opacity: 1;
+    background-color: var(--vscode-tab-hoverBackground);
 }
 
 .dev-sphere-new-chat-tab-icon {
-    margin-right: 6px;
+    margin-right: var(--dev-sphere-spacing-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dev-sphere-new-chat-tab svg {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-new-chat-tab:hover svg {
+    transform: rotate(90deg);
 }
 
 /* Tab scrollbar styles */
 .dev-sphere-tabs-container::-webkit-scrollbar {
-    height: 4px;
+    height: var(--dev-sphere-scrollbar-width);
 }
 
 .dev-sphere-tabs-container::-webkit-scrollbar-track {
@@ -106,8 +141,8 @@
 
 .dev-sphere-tabs-container::-webkit-scrollbar-thumb {
     background-color: var(--vscode-scrollbarSlider-background);
-    border-radius: 2px;
-    transition: background-color 0.2s ease;
+    border-radius: var(--dev-sphere-scrollbar-thumb-radius);
+    transition: background-color var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-tabs-container::-webkit-scrollbar-thumb:hover {
@@ -125,11 +160,11 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 20px;
-    z-index: 11;
+    width: 30px;
+    z-index: var(--dev-sphere-z-dropdown);
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-tabs-container::before {
@@ -159,16 +194,19 @@
 .dev-sphere-tabs-container:empty::after {
     content: "No active chats";
     display: flex;
-    padding: 8px 16px;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
     color: var(--vscode-descriptionForeground);
     font-style: italic;
     opacity: 0.7;
+    background: none;
+    width: auto;
+    position: static;
 }
 
 /* ===== VIEW TABS ===== */
 .dev-sphere-view-tabs {
     display: flex;
-    height: 36px;
+    height: var(--dev-sphere-tab-height);
     background-color: var(--vscode-editorGroupHeader-tabsBackground);
     border-bottom: 1px solid var(--vscode-panelTitle-activeBorder);
 }
@@ -177,26 +215,53 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 16px;
+    padding: 0 var(--dev-sphere-spacing-md);
     height: 100%;
     min-width: 80px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: var(--dev-sphere-font-size-sm);
     color: var(--vscode-tab-inactiveForeground);
     background-color: var(--vscode-tab-inactiveBackground);
     border-right: 1px solid var(--vscode-tab-border);
     position: relative;
+    transition: all var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-view-tab:hover {
     background-color: var(--vscode-tab-hoverBackground);
 }
 
+.dev-sphere-view-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--dev-sphere-accent);
+    opacity: 0;
+    transition: opacity var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-view-tab:hover::after {
+    opacity: 0.5;
+}
+
 .dev-sphere-view-tab-active {
     color: var(--vscode-tab-activeForeground);
     background-color: var(--vscode-tab-activeBackground);
-    border-bottom: 2px solid var(--vscode-tab-activeBorderTop);
-    font-weight: 600;
+    font-weight: 500;
+}
+
+.dev-sphere-view-tab-active::after {
+    opacity: 1;
+}
+
+.dev-sphere-view-tab svg {
+    width: 14px;
+    height: 14px;
+    margin-right: var(--dev-sphere-spacing-xs);
+    color: var(--vscode-icon-foreground);
 }
 
 /* Chat content container */
@@ -204,7 +269,7 @@
     display: flex;
     flex-direction: column;
     flex: 1;
-    height: calc(100% - 36px);
+    height: calc(100% - var(--dev-sphere-tab-height));
     overflow: hidden;
 }
 
@@ -213,24 +278,139 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    height: 32px;
-    margin: 8px 16px;
-    padding: 0 12px;
-    background-color: var(--vscode-button-background);
+    gap: var(--dev-sphere-spacing-sm);
+    height: calc(var(--dev-sphere-tab-height) - 4px);
+    margin: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    padding: 0 var(--dev-sphere-spacing-md);
+    background-color: var(--dev-sphere-primary);
     color: var(--vscode-button-foreground);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--dev-sphere-radius-md);
     cursor: pointer;
-    font-size: 13px;
-    transition: background-color 0.2s;
+    font-size: var(--dev-sphere-font-size-sm);
+    transition: all var(--dev-sphere-transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.dev-sphere-new-chat-button-inline::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--dev-sphere-radius-full);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease-out, height 0.6s ease-out;
 }
 
 .dev-sphere-new-chat-button-inline:hover {
-    background-color: var(--vscode-button-hoverBackground);
+    background-color: var(--dev-sphere-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--dev-sphere-shadow-sm);
+}
+
+.dev-sphere-new-chat-button-inline:hover::before {
+    width: 200px;
+    height: 200px;
+}
+
+.dev-sphere-new-chat-button-inline:active {
+    transform: translateY(0);
+    box-shadow: none;
 }
 
 .dev-sphere-new-chat-button-inline svg {
     width: 14px;
     height: 14px;
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-new-chat-button-inline:hover svg {
+    transform: rotate(90deg);
+}
+
+/* Tab counter badge */
+.dev-sphere-tab-counter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    background-color: var(--dev-sphere-primary);
+    color: var(--vscode-button-foreground);
+    border-radius: var(--dev-sphere-radius-full);
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: var(--dev-sphere-spacing-xs);
+    padding: 0 var(--dev-sphere-spacing-xs);
+}
+
+/* Tab drag and drop styling */
+.dev-sphere-tab.dragging {
+    opacity: 0.7;
+    box-shadow: var(--dev-sphere-shadow-md);
+}
+
+.dev-sphere-tab.drop-target {
+    border-left: 2px solid var(--dev-sphere-accent);
+}
+
+/* Tab scroll buttons */
+.dev-sphere-tab-scroll-button {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 24px;
+    background: linear-gradient(to right, rgba(0,0,0,0.05), transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--dev-sphere-transition-base);
+    z-index: var(--dev-sphere-z-dropdown);
+}
+
+.dev-sphere-tabs-container:hover .dev-sphere-tab-scroll-button {
+    opacity: 1;
+}
+
+.dev-sphere-tab-scroll-button.left {
+    left: 0;
+}
+
+.dev-sphere-tab-scroll-button.right {
+    right: 0;
+    transform: rotate(180deg);
+}
+
+.dev-sphere-tab-scroll-button svg {
+    width: 14px;
+    height: 14px;
+    color: var(--vscode-icon-foreground);
+}
+
+/* Responsive adjustments */
+@media (max-width: var(--dev-sphere-breakpoint-sm)) {
+    .dev-sphere-tab {
+        min-width: 80px;
+        max-width: 120px;
+        padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-view-tab {
+        padding: 0 var(--dev-sphere-spacing-sm);
+        min-width: 60px;
+    }
+
+    .dev-sphere-view-tab span {
+        display: none;
+    }
+
+    .dev-sphere-view-tab svg {
+        margin-right: 0;
+    }
 }

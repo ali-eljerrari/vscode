@@ -10,49 +10,101 @@
     height: 100%;
     overflow: hidden;
     background-color: var(--vscode-editor-background);
+    border-radius: var(--dev-sphere-radius-lg);
+    box-shadow: var(--dev-sphere-shadow-md);
 }
 
 .dev-sphere-history-search {
-    padding: 12px 16px;
+    padding: var(--dev-sphere-spacing-md);
     border-bottom: 1px solid var(--vscode-panel-border);
     background-color: var(--vscode-input-background);
 }
 
+.dev-sphere-history-search-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.dev-sphere-history-search-icon {
+    position: absolute;
+    left: var(--dev-sphere-spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--vscode-descriptionForeground);
+}
+
+.dev-sphere-history-search-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
 .dev-sphere-history-search input {
     width: 100%;
-    height: 32px;
-    padding: 0 12px;
+    height: var(--dev-sphere-input-height);
+    padding: 0 var(--dev-sphere-spacing-md) 0 calc(var(--dev-sphere-spacing-sm) * 4);
     border: 1px solid var(--vscode-input-border);
-    border-radius: 4px;
+    border-radius: var(--dev-sphere-radius-md);
     background-color: var(--vscode-input-background);
     color: var(--vscode-input-foreground);
-    font-size: 13px;
+    font-size: var(--dev-sphere-font-size-sm);
     outline: none;
+    transition: all var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-history-search input::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+    opacity: 0.6;
 }
 
 .dev-sphere-history-search input:focus {
-    border-color: var(--vscode-focusBorder);
+    border-color: var(--dev-sphere-accent);
+    box-shadow: 0 0 0 2px rgba(var(--dev-sphere-accent), 0.2);
 }
 
 .dev-sphere-history-list {
     flex: 1;
-    padding: 8px 0;
+    padding: var(--dev-sphere-spacing-sm) 0;
     overflow-y: auto;
     overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+}
+
+.dev-sphere-history-list::-webkit-scrollbar {
+    width: var(--dev-sphere-scrollbar-width);
+}
+
+.dev-sphere-history-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dev-sphere-history-list::-webkit-scrollbar-thumb {
+    background-color: var(--vscode-scrollbarSlider-background);
+    border-radius: var(--dev-sphere-scrollbar-thumb-radius);
+    transition: background-color var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-history-list::-webkit-scrollbar-thumb:hover {
+    background-color: var(--vscode-scrollbarSlider-hoverBackground);
 }
 
 .dev-sphere-history-item {
     display: flex;
     flex-direction: column;
-    padding: 12px 16px;
+    padding: var(--dev-sphere-spacing-md) var(--dev-sphere-spacing-md);
     border-bottom: 1px solid var(--vscode-panel-border);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all var(--dev-sphere-transition-base);
     position: relative;
+    animation: fadeIn var(--dev-sphere-transition-base) forwards;
 }
 
 .dev-sphere-history-item:hover {
     background-color: var(--vscode-list-hoverBackground);
+    transform: translateY(-1px);
+    box-shadow: var(--dev-sphere-shadow-sm);
 }
 
 .dev-sphere-history-item-selected {
@@ -61,57 +113,134 @@
 }
 
 .dev-sphere-history-date {
-    font-size: 11px;
-    margin-bottom: 4px;
+    font-size: var(--dev-sphere-font-size-sm);
+    margin-bottom: var(--dev-sphere-spacing-xs);
     color: var(--vscode-descriptionForeground);
+    display: flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-xs);
+}
+
+.dev-sphere-history-date svg {
+    width: 12px;
+    height: 12px;
+    opacity: 0.6;
 }
 
 .dev-sphere-history-title {
-    font-size: 14px;
+    font-size: var(--dev-sphere-font-size-base);
     font-weight: 500;
-    margin-bottom: 4px;
+    margin-bottom: var(--dev-sphere-spacing-xs);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    letter-spacing: -0.3px;
 }
 
 .dev-sphere-history-meta {
-    font-size: 12px;
+    font-size: var(--dev-sphere-font-size-sm);
     color: var(--vscode-descriptionForeground);
+    display: flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-history-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px var(--dev-sphere-spacing-xs);
+    background-color: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    border-radius: var(--dev-sphere-radius-sm);
+    font-size: 10px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dev-sphere-history-tag.success {
+    background-color: var(--dev-sphere-success);
+    color: var(--vscode-button-foreground);
+}
+
+.dev-sphere-history-tag.warning {
+    background-color: var(--dev-sphere-warning);
+    color: var(--vscode-button-foreground);
 }
 
 .dev-sphere-history-actions {
     position: absolute;
-    top: 12px;
-    right: 16px;
+    top: var(--dev-sphere-spacing-md);
+    right: var(--dev-sphere-spacing-md);
     display: none;
-    gap: 8px;
-    background-color: var(--vscode-editor-background);
-    padding: 4px;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    gap: var(--dev-sphere-spacing-xs);
+    background-color: var(--vscode-editorWidget-background);
+    padding: var(--dev-sphere-spacing-xs);
+    border-radius: var(--dev-sphere-radius-md);
+    box-shadow: var(--dev-sphere-shadow-md);
+    z-index: var(--dev-sphere-z-tooltip);
+    border: 1px solid var(--vscode-widget-border);
+    transform: scale(0.95);
+    transition: all var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-history-item:hover .dev-sphere-history-actions {
     display: flex;
+    animation: pop var(--dev-sphere-transition-base) forwards;
 }
 
 .dev-sphere-history-action-button {
     width: 28px;
     height: 28px;
-    border-radius: 4px;
-    background-color: var(--vscode-button-secondaryBackground);
+    border-radius: var(--dev-sphere-radius-md);
+    background-color: var(--dev-sphere-secondary);
     color: var(--vscode-button-secondaryForeground);
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.1s ease;
+    transition: all var(--dev-sphere-transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.dev-sphere-history-action-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--dev-sphere-radius-full);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease-out, height 0.6s ease-out;
 }
 
 .dev-sphere-history-action-button:hover {
-    background-color: var(--vscode-button-secondaryHoverBackground);
+    background-color: var(--dev-sphere-secondary-hover);
+    transform: translateY(-1px);
+}
+
+.dev-sphere-history-action-button:hover::before {
+    width: 150px;
+    height: 150px;
+}
+
+.dev-sphere-history-action-button:active {
+    transform: translateY(0);
+}
+
+.dev-sphere-history-action-button svg {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-history-action-button:hover svg {
+    transform: scale(1.1);
 }
 
 /* Empty history state */
@@ -121,24 +250,134 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    padding: 40px 20px;
+    padding: var(--dev-sphere-spacing-xl) var(--dev-sphere-spacing-md);
     text-align: center;
     color: var(--vscode-descriptionForeground);
 }
 
 .dev-sphere-history-empty-icon {
-    margin-bottom: 20px;
+    margin-bottom: var(--dev-sphere-spacing-md);
     opacity: 0.6;
+    width: 60px;
+    height: 60px;
+    color: var(--vscode-descriptionForeground);
+    animation: float 3s ease-in-out infinite;
 }
 
 .dev-sphere-history-empty-title {
-    font-size: 16px;
+    font-size: var(--dev-sphere-font-size-lg);
     font-weight: 500;
-    margin-bottom: 8px;
+    margin-bottom: var(--dev-sphere-spacing-sm);
+    color: var(--vscode-foreground);
 }
 
 .dev-sphere-history-empty-subtitle {
-    font-size: 13px;
+    font-size: var(--dev-sphere-font-size-base);
     max-width: 300px;
-    line-height: 1.5;
+    line-height: var(--dev-sphere-line-height);
+    margin-bottom: var(--dev-sphere-spacing-md);
+}
+
+.dev-sphere-history-empty-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-sm);
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    background-color: var(--dev-sphere-primary);
+    color: var(--vscode-button-foreground);
+    border: none;
+    border-radius: var(--dev-sphere-radius-md);
+    cursor: pointer;
+    font-size: var(--dev-sphere-font-size-sm);
+    font-weight: 500;
+    transition: all var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-history-empty-button:hover {
+    background-color: var(--dev-sphere-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--dev-sphere-shadow-sm);
+}
+
+.dev-sphere-history-empty-button svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Date separator */
+.dev-sphere-history-date-separator {
+    display: flex;
+    align-items: center;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    background-color: var(--vscode-editorWidget-background);
+    font-size: var(--dev-sphere-font-size-sm);
+    font-weight: 500;
+    color: var(--vscode-descriptionForeground);
+    position: sticky;
+    top: 0;
+    z-index: var(--dev-sphere-z-tooltip);
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.dev-sphere-history-date-separator::before,
+.dev-sphere-history-date-separator::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background-color: var(--vscode-panel-border);
+}
+
+.dev-sphere-history-date-separator::before {
+    margin-right: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-history-date-separator::after {
+    margin-left: var(--dev-sphere-spacing-sm);
+}
+
+/* Skeleton loading for history */
+.dev-sphere-history-skeleton-item {
+    display: flex;
+    flex-direction: column;
+    padding: var(--dev-sphere-spacing-md);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    gap: var(--dev-sphere-spacing-xs);
+}
+
+.dev-sphere-skeleton-line {
+    background: linear-gradient(90deg, var(--vscode-editorWidget-background) 0%, var(--vscode-editor-background) 50%, var(--vscode-editorWidget-background) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    border-radius: var(--dev-sphere-radius-sm);
+}
+
+.dev-sphere-skeleton-date {
+    width: 30%;
+    height: 10px;
+}
+
+.dev-sphere-skeleton-title {
+    width: 90%;
+    height: 14px;
+}
+
+.dev-sphere-skeleton-meta {
+    width: 60%;
+    height: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: var(--dev-sphere-breakpoint-sm)) {
+    .dev-sphere-history-search {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-history-item {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-history-actions {
+        top: var(--dev-sphere-spacing-sm);
+        right: var(--dev-sphere-spacing-sm);
+    }
 }

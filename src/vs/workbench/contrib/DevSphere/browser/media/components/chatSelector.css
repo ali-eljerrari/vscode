@@ -6,13 +6,13 @@
 /* ===== CHAT SELECTOR DIALOG ===== */
 .dev-sphere-chat-selector {
     position: fixed;
-    z-index: 100;
+    z-index: var(--dev-sphere-z-modal);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.95);
     background-color: var(--vscode-editor-background);
     border: 1px solid var(--vscode-widget-border);
-    border-radius: 6px;
+    border-radius: var(--dev-sphere-radius-lg);
     width: 80%;
     max-width: 600px;
     max-height: 80vh;
@@ -20,87 +20,152 @@
     flex-direction: column;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.2s ease, transform 0.2s ease;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    transition: all var(--dev-sphere-transition-base);
+    box-shadow: var(--dev-sphere-shadow-lg);
+    overflow: hidden;
 }
 
 .dev-sphere-chat-selector.show {
     opacity: 1;
     pointer-events: auto;
     transform: translate(-50%, -50%) scale(1);
+    animation: modalIn var(--dev-sphere-transition-base) forwards;
 }
 
 .dev-sphere-chat-selector-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: var(--dev-sphere-spacing-md) var(--dev-sphere-spacing-md);
     border-bottom: 1px solid var(--vscode-panel-border);
+    background-color: var(--vscode-editorGroupHeader-tabsBackground);
 }
 
 .dev-sphere-chat-selector-title {
-    font-size: 16px;
+    font-size: var(--dev-sphere-font-size-lg);
     font-weight: 500;
     color: var(--vscode-foreground);
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-chat-selector-title svg {
+    width: 18px;
+    height: 18px;
+    color: var(--dev-sphere-primary);
 }
 
 .dev-sphere-chat-selector-close {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--dev-sphere-radius-md);
     color: var(--vscode-descriptionForeground);
-    transition: background-color 0.2s;
+    transition: all var(--dev-sphere-transition-base);
+    background-color: transparent;
 }
 
 .dev-sphere-chat-selector-close:hover {
     background-color: var(--vscode-toolbar-hoverBackground);
     color: var(--vscode-foreground);
+    transform: rotate(90deg);
+}
+
+.dev-sphere-chat-selector-close svg {
+    width: 16px;
+    height: 16px;
 }
 
 .dev-sphere-chat-selector-search {
-    padding: 12px 16px;
+    padding: var(--dev-sphere-spacing-md);
     border-bottom: 1px solid var(--vscode-panel-border);
+    background-color: var(--vscode-input-background);
+    position: relative;
+}
+
+.dev-sphere-chat-selector-search-icon {
+    position: absolute;
+    left: calc(var(--dev-sphere-spacing-md) + var(--dev-sphere-spacing-xs));
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--vscode-descriptionForeground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dev-sphere-chat-selector-search-icon svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
 }
 
 .dev-sphere-chat-selector-search input {
     width: 100%;
-    height: 32px;
-    padding: 0 12px;
+    height: var(--dev-sphere-input-height);
+    padding: 0 var(--dev-sphere-spacing-md) 0 calc(var(--dev-sphere-spacing-sm) * 4);
     border: 1px solid var(--vscode-input-border);
-    border-radius: 4px;
+    border-radius: var(--dev-sphere-radius-md);
     background-color: var(--vscode-input-background);
     color: var(--vscode-input-foreground);
-    font-size: 13px;
+    font-size: var(--dev-sphere-font-size-sm);
     outline: none;
+    transition: all var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-chat-selector-search input::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+    opacity: 0.6;
 }
 
 .dev-sphere-chat-selector-search input:focus {
-    border-color: var(--vscode-focusBorder);
+    border-color: var(--dev-sphere-accent);
+    box-shadow: 0 0 0 2px rgba(var(--dev-sphere-accent), 0.2);
 }
 
 .dev-sphere-chat-selector-list {
     flex: 1;
-    padding: 8px 0;
+    padding: 0;
     overflow-y: auto;
     max-height: calc(80vh - 120px);
+    scrollbar-width: thin;
+    scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+}
+
+.dev-sphere-chat-selector-list::-webkit-scrollbar {
+    width: var(--dev-sphere-scrollbar-width);
+}
+
+.dev-sphere-chat-selector-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dev-sphere-chat-selector-list::-webkit-scrollbar-thumb {
+    background-color: var(--vscode-scrollbarSlider-background);
+    border-radius: var(--dev-sphere-scrollbar-thumb-radius);
 }
 
 .dev-sphere-chat-item {
     display: flex;
     align-items: center;
-    padding: 10px 16px;
+    padding: var(--dev-sphere-spacing-md);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all var(--dev-sphere-transition-base);
     border-bottom: 1px solid var(--vscode-widget-shadow);
     justify-content: space-between;
+    animation: fadeIn var(--dev-sphere-transition-base) forwards;
+    opacity: 0;
 }
 
 .dev-sphere-chat-item:hover {
     background-color: var(--vscode-list-hoverBackground);
+    transform: translateY(-1px);
+    box-shadow: var(--dev-sphere-shadow-sm);
 }
 
 .dev-sphere-chat-item-selected {
@@ -108,43 +173,264 @@
     color: var(--vscode-list-activeSelectionForeground);
 }
 
+.dev-sphere-chat-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dev-sphere-spacing-xs);
+}
+
 .dev-sphere-chat-title {
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 14px;
+    font-size: var(--dev-sphere-font-size-base);
+    font-weight: 500;
+    letter-spacing: -0.3px;
+}
+
+.dev-sphere-chat-model {
+    font-size: var(--dev-sphere-font-size-sm);
+    color: var(--vscode-descriptionForeground);
+    display: flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-xs);
+}
+
+.dev-sphere-chat-model svg {
+    width: 12px;
+    height: 12px;
+    opacity: 0.6;
+}
+
+.dev-sphere-chat-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-chat-date {
+    font-size: 10px;
+    color: var(--vscode-descriptionForeground);
+    white-space: nowrap;
+}
+
+.dev-sphere-chat-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    background-color: var(--dev-sphere-primary);
+    color: var(--vscode-button-foreground);
+    border-radius: var(--dev-sphere-radius-full);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 0 var(--dev-sphere-spacing-xs);
 }
 
 .dev-sphere-chat-actions {
     display: none;
-    gap: 8px;
+    gap: var(--dev-sphere-spacing-xs);
 }
 
 .dev-sphere-chat-item:hover .dev-sphere-chat-actions {
     display: flex;
+    animation: fadeIn var(--dev-sphere-transition-base) forwards;
 }
 
 .dev-sphere-chat-action-button {
-    width: 24px;
-    height: 24px;
-    background-color: transparent;
+    width: 28px;
+    height: 28px;
+    background-color: var(--dev-sphere-secondary);
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--vscode-descriptionForeground);
-    border-radius: 3px;
+    color: var(--vscode-button-secondaryForeground);
+    border-radius: var(--dev-sphere-radius-md);
+    transition: all var(--dev-sphere-transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.dev-sphere-chat-action-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--dev-sphere-radius-full);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease-out, height 0.6s ease-out;
 }
 
 .dev-sphere-chat-action-button:hover {
-    background-color: var(--vscode-toolbar-hoverBackground);
+    background-color: var(--dev-sphere-secondary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--dev-sphere-shadow-sm);
+}
+
+.dev-sphere-chat-action-button:hover::before {
+    width: 150px;
+    height: 150px;
+}
+
+.dev-sphere-chat-action-button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.dev-sphere-chat-action-button svg {
+    width: 14px;
+    height: 14px;
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-chat-action-button:hover svg {
+    transform: scale(1.1);
 }
 
 .dev-sphere-chat-list-empty {
-    padding: 30px 20px;
+    padding: var(--dev-sphere-spacing-xl) var(--dev-sphere-spacing-md);
     text-align: center;
     color: var(--vscode-descriptionForeground);
     font-style: italic;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+}
+
+.dev-sphere-chat-list-empty-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--dev-sphere-spacing-md);
+    opacity: 0.5;
+    color: var(--vscode-descriptionForeground);
+    animation: float 3s ease-in-out infinite;
+}
+
+.dev-sphere-chat-list-empty-text {
+    font-size: var(--dev-sphere-font-size-base);
+    margin-bottom: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-chat-list-empty-hint {
+    font-size: var(--dev-sphere-font-size-sm);
+    opacity: 0.7;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.dev-sphere-chat-selector-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--dev-sphere-spacing-md);
+    border-top: 1px solid var(--vscode-panel-border);
+    background-color: var(--vscode-editorWidget-background);
+}
+
+.dev-sphere-selector-button {
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    border-radius: var(--dev-sphere-radius-md);
+    font-size: var(--dev-sphere-font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-sm);
+    transition: all var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-selector-button-primary {
+    background-color: var(--dev-sphere-primary);
+    color: var(--vscode-button-foreground);
+    border: none;
+}
+
+.dev-sphere-selector-button-primary:hover {
+    background-color: var(--dev-sphere-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--dev-sphere-shadow-sm);
+}
+
+.dev-sphere-selector-button-secondary {
+    background-color: var(--dev-sphere-secondary);
+    color: var(--vscode-button-secondaryForeground);
+    border: none;
+}
+
+.dev-sphere-selector-button-secondary:hover {
+    background-color: var(--dev-sphere-secondary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--dev-sphere-shadow-sm);
+}
+
+.dev-sphere-selector-button svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Skeleton loading for chat selector */
+.dev-sphere-chat-skeleton-item {
+    display: flex;
+    padding: var(--dev-sphere-spacing-md);
+    border-bottom: 1px solid var(--vscode-widget-shadow);
+    gap: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-chat-skeleton-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--dev-sphere-spacing-xs);
+}
+
+.dev-sphere-chat-skeleton-title {
+    height: 16px;
+    width: 70%;
+    background: linear-gradient(90deg, var(--vscode-editorWidget-background) 0%, var(--vscode-editor-background) 50%, var(--vscode-editorWidget-background) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    border-radius: var(--dev-sphere-radius-sm);
+}
+
+.dev-sphere-chat-skeleton-meta {
+    height: 10px;
+    width: 40%;
+    background: linear-gradient(90deg, var(--vscode-editorWidget-background) 0%, var(--vscode-editor-background) 50%, var(--vscode-editorWidget-background) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    border-radius: var(--dev-sphere-radius-sm);
+}
+
+/* Responsive adjustments */
+@media (max-width: var(--dev-sphere-breakpoint-sm)) {
+    .dev-sphere-chat-selector {
+        width: 95%;
+    }
+
+    .dev-sphere-chat-selector-header {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-chat-selector-search {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-chat-item {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-chat-date {
+        display: none;
+    }
 }

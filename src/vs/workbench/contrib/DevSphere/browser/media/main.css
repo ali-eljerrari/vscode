@@ -5,6 +5,9 @@
 
 /* Main CSS file that imports all DevSphere component styles */
 
+/* Base variables and theme */
+@import './theme.css';
+
 /* Base styles */
 @import './base.css';
 
@@ -19,3 +22,6 @@
 
 /* Animations */
 @import './animations.css';
+
+/* Responsive adjustments */
+@import './responsive.css';

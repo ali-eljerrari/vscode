@@ -6,71 +6,219 @@
 /* ===== INPUT AREA ===== */
 .dev-sphere-input-section {
     display: flex;
-    padding: 16px;
+    padding: var(--dev-sphere-spacing-md);
     background-color: var(--vscode-editor-background);
     border-top: 1px solid var(--vscode-widget-shadow);
     position: relative;
     bottom: 0;
-    z-index: 10;
+    z-index: var(--dev-sphere-z-tooltip);
+    backdrop-filter: blur(8px);
+    background-color: rgba(var(--vscode-editor-background), 0.95);
 }
 
 .dev-sphere-input-container {
     display: flex;
     flex-grow: 1;
     position: relative;
-    border-radius: 8px;
+    border-radius: var(--dev-sphere-radius-lg);
     background-color: var(--vscode-input-background);
     border: 1px solid var(--vscode-input-border);
     overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--dev-sphere-shadow-md);
+    transition: all var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-input-container:focus-within {
-    border-color: var(--vscode-focusBorder);
-    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
+    border-color: var(--dev-sphere-accent);
+    box-shadow: 0 0 0 2px rgba(var(--dev-sphere-accent), 0.2);
+    transform: translateY(-1px);
 }
 
 .dev-sphere-input {
     flex: 1;
-    min-height: 42px;
+    min-height: var(--dev-sphere-input-height);
     max-height: 200px;
-    padding: 10px 16px;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
     background-color: transparent;
     color: var(--vscode-input-foreground);
     border: none;
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: var(--dev-sphere-font-size-base);
+    line-height: var(--dev-sphere-line-height);
     resize: none;
     outline: none;
-    font-family: var(--monaco-monospace-font);
+    font-family: var(--dev-sphere-font-family);
+    transition: all var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-input::placeholder {
     color: var(--vscode-input-placeholderForeground);
     opacity: 0.7;
+    transition: opacity var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-input:focus::placeholder {
+    opacity: 1;
 }
 
 .dev-sphere-submit-button {
-    background-color: var(--vscode-button-background);
+    background-color: var(--dev-sphere-primary);
     color: var(--vscode-button-foreground);
     border: none;
-    padding: 6px 12px;
-    margin: 5px;
-    border-radius: 6px;
-    font-size: 13px;
+    padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-md);
+    margin: var(--dev-sphere-spacing-xs);
+    border-radius: var(--dev-sphere-radius-md);
+    font-size: var(--dev-sphere-font-size-base);
     font-weight: 500;
     cursor: pointer;
     min-width: 70px;
+    height: calc(var(--dev-sphere-input-height) - 8px);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all var(--dev-sphere-transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.dev-sphere-submit-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: var(--dev-sphere-radius-full);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease-out, height 0.6s ease-out;
 }
 
 .dev-sphere-submit-button:hover {
-    background-color: var(--vscode-button-hoverBackground);
+    background-color: var(--dev-sphere-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--dev-sphere-shadow-md);
+}
+
+.dev-sphere-submit-button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.dev-sphere-submit-button:active {
+    transform: translateY(0);
+    box-shadow: var(--dev-sphere-shadow-sm);
 }
 
 .dev-sphere-submit-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.dev-sphere-submit-button:disabled::before {
+    display: none;
+}
+
+/* Input character count */
+.dev-sphere-input-count {
+    position: absolute;
+    bottom: var(--dev-sphere-spacing-xs);
+    right: var(--dev-sphere-spacing-md);
+    font-size: var(--dev-sphere-font-size-sm);
+    color: var(--vscode-descriptionForeground);
+    opacity: 0.7;
+    transition: opacity var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-input:focus + .dev-sphere-input-count {
+    opacity: 1;
+}
+
+/* Input suggestions */
+.dev-sphere-input-suggestions {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: var(--dev-sphere-radius-md) var(--dev-sphere-radius-md) 0 0;
+    box-shadow: var(--dev-sphere-shadow-lg);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: var(--dev-sphere-z-dropdown);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all var(--dev-sphere-transition-base);
+    pointer-events: none;
+}
+
+.dev-sphere-input-suggestions.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.dev-sphere-suggestion-item {
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    cursor: pointer;
+    transition: background-color var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-suggestion-item:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.dev-sphere-suggestion-item.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+}
+
+/* Input toolbar */
+.dev-sphere-input-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--dev-sphere-spacing-sm);
+    padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-sm);
+    border-top: 1px solid var(--vscode-input-border);
+    background-color: var(--vscode-editorWidget-background);
+}
+
+.dev-sphere-toolbar-button {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--dev-sphere-radius-sm);
+    color: var(--vscode-descriptionForeground);
+    cursor: pointer;
+    transition: all var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-toolbar-button:hover {
+    background-color: var(--vscode-toolbar-hoverBackground);
+    color: var(--vscode-foreground);
+}
+
+.dev-sphere-toolbar-button.active {
+    background-color: var(--dev-sphere-primary);
+    color: var(--vscode-button-foreground);
+}
+
+/* Responsive adjustments */
+@media (max-width: var(--dev-sphere-breakpoint-sm)) {
+    .dev-sphere-input-section {
+        padding: var(--dev-sphere-spacing-sm);
+    }
+
+    .dev-sphere-input-container {
+        border-radius: var(--dev-sphere-radius-md);
+    }
+
+    .dev-sphere-submit-button {
+        min-width: 60px;
+        padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-sm);
+    }
 }

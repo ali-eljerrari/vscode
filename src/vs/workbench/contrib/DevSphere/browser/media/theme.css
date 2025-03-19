@@ -1,0 +1,83 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/* Modern Theme Variables */
+:root {
+    /* Colors */
+    --dev-sphere-primary: var(--vscode-button-background, #0078d4);
+    --dev-sphere-primary-hover: var(--vscode-button-hoverBackground, #106ebe);
+    --dev-sphere-secondary: var(--vscode-button-secondaryBackground, #2d2d2d);
+    --dev-sphere-secondary-hover: var(--vscode-button-secondaryHoverBackground, #3d3d3d);
+    --dev-sphere-accent: var(--vscode-focusBorder, #0078d4);
+    --dev-sphere-success: var(--vscode-testing-iconPassed, #4caf50);
+    --dev-sphere-warning: var(--vscode-testing-iconFailed, #ff9800);
+    --dev-sphere-error: var(--vscode-errorForeground, #f44336);
+
+    /* Typography */
+    --dev-sphere-font-family: var(--monaco-monospace-font, 'SF Mono', 'Consolas', monospace);
+    --dev-sphere-font-size-sm: 12px;
+    --dev-sphere-font-size-base: 14px;
+    --dev-sphere-font-size-lg: 16px;
+    --dev-sphere-line-height: 1.5;
+
+    /* Spacing */
+    --dev-sphere-spacing-xs: 4px;
+    --dev-sphere-spacing-sm: 8px;
+    --dev-sphere-spacing-md: 16px;
+    --dev-sphere-spacing-lg: 24px;
+    --dev-sphere-spacing-xl: 32px;
+
+    /* Border Radius */
+    --dev-sphere-radius-sm: 4px;
+    --dev-sphere-radius-md: 8px;
+    --dev-sphere-radius-lg: 12px;
+    --dev-sphere-radius-full: 9999px;
+
+    /* Shadows */
+    --dev-sphere-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --dev-sphere-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --dev-sphere-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+    /* Transitions */
+    --dev-sphere-transition-fast: 150ms ease;
+    --dev-sphere-transition-base: 200ms ease;
+    --dev-sphere-transition-slow: 300ms ease;
+
+    /* Z-index */
+    --dev-sphere-z-dropdown: 1000;
+    --dev-sphere-z-modal: 1100;
+    --dev-sphere-z-tooltip: 1200;
+
+    /* Breakpoints */
+    --dev-sphere-breakpoint-sm: 640px;
+    --dev-sphere-breakpoint-md: 768px;
+    --dev-sphere-breakpoint-lg: 1024px;
+    --dev-sphere-breakpoint-xl: 1280px;
+
+    /* Container */
+    --dev-sphere-container-max-width: 1200px;
+    --dev-sphere-container-padding: var(--dev-sphere-spacing-md);
+
+    /* Message Bubbles */
+    --dev-sphere-message-bubble-radius: var(--dev-sphere-radius-md);
+    --dev-sphere-message-bubble-padding: var(--dev-sphere-spacing-md);
+    --dev-sphere-message-bubble-margin: var(--dev-sphere-spacing-sm);
+
+    /* Input Area */
+    --dev-sphere-input-height: 42px;
+    --dev-sphere-input-padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+
+    /* Header */
+    --dev-sphere-header-height: 48px;
+    --dev-sphere-header-padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+
+    /* Tabs */
+    --dev-sphere-tab-height: 36px;
+    --dev-sphere-tab-padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+
+    /* Scrollbar */
+    --dev-sphere-scrollbar-width: 8px;
+    --dev-sphere-scrollbar-thumb-radius: var(--dev-sphere-radius-full);
+}

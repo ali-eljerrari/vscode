@@ -8,10 +8,11 @@
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 20px 16px;
+    padding: var(--dev-sphere-spacing-lg) var(--dev-sphere-spacing-md);
     scroll-behavior: smooth;
     scrollbar-width: thin;
     scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
+    background: linear-gradient(180deg, var(--vscode-editor-background) 0%, var(--vscode-editorWidget-background) 100%);
 }
 
 /* Message groups */
@@ -19,9 +20,9 @@
     position: relative;
     margin: 0;
     width: 100%;
-    border-bottom: 1px solid var(--vscode-editorWidget-border, rgba(127, 127, 127, 0.1));
-    margin-bottom: 24px;
-    animation: fadeIn 0.3s ease forwards;
+    border-bottom: 1px solid var(--vscode-editorWidget-border);
+    margin-bottom: var(--dev-sphere-spacing-lg);
+    animation: fadeIn var(--dev-sphere-transition-base) forwards;
     opacity: 0;
 }
 
@@ -30,22 +31,29 @@
 }
 
 .dev-sphere-message-group-assistant {
-    background-color: var(--vscode-editorWidget-background, rgba(30, 30, 30, 0.4));
+    background-color: var(--vscode-editorWidget-background);
 }
 
 .dev-sphere-message-group-system {
     background-color: var(--vscode-editor-background);
-    border-top: 1px dashed var(--vscode-editorWidget-border, rgba(127, 127, 127, 0.2));
-    border-bottom: 1px dashed var(--vscode-editorWidget-border, rgba(127, 127, 127, 0.2));
-    padding: 8px 0;
+    border-top: 1px dashed var(--vscode-editorWidget-border);
+    border-bottom: 1px dashed var(--vscode-editorWidget-border);
+    padding: var(--dev-sphere-spacing-sm) 0;
 }
 
-/* Improved Message Display */
+/* Message Display */
 .dev-sphere-message {
     position: relative;
-    padding: 16px 24px;
-    line-height: 1.6;
-    margin-bottom: 8px;
+    padding: var(--dev-sphere-spacing-md) var(--dev-sphere-spacing-lg);
+    line-height: var(--dev-sphere-line-height);
+    margin-bottom: var(--dev-sphere-spacing-sm);
+    border-radius: var(--dev-sphere-radius-md);
+    transition: all var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-message:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--dev-sphere-shadow-sm);
 }
 
 .dev-sphere-message:last-child {
@@ -54,9 +62,9 @@
 
 /* Text content */
 .dev-sphere-text {
-    line-height: 1.6;
-    padding: 16px 24px;
-    font-size: 14px;
+    line-height: var(--dev-sphere-line-height);
+    padding: var(--dev-sphere-spacing-md) var(--dev-sphere-spacing-lg);
+    font-size: var(--dev-sphere-font-size-base);
     word-wrap: break-word;
     max-width: 100%;
     white-space: pre-wrap;
@@ -65,71 +73,79 @@
 
 /* Avatar elements */
 .dev-sphere-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--dev-sphere-radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    font-weight: 600;
     color: var(--vscode-editor-background);
-    margin-right: 12px;
+    margin-right: var(--dev-sphere-spacing-sm);
     flex-shrink: 0;
+    box-shadow: var(--dev-sphere-shadow-sm);
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-avatar:hover {
+    transform: scale(1.05);
 }
 
 .dev-sphere-avatar-user {
-    background-color: var(--vscode-activityBarBadge-background);
+    background-color: var(--dev-sphere-primary);
 }
 
 .dev-sphere-avatar-assistant {
-    background-color: var(--vscode-statusBarItem-remoteBackground, var(--vscode-button-background));
+    background-color: var(--dev-sphere-success);
 }
 
 .dev-sphere-avatar-system {
-    background-color: var(--vscode-statusBarItem-warningBackground);
-    font-size: 12px;
+    background-color: var(--dev-sphere-warning);
+    font-size: var(--dev-sphere-font-size-sm);
 }
 
 /* Message headers */
 .dev-sphere-message-header {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: var(--dev-sphere-spacing-sm);
 }
 
 /* Role Badge Styling */
 .dev-sphere-message-role-badge {
     display: inline-block;
     padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 12px;
+    border-radius: var(--dev-sphere-radius-full);
+    font-size: var(--dev-sphere-font-size-sm);
     font-weight: 600;
-    background-color: var(--vscode-badge-background);
-    color: var(--vscode-badge-foreground);
+    background-color: var(--dev-sphere-primary);
+    color: var(--vscode-button-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .dev-sphere-message-group-user .dev-sphere-message-role-badge {
-    background-color: var(--vscode-activityBarBadge-background);
+    background-color: var(--dev-sphere-primary);
 }
 
 .dev-sphere-message-group-assistant .dev-sphere-message-role-badge {
-    background-color: var(--vscode-statusBarItem-remoteBackground, var(--vscode-button-background));
+    background-color: var(--dev-sphere-success);
 }
 
 .dev-sphere-message-group-system .dev-sphere-message-role-badge {
-    background-color: var(--vscode-statusBarItem-warningBackground);
+    background-color: var(--dev-sphere-warning);
 }
 
 /* Message Content Styling */
 .dev-sphere-message-content {
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: var(--dev-sphere-font-size-base);
+    line-height: var(--dev-sphere-line-height);
     word-wrap: break-word;
     overflow-wrap: break-word;
 }
 
 .dev-sphere-message-content p {
-    margin: 0 0 16px 0;
+    margin: 0 0 var(--dev-sphere-spacing-md) 0;
 }
 
 .dev-sphere-message-content p:last-child {
@@ -139,26 +155,29 @@
 .dev-sphere-message-content a {
     color: var(--vscode-textLink-foreground);
     text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--dev-sphere-transition-base);
 }
 
 .dev-sphere-message-content a:hover {
-    text-decoration: underline;
+    border-bottom-color: currentColor;
     color: var(--vscode-textLink-activeForeground);
 }
 
 .dev-sphere-message-content ul,
 .dev-sphere-message-content ol {
-    margin: 0 0 16px 0;
-    padding-left: 24px;
+    margin: 0 0 var(--dev-sphere-spacing-md) 0;
+    padding-left: var(--dev-sphere-spacing-lg);
 }
 
 .dev-sphere-message-content li {
-    margin-bottom: 4px;
+    margin-bottom: var(--dev-sphere-spacing-xs);
 }
 
 .dev-sphere-message-content strong,
 .dev-sphere-message-content b {
     font-weight: 600;
+    color: var(--vscode-foreground);
 }
 
 .dev-sphere-message-content em,
@@ -168,23 +187,24 @@
 
 /* Code formatting */
 .dev-sphere-message-content code {
-    font-family: var(--monaco-monospace-font);
-    background-color: var(--vscode-textCodeBlock-background, rgba(127, 127, 127, 0.15));
+    font-family: var(--dev-sphere-font-family);
+    background-color: var(--vscode-textCodeBlock-background);
     padding: 2px 5px;
-    border-radius: 4px;
+    border-radius: var(--dev-sphere-radius-sm);
     font-size: 0.9em;
+    color: var(--vscode-editor-foreground);
 }
 
 .dev-sphere-message-content pre {
-    background-color: var(--vscode-editor-inactiveSelectionBackground, var(--vscode-editor-background));
-    border-radius: 6px;
-    padding: 16px;
-    margin: 16px 0;
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
+    border-radius: var(--dev-sphere-radius-lg);
+    padding: var(--dev-sphere-spacing-md);
+    margin: var(--dev-sphere-spacing-md) 0;
     overflow-x: auto;
-    font-family: var(--monaco-monospace-font);
-    font-size: 13px;
-    line-height: 1.5;
-    border: 1px solid var(--vscode-editorWidget-border, var(--vscode-editor-lineHighlightBorder));
+    font-family: var(--dev-sphere-font-family);
+    font-size: var(--dev-sphere-font-size-sm);
+    line-height: var(--dev-sphere-line-height);
+    border: 1px solid var(--vscode-editorWidget-border);
     position: relative;
 }
 
@@ -195,8 +215,8 @@
     left: 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(to right, var(--vscode-activityBarBadge-background), transparent);
-    border-radius: 6px 6px 0 0;
+    background: linear-gradient(to right, var(--dev-sphere-primary), transparent);
+    border-radius: var(--dev-sphere-radius-lg) var(--dev-sphere-radius-lg) 0 0;
 }
 
 .dev-sphere-message-content pre code {
@@ -210,7 +230,7 @@
 /* Tables */
 .dev-sphere-message-content table {
     border-collapse: collapse;
-    margin: 16px 0;
+    margin: var(--dev-sphere-spacing-md) 0;
     width: 100%;
     font-size: 0.9em;
 }
@@ -218,7 +238,7 @@
 .dev-sphere-message-content th,
 .dev-sphere-message-content td {
     border: 1px solid var(--vscode-editorWidget-border);
-    padding: 8px 12px;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
     text-align: left;
 }
 
@@ -229,13 +249,13 @@
 
 /* Blockquotes */
 .dev-sphere-message-content blockquote {
-    margin: 16px 0;
-    padding: 8px 16px;
-    border-left: 4px solid var(--vscode-activityBarBadge-background);
-    background-color: var(--vscode-editorWidget-background, rgba(30, 30, 30, 0.2));
+    margin: var(--dev-sphere-spacing-md) 0;
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
+    border-left: 4px solid var(--dev-sphere-primary);
+    background-color: var(--vscode-editorWidget-background);
     font-style: italic;
     color: var(--vscode-foreground);
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 var(--dev-sphere-radius-md) var(--dev-sphere-radius-md) 0;
 }
 
 /* Message types */
@@ -252,14 +272,14 @@
 .dev-sphere-text-system {
     color: var(--vscode-editorInfo-foreground);
     font-style: italic;
-    font-size: 13px;
-    padding: 12px 24px;
+    font-size: var(--dev-sphere-font-size-sm);
+    padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-lg);
     opacity: 0.85;
 }
 
-/* Loading Indicator Improvements */
+/* Loading Indicator */
 .dev-sphere-message-loading {
-    padding: 12px 24px;
+    padding: var(--dev-sphere-spacing-md) var(--dev-sphere-spacing-lg);
     display: flex;
     justify-content: center;
 }
@@ -268,21 +288,21 @@
     display: inline-flex;
     align-items: center;
     color: var(--vscode-descriptionForeground);
-    font-size: 14px;
+    font-size: var(--dev-sphere-font-size-base);
 }
 
 .dev-sphere-loading-dots {
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-left: 8px;
+    margin-left: var(--dev-sphere-spacing-sm);
 }
 
 /* Loading Indicator Animation */
 .dev-sphere-loading-dot {
     width: 6px;
     height: 6px;
-    border-radius: 50%;
+    border-radius: var(--dev-sphere-radius-full);
     background-color: var(--vscode-descriptionForeground);
     opacity: 0.7;
     animation: pulse 1.5s ease-in-out infinite;
@@ -298,38 +318,6 @@
     animation-delay: 0.4s;
 }
 
-/* Code block styles */
-.dev-sphere-text pre {
-    background-color: var(--vscode-editor-inactiveSelectionBackground, var(--vscode-editor-background));
-    border-radius: 8px;
-    padding: 16px;
-    margin: 12px 0;
-    overflow-x: auto;
-    font-family: var(--monaco-monospace-font);
-    font-size: 13px;
-    border: 1px solid var(--vscode-editorWidget-border, var(--vscode-editor-lineHighlightBorder));
-    position: relative;
-}
-
-.dev-sphere-text pre::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(to right, var(--vscode-activityBarBadge-background), transparent);
-    border-radius: 8px 8px 0 0;
-}
-
-.dev-sphere-text code {
-    font-family: var(--monaco-monospace-font);
-    background-color: var(--vscode-textCodeBlock-background, rgba(127, 127, 127, 0.15));
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-size: 0.9em;
-}
-
 /* Empty state message */
 .dev-sphere-messages:empty::after {
     content: "Start a conversation with DevSphere";
@@ -338,10 +326,10 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    padding: 40px;
+    padding: var(--dev-sphere-spacing-xl);
     color: var(--vscode-descriptionForeground);
     font-style: italic;
-    font-size: 15px;
+    font-size: var(--dev-sphere-font-size-lg);
     opacity: 0.7;
     text-align: center;
 }
@@ -351,72 +339,14 @@
     display: block;
     width: 60px;
     height: 60px;
-    margin-bottom: 20px;
-    background-color: var(--vscode-descriptionForeground, rgba(127, 127, 127, 0.5));
+    margin-bottom: var(--dev-sphere-spacing-lg);
+    background-color: var(--vscode-descriptionForeground);
     mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>');
     mask-size: contain;
     mask-repeat: no-repeat;
     mask-position: center;
     opacity: 0.5;
-}
-
-/* Webkit scrollbar styles for Chrome, Safari, Edge */
-.dev-sphere-messages::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.dev-sphere-messages::-webkit-scrollbar-track {
-    background: transparent;
-    margin: 4px 0;
-}
-
-.dev-sphere-messages::-webkit-scrollbar-thumb {
-    background-color: var(--vscode-scrollbarSlider-background);
-    border-radius: 4px;
-    transition: background-color 0.2s ease;
-}
-
-.dev-sphere-messages::-webkit-scrollbar-thumb:hover {
-    background-color: var(--vscode-scrollbarSlider-hoverBackground);
-}
-
-.dev-sphere-messages::-webkit-scrollbar-thumb:active {
-    background-color: var(--vscode-scrollbarSlider-activeBackground);
-}
-
-/* Add a subtle fade effect to indicate scrollable content */
-.dev-sphere-messages::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 20px;
-    background: linear-gradient(to top, var(--vscode-editor-background), transparent);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.dev-sphere-messages.scrollable::after {
-    opacity: 1;
-}
-
-/* Message content indicators with subtle color bars */
-.dev-sphere-message-group-user .dev-sphere-message-content {
-    border-left: 3px solid var(--vscode-activityBarBadge-background);
-    padding-left: 12px;
-}
-
-.dev-sphere-message-group-assistant .dev-sphere-message-content {
-    border-left: 3px solid var(--vscode-terminal-ansiGreen, #3e9545);
-    padding-left: 12px;
-}
-
-.dev-sphere-message-group-system .dev-sphere-message-content {
-    border-left: 3px solid var(--vscode-terminal-ansiYellow, #dbd700);
-    padding-left: 12px;
+    animation: float 3s ease-in-out infinite;
 }
 
 /* Scroll to bottom button */
@@ -424,20 +354,20 @@
     position: absolute;
     bottom: 80px;
     right: 20px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: var(--vscode-button-background);
+    width: 40px;
+    height: 40px;
+    border-radius: var(--dev-sphere-radius-full);
+    background-color: var(--dev-sphere-primary);
     color: var(--vscode-button-foreground);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-    z-index: 10;
+    box-shadow: var(--dev-sphere-shadow-md);
+    z-index: var(--dev-sphere-z-tooltip);
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: all var(--dev-sphere-transition-base);
     border: none;
 }
 
@@ -447,5 +377,22 @@
 }
 
 .dev-sphere-scroll-button:hover {
-    background-color: var(--vscode-button-hoverBackground);
+    background-color: var(--dev-sphere-primary-hover);
+    transform: translateY(-2px);
+}
+
+/* Message content indicators */
+.dev-sphere-message-group-user .dev-sphere-message-content {
+    border-left: 3px solid var(--dev-sphere-primary);
+    padding-left: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-message-group-assistant .dev-sphere-message-content {
+    border-left: 3px solid var(--dev-sphere-success);
+    padding-left: var(--dev-sphere-spacing-sm);
+}
+
+.dev-sphere-message-group-system .dev-sphere-message-content {
+    border-left: 3px solid var(--dev-sphere-warning);
+    padding-left: var(--dev-sphere-spacing-sm);
 }
