@@ -341,9 +341,6 @@ export class DevSphereMessages extends Disposable {
 			const lines = codeContent.split('<br/>');
 			let codeWithLines = '';
 
-			// Store raw content for the copy button (without HTML escaping)
-			const rawCodeContent = lines.join('\n');
-
 			// Wrap each line with a span to enable line numbering via CSS
 			lines.forEach((line: string) => {
 				// Escape HTML to prevent rendering issues
@@ -357,25 +354,13 @@ export class DevSphereMessages extends Disposable {
 			// Create unique ID for this code block
 			const blockId = `code-block-${Math.random().toString(36).substring(2, 9)}`;
 
-			// Prepare language label for toolbar
-			const langLabel = language && language.trim() ?
-				`<span class="dev-sphere-code-language">${this.escapeHTML(language.trim())}</span>` : '';
-
-			// Include copy button with data attributes
-			const copyButton = `<button class="dev-sphere-copy-button" title="Copy code" data-code-content="${this.escapeHTML(rawCodeContent)}" data-block-id="${blockId}">
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-					<path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
-				</svg>
-			</button>`;
-
 			// Ensure copy functionality is initialized only once
 			if (!this.hasCopyHandlersAdded) {
 				this.initializeCopyFunctionality();
 			}
 
 			// Return the formatted code block with copy button and language indicator
-			return `<pre id="${blockId}">${langLabel}${copyButton}<code${langClass}>${codeWithLines}</code></pre>`;
+			return `<pre id="${blockId}"><code${langClass}>${codeWithLines}</code></pre>`;
 		});
 
 		return formattedText;
@@ -426,7 +411,7 @@ export class DevSphereMessages extends Disposable {
 
 		// Add scrollability detection for code blocks
 		this.messagesContainer.addEventListener('DOMNodeInserted', (e) => {
-			if (e.target instanceof HTMLElement) {
+			if (DOM.isHTMLElement(e.target)) {
 				// Check for pre elements
 				const preElements = e.target.tagName === 'PRE' ? [e.target] :
 					Array.from(e.target.querySelectorAll('pre'));
