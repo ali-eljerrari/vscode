@@ -143,7 +143,7 @@ export class DevSphereView extends ViewPane {
 	/**
 	 * Adds a system message indicating the model has been changed
 	 */
-	private addModelChangeMessage(modelId: string): void {
+	public addModelChangeMessage(modelId: string): void {
 		const model = this.devSphereService.getAvailableModels().find(m => m.id === modelId);
 		if (model) {
 			this.viewModel.addSystemMessage(`Model changed to **${model.name}** (${model.description})`);
@@ -155,16 +155,40 @@ export class DevSphereView extends ViewPane {
 		const section = document.createElement('div');
 		section.classList.add('dev-sphere-section');
 
-		// Create text input
+		// Create a styled input container
+		const inputContainer = document.createElement('div');
+		inputContainer.classList.add('dev-sphere-input-container');
+
+		// Create text input with improved placeholder
 		const input = document.createElement('input');
 		input.type = 'text';
-		input.placeholder = 'Enter your text here';
+		input.placeholder = 'Ask DevSphere...';
+		input.spellcheck = false;
 		this.inputElement = input;
-		section.appendChild(input);
+		inputContainer.appendChild(input);
 
-		// Create submit button
+		// Add the input container to the section
+		section.appendChild(inputContainer);
+
+		// Create submit button with a modern look
 		const button = document.createElement('button');
-		button.textContent = 'Submit';
+
+		// Add a small send icon SVG
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		svg.setAttribute('viewBox', '0 0 16 16');
+		svg.setAttribute('fill', 'none');
+		svg.setAttribute('stroke', 'currentColor');
+		svg.setAttribute('stroke-width', '2');
+		svg.setAttribute('stroke-linecap', 'round');
+		svg.setAttribute('stroke-linejoin', 'round');
+
+		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		path.setAttribute('d', 'M15 8l-12 7v-14l12 7z');
+		svg.appendChild(path);
+
+		button.appendChild(svg);
+		button.appendChild(document.createTextNode('Send'));
+		button.title = 'Send message';
 		section.appendChild(button);
 
 		// Add event listener for button click
@@ -180,7 +204,8 @@ export class DevSphereView extends ViewPane {
 
 		// Add event listener for Enter key
 		input.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter') {
+			if (e.key === 'Enter' && !e.shiftKey) {
+				e.preventDefault(); // Prevent default to avoid newline
 				const text = input.value.trim();
 				if (text) {
 					this.viewModel.sendMessage(text);
@@ -194,28 +219,68 @@ export class DevSphereView extends ViewPane {
 		container.appendChild(section);
 	}
 
-	private onMessagesChanged(messages: Message[]): void {
+	private onMessagesChanged(): void {
 		if (!this.messagesContainer) {
 			return;
 		}
 
-		// Clear existing messages
+		// Check if we're scrolled to the bottom before updating
+		const wasScrolledToBottom = this.isScrolledToBottom();
+
+		// Clear existing messages - use DOM methods instead of innerHTML
 		while (this.messagesContainer.firstChild) {
 			this.messagesContainer.removeChild(this.messagesContainer.firstChild);
 		}
 
-		// Render all messages
-		messages.forEach(message => {
-			this.renderMessage(message);
-		});
+		// Get messages from the view model using the public getter
+		const messages = this.viewModel.messageList;
 
-		// Scroll to bottom
-		this.scrollToBottom();
+		if (messages.length === 0) {
+			// Show empty state when no messages
+			const emptyState = document.createElement('div');
+			emptyState.classList.add('dev-sphere-empty-state');
 
-		// Ensure input field gets focus after messages are rendered
-		if (!this.viewModel.isLoading) {
-			setTimeout(() => this.focusInput(), 100);
+			const emptyIcon = document.createElement('div');
+			emptyIcon.classList.add('dev-sphere-empty-icon');
+			emptyState.appendChild(emptyIcon);
+
+			const emptyTitle = document.createElement('h3');
+			emptyTitle.textContent = 'How can I help you today?';
+			emptyState.appendChild(emptyTitle);
+
+			const emptyText = document.createElement('p');
+			emptyText.textContent = 'Start a conversation with DevSphere AI to get assistance with your code, answer questions, or help with any tasks.';
+			emptyState.appendChild(emptyText);
+
+			this.messagesContainer.appendChild(emptyState);
+		} else {
+			// Render all messages
+			messages.forEach((message: Message) => {
+				this.renderMessage(message);
+			});
 		}
+
+		// Scroll to bottom if we were already at the bottom
+		if (wasScrolledToBottom || this.viewModel.isLoading) {
+			this.scrollToBottom();
+		}
+
+		// Focus the input field after messages are rendered (if not loading)
+		if (this.inputElement && !this.viewModel.isLoading) {
+			this.inputElement.focus();
+		}
+	}
+
+	private isScrolledToBottom(): boolean {
+		if (!this.messagesContainer) {
+			return true;
+		}
+
+		const scrollPosition = this.messagesContainer.scrollTop + this.messagesContainer.clientHeight;
+		const scrollHeight = this.messagesContainer.scrollHeight;
+
+		// Consider "scrolled to bottom" if within 50px of actual bottom
+		return scrollHeight - scrollPosition < 50;
 	}
 
 	private renderMessage(message: Message): void {
@@ -224,37 +289,107 @@ export class DevSphereView extends ViewPane {
 		}
 
 		if (message.role === 'loading') {
-			// Render loading message
+			// Render loading message with animated dots
 			const loadingMessage = document.createElement('div');
 			loadingMessage.classList.add('dev-sphere-text', 'dev-sphere-text-loading');
-			loadingMessage.textContent = message.content;
-			this.messagesContainer.appendChild(loadingMessage);
+
+			// Create loading text
+			const loadingText = document.createTextNode('Generating response ');
+			loadingMessage.appendChild(loadingText);
+
+			// Create the animated dots
+			const dotsContainer = document.createElement('div');
+			dotsContainer.className = 'loading-dots';
+
+			// Add three dots for animation
+			for (let i = 0; i < 3; i++) {
+				const dot = document.createElement('span');
+				dot.className = 'dot';
+				// Add staggered animation delay
+				dot.style.animationDelay = `${i * 0.2}s`;
+				dotsContainer.appendChild(dot);
+			}
+
+			loadingMessage.appendChild(dotsContainer);
+
+			// Create message group for loading
+			const messageGroup = document.createElement('div');
+			messageGroup.classList.add('dev-sphere-message-group', 'dev-sphere-message-group-loading');
+			messageGroup.appendChild(loadingMessage);
+
+			this.messagesContainer.appendChild(messageGroup);
 			return;
+		}
+
+		// For non-loading messages, check if we should create a new message group or append to existing
+		let messageGroup: HTMLElement;
+		const lastChild = this.messagesContainer.lastElementChild;
+
+		// If last message type is different, create a new group
+		if (!lastChild || !lastChild.classList.contains(`dev-sphere-message-group-${message.role}`)) {
+			messageGroup = document.createElement('div');
+			messageGroup.classList.add('dev-sphere-message-group', `dev-sphere-message-group-${message.role}`);
+			this.messagesContainer.appendChild(messageGroup);
+		} else {
+			// Use the existing group
+			messageGroup = lastChild as HTMLElement;
 		}
 
 		// Create message container
 		const messageElement = document.createElement('div');
 		messageElement.classList.add('dev-sphere-text', `dev-sphere-text-${message.role}`);
 
-		// Create header with role label
-		const headerDiv = document.createElement('div');
-		headerDiv.classList.add('dev-sphere-message-header');
+		// Create header with avatar and role info - only for first message in a group
+		if (messageGroup.childElementCount === 0) {
+			const headerDiv = document.createElement('div');
+			headerDiv.classList.add('dev-sphere-message-header');
 
-		const roleLabel = document.createElement('span');
-		roleLabel.classList.add(`dev-sphere-${message.role}-label`);
+			// Create avatar
+			const avatar = document.createElement('div');
+			avatar.classList.add('dev-sphere-avatar', `dev-sphere-avatar-${message.role}`);
 
-		// Set role label text based on message role
-		if (message.role === 'user') {
-			roleLabel.textContent = 'You';
-		} else if (message.role === 'system') {
-			roleLabel.textContent = 'System';
-		} else {
-			roleLabel.textContent = 'Assistant';
+			// Set avatar text based on role
+			if (message.role === 'user') {
+				avatar.textContent = 'U';
+			} else if (message.role === 'system') {
+				avatar.textContent = 'S';
+			} else {
+				avatar.textContent = 'AI';
+			}
+
+			headerDiv.appendChild(avatar);
+
+			// Create role info wrapper
+			const roleWrapper = document.createElement('div');
+			roleWrapper.classList.add('dev-sphere-role-wrapper');
+
+			// Role name
+			const roleName = document.createElement('div');
+			roleName.classList.add('dev-sphere-role-name');
+
+			// Set role label text based on message role
+			if (message.role === 'user') {
+				roleName.textContent = 'You';
+			} else if (message.role === 'system') {
+				roleName.textContent = 'System';
+			} else {
+				roleName.textContent = 'DevSphere AI';
+			}
+
+			roleWrapper.appendChild(roleName);
+
+			// Role subtitle - model name for assistant
+			if (message.role === 'assistant') {
+				const currentModel = this.devSphereService.getCurrentModel();
+				const subtitle = document.createElement('div');
+				subtitle.classList.add('dev-sphere-role-subtitle');
+				subtitle.textContent = currentModel.name;
+				roleWrapper.appendChild(subtitle);
+			}
+
+			headerDiv.appendChild(roleWrapper);
+			messageElement.appendChild(headerDiv);
 		}
-
-		headerDiv.appendChild(roleLabel);
-
-		messageElement.appendChild(headerDiv);
 
 		// Create content container
 		const contentDiv = document.createElement('div');
@@ -265,7 +400,7 @@ export class DevSphereView extends ViewPane {
 
 		// Add content to the main container
 		messageElement.appendChild(contentDiv);
-		this.messagesContainer.appendChild(messageElement);
+		messageGroup.appendChild(messageElement);
 	}
 
 	private scrollToBottom(): void {

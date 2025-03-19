@@ -1,4 +1,4 @@
-/* DevSphere Styles */
+/* DevSphere Modern UI - Complete Redesign */
 .dev-sphere-container {
     display: flex;
     flex-direction: column;
@@ -6,320 +6,370 @@
     color: var(--vscode-editor-foreground);
     font-family: var(--monaco-monospace-font);
     height: 100%;
-    overflow: hidden; /* Prevent double scrollbars */
-    position: relative; /* For proper positioning of sticky elements */
+    overflow: hidden;
+    position: relative;
 }
 
-/* Model Selector styles */
+/* ===== HEADER SECTION ===== */
 .dev-sphere-model-selector {
     display: flex;
     align-items: center;
-    padding: 10px 16px;
-    background-color: var(--vscode-editorWidget-background);
-    border-bottom: 1px solid var(--vscode-input-border);
+    justify-content: space-between;
+    padding: 12px 20px;
+    background-color: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-editor-background));
+    border-bottom: 1px solid var(--vscode-widget-shadow);
     z-index: 5;
-    gap: 10px;
-    font-size: 13px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
 }
 
 .dev-sphere-model-selector label {
-    font-weight: 500;
+    font-weight: 600;
     color: var(--vscode-foreground);
     white-space: nowrap;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    opacity: 0.8;
+    padding-right: 10px;
 }
 
 .dev-sphere-model-select {
-    background-color: var(--vscode-dropdown-background);
-    color: var(--vscode-dropdown-foreground);
-    border: 1px solid var(--vscode-dropdown-border);
-    border-radius: 4px;
-    padding: 4px 8px;
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-editor-foreground);
+    border: 1px solid var(--vscode-panelInput-border, var(--vscode-input-border));
+    border-radius: 6px;
+    padding: 6px 10px;
     font-size: 12px;
-    flex: 1;
-    height: 28px;
+    max-width: 240px;
+    width: 100%;
+    height: 32px;
     outline: none;
     cursor: pointer;
 }
 
 .dev-sphere-model-select:hover {
     border-color: var(--vscode-focusBorder);
+    background-color: var(--vscode-list-hoverBackground);
 }
 
 .dev-sphere-model-select:focus {
     border-color: var(--vscode-focusBorder);
+    box-shadow: 0 0 0 1px var(--vscode-focusBorder, rgba(0, 122, 204, 0.4));
     outline: none;
 }
 
 .dev-sphere-model-select option {
     background-color: var(--vscode-dropdown-listBackground);
     color: var(--vscode-dropdown-foreground);
+    padding: 8px;
 }
 
-/* System message styles */
-.dev-sphere-text-system {
-    background-color: var(--vscode-activityBar-background, #333);
-    color: var(--vscode-activityBar-foreground, #fff);
-    border-radius: 4px;
-    font-style: italic;
-    font-size: 12px;
-    padding: 8px 12px;
-    margin: 4px 0;
-    text-align: center;
-    max-width: 90%;
-    align-self: center;
-    opacity: 0.9;
-}
-
-/* Messages container */
+/* ===== CHAT AREA ===== */
 .dev-sphere-messages {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    padding: 20px;
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    /* Ensure there's space for the input at the bottom */
-    padding-bottom: 30px; /* Extra padding at the bottom for better UX */
+    background-color: var(--vscode-editor-background);
+    padding: 0;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
 }
 
-/* Text content (individual messages) */
+/* Message groups */
+.dev-sphere-message-group {
+    position: relative;
+    margin: 0;
+    width: 100%;
+}
+
+.dev-sphere-message-group-user {
+    background-color: var(--vscode-editor-background);
+}
+
+.dev-sphere-message-group-assistant {
+    background-color: var(--vscode-editorWidget-background, rgba(30, 30, 30, 0.4));
+}
+
+.dev-sphere-message-group-system {
+    background-color: var(--vscode-editor-background);
+    border-top: 1px dashed var(--vscode-editorWidget-border, rgba(255, 255, 255, 0.1));
+    border-bottom: 1px dashed var(--vscode-editorWidget-border, rgba(255, 255, 255, 0.1));
+}
+
+/* Text content */
 .dev-sphere-text {
     line-height: 1.6;
-    padding: 16px;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding: 16px 24px;
     font-size: 14px;
-    animation: fade-in 0.3s ease;
     word-wrap: break-word;
     max-width: 100%;
     white-space: pre-wrap;
+    border-left: none;
 }
 
-/* User message styling */
+/* Avatar elements */
+.dev-sphere-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--vscode-editor-background);
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.dev-sphere-avatar-user {
+    background-color: var(--vscode-activityBarBadge-background);
+}
+
+.dev-sphere-avatar-assistant {
+    background-color: var(--vscode-statusBarItem-remoteBackground, var(--vscode-button-background));
+}
+
+.dev-sphere-avatar-system {
+    background-color: var(--vscode-statusBarItem-warningBackground);
+    font-size: 12px;
+}
+
+/* Message headers */
+.dev-sphere-message-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 12px 24px 0 24px;
+}
+
+.dev-sphere-role-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.dev-sphere-role-name {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+
+.dev-sphere-role-subtitle {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.dev-sphere-text-user .dev-sphere-role-name {
+    color: var(--vscode-statusBar-debuggingForeground, var(--vscode-editor-foreground));
+}
+
+.dev-sphere-text-assistant .dev-sphere-role-name {
+    color: var(--vscode-statusBarItem-remoteForeground, var(--vscode-button-foreground));
+}
+
+.dev-sphere-text-system .dev-sphere-role-name {
+    color: var(--vscode-statusBarItem-warningForeground);
+}
+
+/* Message content areas */
+.dev-sphere-message-content {
+    position: relative;
+}
+
+/* Message types */
 .dev-sphere-text-user {
-    background-color: var(--vscode-tab-activeBackground, var(--vscode-editor-background));
+    background-color: rgba(127, 127, 127, 0.03);
     color: var(--vscode-editor-foreground);
-    border-top-right-radius: 2px;
-    align-self: flex-end;
-    max-width: 80%;
-    margin-left: 20%;
-    position: relative;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--vscode-dropdown-border);
-    border-right: 3px solid var(--vscode-activityBarBadge-background);
 }
 
-.dev-sphere-text-user::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: -8px;
-    width: 0;
-    height: 0;
-    border-top: 8px solid var(--vscode-dropdown-border);
-    border-right: 8px solid transparent;
-}
-
-/* Assistant message styling */
 .dev-sphere-text-assistant {
-    background-color: var(--vscode-editor-background);
+    background-color: rgba(127, 127, 127, 0.1);
     color: var(--vscode-editor-foreground);
-    border-top-left-radius: 2px;
-    align-self: flex-start;
-    max-width: 90%;
-    margin-right: 10%;
-    position: relative;
-    border-left: 3px solid var(--vscode-activityBarBadge-background);
-    border: 1px solid var(--vscode-dropdown-border);
-    opacity: 0.95;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.dev-sphere-text-assistant::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -8px;
-    width: 0;
-    height: 0;
-    border-top: 8px solid var(--vscode-dropdown-border);
-    border-left: 8px solid transparent;
+.dev-sphere-text-system {
+    color: var(--vscode-editorInfo-foreground);
+    font-style: italic;
+    font-size: 13px;
+    padding: 12px 24px;
+    opacity: 0.85;
 }
 
-/* Loading message styling */
+/* Loading indicator */
 .dev-sphere-text-loading {
-    background-color: var(--vscode-editor-background);
+    background-color: transparent;
     color: var(--vscode-descriptionForeground);
     font-style: italic;
     text-align: center;
-    max-width: 60%;
-    align-self: center;
-    padding: 8px 16px;
-    border-radius: 12px;
-    animation: pulse 1.5s infinite ease-in-out;
+    padding: 16px;
+    max-width: auto;
+    margin: 20px auto;
+    position: relative;
 }
 
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
+/* Static loading dots without animation */
+.loading-dots {
+    display: inline-flex;
+    align-items: center;
+    height: 20px;
+    margin-left: 8px;
 }
 
-/* Code blocks in assistant messages - make softer */
-.dev-sphere-text-assistant pre {
-    background-color: var(--vscode-notebook-cellEditorBackground, var(--vscode-editor-background));
-    border: 1px solid var(--vscode-notebook-cellBorderColor, var(--vscode-dropdown-border));
-    box-shadow: none;
+.loading-dots span {
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--vscode-foreground);
+    margin: 0 2px;
+    opacity: 0.7; /* Static opacity instead of animation */
 }
 
-/* Inline code in assistant messages */
-.dev-sphere-text-assistant code {
-    background-color: var(--vscode-notebook-cellEditorBackground, var(--vscode-editor-background));
-    color: var(--vscode-editor-foreground);
-    opacity: 0.9;
+.loading-dots span:nth-child(2) {
+    opacity: 0.5; /* Different static opacity for visual interest */
 }
 
-/* Input section - fixed at the bottom */
+.loading-dots span:nth-child(3) {
+    opacity: 0.3; /* Different static opacity for visual interest */
+}
+
+/* ===== CODE FORMATTING ===== */
+.dev-sphere-text pre {
+    background-color: var(--vscode-editor-inactiveSelectionBackground, var(--vscode-editor-background));
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+    overflow-x: auto;
+    font-family: var(--monaco-monospace-font);
+    font-size: 13px;
+    border: 1px solid var(--vscode-editorWidget-border, var(--vscode-editor-lineHighlightBorder));
+    position: relative;
+}
+
+.dev-sphere-text pre::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, var(--vscode-activityBarBadge-background), transparent);
+    border-radius: 8px 8px 0 0;
+}
+
+.dev-sphere-text code {
+    font-family: var(--monaco-monospace-font);
+    background-color: var(--vscode-textCodeBlock-background, rgba(127, 127, 127, 0.15));
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* ===== INPUT AREA ===== */
 .dev-sphere-section {
     display: flex;
-    gap: 10px;
-    padding: 12px 20px;
-    background-color: var(--vscode-editorWidget-background);
-    border-top: 1px solid var(--vscode-input-border);
+    gap: 12px;
+    padding: 16px 24px 24px 24px;
+    background-color: var(--vscode-editor-background);
+    border-top: 1px solid var(--vscode-editorWidget-border);
     position: sticky;
     bottom: 0;
-    left: 0;
-    right: 0;
     z-index: 10;
-    min-height: 56px;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-    margin-top: auto; /* Push to bottom if not enough content */
+}
+
+.dev-sphere-input-container {
+    display: flex;
+    flex-grow: 1;
+    position: relative;
+    border-radius: 10px;
+    background-color: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dev-sphere-input-container:focus-within {
+    border-color: var(--vscode-focusBorder);
+    box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
 }
 
 .dev-sphere-section input {
     flex: 1;
-    padding: 8px 12px;
-    background-color: var(--vscode-input-background);
+    padding: 12px 16px;
+    background-color: transparent;
     color: var(--vscode-input-foreground);
-    border: 1px solid var(--vscode-input-border);
-    border-radius: 4px;
-    font-size: 13px;
-    height: 32px;
+    border: none;
+    font-size: 14px;
+    min-height: 42px;
 }
 
 .dev-sphere-section input:focus {
-    border-color: var(--vscode-focusBorder);
     outline: none;
 }
 
 .dev-sphere-section input::placeholder {
     color: var(--vscode-input-placeholderForeground);
-    opacity: 0.8;
+    opacity: 0.7;
 }
 
+/* Button styles without transitions or animations */
 .dev-sphere-section button {
     background-color: var(--vscode-button-background);
     color: var(--vscode-button-foreground);
     border: none;
-    padding: 6px 14px;
-    border-radius: 4px;
-    font-size: 13px;
-    cursor: pointer;
-    height: 32px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 14px;
     font-weight: 500;
+    cursor: pointer;
     min-width: 80px;
-    transition: background-color 0.2s;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .dev-sphere-section button:hover {
     background-color: var(--vscode-button-hoverBackground);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
 }
 
 .dev-sphere-section button:active {
-    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Enhanced code blocks styling */
-.dev-sphere-text pre {
-    background-color: var(--vscode-textCodeBlock-background);
-    border-radius: 4px;
-    padding: 12px;
-    margin: 8px 0;
-    overflow-x: auto;
-    font-family: var(--monaco-monospace-font);
-    font-size: 12px;
-    border: 1px solid var(--vscode-notebook-cellBorderColor, var(--vscode-dropdown-border));
+.dev-sphere-section button svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
 }
 
-/* Code block scrollbars */
-.dev-sphere-text pre::-webkit-scrollbar {
-    height: 6px;
-    width: 6px;
-}
-
-.dev-sphere-text pre::-webkit-scrollbar-track {
-    background: var(--vscode-scrollbarSlider-background, rgba(100, 100, 100, 0.2));
-    border-radius: 3px;
-}
-
-.dev-sphere-text pre::-webkit-scrollbar-thumb {
-    background-color: var(--vscode-scrollbarSlider-hoverBackground, rgba(100, 100, 100, 0.5));
-    border-radius: 3px;
-}
-
-.dev-sphere-text pre::-webkit-scrollbar-thumb:hover {
-    background-color: var(--vscode-scrollbarSlider-activeBackground, rgba(100, 100, 100, 0.7));
-}
-
-/* Inline code styling */
-.dev-sphere-text code {
-    font-family: var(--monaco-monospace-font);
-    background-color: var(--vscode-textCodeBlock-background);
-    padding: 2px 4px;
-    border-radius: 3px;
-    font-size: 0.9em;
-}
-
-/* Code in user messages */
-.dev-sphere-text-user code,
-.dev-sphere-text-user pre {
-    background-color: var(--vscode-notebook-cellEditorBackground, var(--vscode-editor-background));
-    border-color: var(--vscode-notebook-cellBorderColor, var(--vscode-dropdown-border));
-    color: var(--vscode-editor-foreground);
-}
-
-/* Enhance user message hover */
-.dev-sphere-text-user:hover {
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
-    transition: all 0.2s ease;
-}
-
-/* Bold text */
-.dev-sphere-text strong {
-    font-weight: 600;
-}
-
-/* Animation */
-@keyframes fade-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Empty state when no messages */
+/* Empty state message */
 .dev-sphere-messages:empty::after {
-    content: "No messages yet. Type something below to get started.";
-    display: block;
+    content: "Start a conversation with DevSphere";
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
     text-align: center;
-    padding: 30px;
+    padding: 40px;
     color: var(--vscode-descriptionForeground);
     font-style: italic;
+    font-size: 14px;
+    opacity: 0.7;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="rgba(150,150,150,0.2)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>');
+    background-position: center 30%;
+    background-repeat: no-repeat;
 }
 
 /* Scrollbar styling */
 .dev-sphere-messages::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
 }
 
 .dev-sphere-messages::-webkit-scrollbar-track {
@@ -328,15 +378,19 @@
 
 .dev-sphere-messages::-webkit-scrollbar-thumb {
     background-color: var(--vscode-scrollbarSlider-background);
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 .dev-sphere-messages::-webkit-scrollbar-thumb:hover {
     background-color: var(--vscode-scrollbarSlider-hoverBackground);
 }
 
-/* Add subtle hover effect to assistant messages too */
-.dev-sphere-text-assistant:hover {
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-    transition: all 0.2s ease;
+/* Add hover effects to input elements */
+.dev-sphere-input-container input:focus {
+    box-shadow: 0 0 0 2px var(--vscode-focusBorder);
+}
+
+/* Remove transition comment */
+.dev-sphere-section button {
+    /* No transition property */
 }

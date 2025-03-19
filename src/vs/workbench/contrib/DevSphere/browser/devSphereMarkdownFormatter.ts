@@ -3,10 +3,16 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// Since we're not actually using the trusted types policy in this class,
+// let's remove it to avoid the linter warning
+// import { createTrustedTypesPolicy } from '../../../../base/browser/trustedTypes.js';
+
 /**
  * Utility class for formatting markdown content into DOM elements
  */
 export class MarkdownFormatter {
+	// Remove the unused policy definition
+
 	/**
 	 * Converts a markdown-like text string into DOM nodes
 	 * @param text The markdown text to format
@@ -24,14 +30,30 @@ export class MarkdownFormatter {
 	 * @param text The markdown text to format
 	 */
 	public static appendFormattedContent(container: HTMLElement, text: string): void {
+		// Handle null/empty text
+		if (!text) {
+			return;
+		}
+
+		// Sanitize input text to prevent XSS
+		// This escapes HTML characters so they're rendered as text, not HTML
+		const sanitizedText = text
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
+
 		// Split by code blocks first
-		const parts = text.split(/```([^`]+)```/);
+		const parts = sanitizedText.split(/```([^`]+)```/);
 
 		for (let i = 0; i < parts.length; i++) {
 			if (i % 2 === 1) {
 				// This is a code block
 				const pre = document.createElement('pre');
-				pre.textContent = parts[i];
+				const code = document.createElement('code');
+				code.textContent = parts[i].trim();
+				pre.appendChild(code);
 				container.appendChild(pre);
 			} else if (parts[i]) {
 				// Process the non-code block content
