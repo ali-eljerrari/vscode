@@ -70,6 +70,7 @@ export class DevSphereView extends ViewPane {
 		this._register(this.viewModel.onChatsChanged(() => {
 			this.tabsComponent?.updateChatTabs();
 			this.chatSelectorComponent?.updateChatSelectorList();
+			this.updateChatCount();
 		}));
 
 		this._register(this.viewModel.onCurrentChatChanged(() => {
@@ -188,5 +189,12 @@ export class DevSphereView extends ViewPane {
 		if (model) {
 			this.viewModel.addSystemMessage(`Model changed to **${model.name}** (${model.description})`);
 		}
+	}
+
+	/**
+	 * Updates the chat count in the header
+	 */
+	private updateChatCount(): void {
+		this.headerComponent?.updateChatCount();
 	}
 }
