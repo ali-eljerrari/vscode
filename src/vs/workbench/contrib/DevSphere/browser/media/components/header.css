@@ -191,6 +191,7 @@
     transition: all var(--dev-sphere-transition-base);
     position: relative;
     overflow: hidden;
+    min-width: 32px;
 }
 
 .dev-sphere-action-button::before {
@@ -223,13 +224,20 @@
 }
 
 .dev-sphere-action-button svg {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
     transition: transform var(--dev-sphere-transition-base);
+    color: var(--vscode-button-secondaryForeground);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .dev-sphere-action-button:hover svg {
     transform: scale(1.1);
+    color: var(--vscode-button-secondaryForeground);
 }
 
 .dev-sphere-browse-chats-button {
@@ -320,4 +328,53 @@
     .dev-sphere-action-button span {
         display: none;
     }
+}
+
+.dev-sphere-chat-actions-button {
+    min-width: 80px;
+    width: auto;
+    padding: var(--dev-sphere-spacing-xs) var(--dev-sphere-spacing-sm);
+    font-size: var(--dev-sphere-font-size-sm);
+    font-weight: 500;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--vscode-dropdown-background);
+    color: var(--vscode-dropdown-foreground);
+    border: 1px solid var(--vscode-dropdown-border);
+}
+
+.dev-sphere-chat-actions-button:hover {
+    border-color: var(--dev-sphere-accent);
+    background-color: var(--vscode-dropdown-hoverBackground, var(--vscode-list-hoverBackground));
+}
+
+/* Remove the SVG specific styling for chat actions button */
+.dev-sphere-chat-actions-button svg {
+    display: none;
+}
+
+/* Responsive styling for chat actions button */
+@media (max-width: var(--dev-sphere-breakpoint-sm)) {
+    .dev-sphere-chat-actions-button {
+        min-width: 60px;
+        font-size: 10px;
+    }
+}
+
+.dev-sphere-dropdown-caret {
+    margin-left: 4px;
+    font-size: 10px;
+    opacity: 0.7;
+    transition: transform var(--dev-sphere-transition-base);
+}
+
+.dev-sphere-chat-actions-button:hover .dev-sphere-dropdown-caret {
+    opacity: 1;
+    transform: translateY(1px);
+}
+
+.dev-sphere-chat-actions-button:active .dev-sphere-dropdown-caret {
+    transform: translateY(0);
 }

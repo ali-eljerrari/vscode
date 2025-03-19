@@ -5,20 +5,37 @@
 
 /* ===== DROPDOWN MENUS ===== */
 .dev-sphere-chat-actions-dropdown {
-    position: fixed;
+    position: absolute;
+    top: 100%;
+    right: 0;
     z-index: var(--dev-sphere-z-dropdown);
-    background-color: var(--vscode-menu-background, var(--vscode-editor-background));
-    border: 1px solid var(--vscode-widget-border);
-    border-radius: var(--dev-sphere-radius-lg);
-    box-shadow: var(--dev-sphere-shadow-lg);
+    background-color: var(--vscode-dropdown-background);
+    border: 1px solid var(--vscode-dropdown-border);
+    border-radius: 0 0 var(--dev-sphere-radius-md) var(--dev-sphere-radius-md);
+    box-shadow: var(--dev-sphere-shadow-md);
     width: 220px;
     padding: var(--dev-sphere-spacing-xs) 0;
     font-size: var(--dev-sphere-font-size-sm);
-    overflow: hidden;
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
     animation: slideUp var(--dev-sphere-transition-base) forwards;
     transform-origin: top center;
-    color: var(--vscode-menu-foreground, var(--vscode-editor-foreground));
-    backdrop-filter: blur(8px);
+    color: var(--vscode-dropdown-foreground);
+}
+
+.dev-sphere-chat-actions-dropdown::-webkit-scrollbar {
+    width: var(--dev-sphere-scrollbar-width);
+}
+
+.dev-sphere-chat-actions-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dev-sphere-chat-actions-dropdown::-webkit-scrollbar-thumb {
+    background-color: var(--vscode-scrollbarSlider-background);
+    border-radius: var(--dev-sphere-scrollbar-thumb-radius);
 }
 
 .dev-sphere-dropdown-item {
@@ -26,10 +43,40 @@
     align-items: center;
     padding: var(--dev-sphere-spacing-sm) var(--dev-sphere-spacing-md);
     cursor: pointer;
-    color: var(--vscode-menu-foreground, var(--vscode-editor-foreground));
-    transition: all var(--dev-sphere-transition-base);
+    transition: background-color var(--dev-sphere-transition-base);
     position: relative;
-    overflow: hidden;
+}
+
+.dev-sphere-dropdown-item:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.dev-sphere-dropdown-item:active {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+}
+
+.dev-sphere-dropdown-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: var(--dev-sphere-spacing-sm);
+    color: var(--vscode-descriptionForeground);
+    opacity: 0.8;
+    transition: opacity var(--dev-sphere-transition-base);
+    font-size: var(--dev-sphere-font-size-lg);
+    line-height: 1;
+}
+
+.dev-sphere-dropdown-item-icon svg {
+    display: none;
+}
+
+.dev-sphere-dropdown-item:hover .dev-sphere-dropdown-item-icon {
+    opacity: 1;
+    color: var(--vscode-list-activeSelectionForeground);
 }
 
 .dev-sphere-dropdown-item::before {
@@ -45,36 +92,9 @@
     transition: width var(--dev-sphere-transition-base), opacity var(--dev-sphere-transition-base);
 }
 
-.dev-sphere-dropdown-item:hover {
-    background-color: var(--vscode-menu-selectionBackground, var(--vscode-list-hoverBackground));
-    color: var(--vscode-menu-selectionForeground, var(--vscode-list-activeSelectionForeground));
-}
-
 .dev-sphere-dropdown-item:hover::before {
     width: 4px;
     opacity: 1;
-}
-
-.dev-sphere-dropdown-item:active {
-    background-color: var(--vscode-menu-selectionBackground, var(--vscode-list-activeSelectionBackground));
-    transform: scale(0.98);
-}
-
-.dev-sphere-dropdown-item-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 16px;
-    height: 16px;
-    margin-right: var(--dev-sphere-spacing-sm);
-    color: var(--vscode-menu-foreground, var(--vscode-editor-foreground));
-    flex-shrink: 0;
-    transition: transform var(--dev-sphere-transition-base);
-}
-
-.dev-sphere-dropdown-item:hover .dev-sphere-dropdown-item-icon {
-    color: var(--vscode-menu-selectionForeground, var(--vscode-list-activeSelectionForeground));
-    transform: scale(1.1);
 }
 
 .dev-sphere-dropdown-item-label {
