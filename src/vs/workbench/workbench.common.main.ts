@@ -147,6 +147,8 @@ import { ExtensionStorageService, IExtensionStorageService } from '../platform/e
 import { IUserDataSyncLogService } from '../platform/userDataSync/common/userDataSync.js';
 import { UserDataSyncLogService } from '../platform/userDataSync/common/userDataSyncLog.js';
 
+import './contrib/myPanel/browser/myPanel.contribution.js';
+
 registerSingleton(IUserDataSyncLogService, UserDataSyncLogService, InstantiationType.Delayed);
 registerSingleton(IAllowedExtensionsService, AllowedExtensionsService, InstantiationType.Delayed);
 registerSingleton(IIgnoredExtensionsManagementService, IgnoredExtensionsManagementService, InstantiationType.Delayed);
