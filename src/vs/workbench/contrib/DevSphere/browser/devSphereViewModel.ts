@@ -45,7 +45,31 @@ export class DevSphereViewModel extends Disposable {
 		if (this._isLoading !== value) {
 			this._isLoading = value;
 			this._onLoadingStateChanged.fire(value);
+
+			// When loading is complete, emit an event to trigger focus
+			if (value === false) {
+				setTimeout(() => {
+					// Give UI time to update before triggering a focus event
+					this._onMessagesChanged.fire(this.messages);
+				}, 50);
+			}
 		}
+	}
+
+	/**
+	 * Adds a system message to the chat
+	 * @param content The content of the system message
+	 */
+	public addSystemMessage(content: string): void {
+		const systemMessage: Message = {
+			id: `system-${Date.now()}`,
+			role: 'system',
+			content: content,
+			timestamp: Date.now()
+		};
+
+		this.messages.push(systemMessage);
+		this._onMessagesChanged.fire(this.messages);
 	}
 
 	public async sendMessage(content: string): Promise<void> {

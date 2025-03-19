@@ -11,9 +11,15 @@ import { IViewsService } from '../../../services/views/common/viewsService.js';
 import { IViewDescriptorService } from '../../../common/views.js';
 import { DevSphereView } from './devSphereView.js';
 import { IDevSphereService } from './devSphereService.js';
+import { IQuickInputService, IQuickPickItem } from '../../../../platform/quickinput/common/quickInput.js';
 
 // Constants
 export const DEV_SPHERE_CONTAINER_ID = 'devSphere';
+
+// Define an extended QuickPickItem interface that includes the model ID
+interface ModelQuickPickItem extends IQuickPickItem {
+	id: string;
+}
 
 /**
  * Registers all DevSphere-related commands and actions
@@ -41,6 +47,53 @@ export function registerDevSphereActions(): void {
 
 				// Then focus the specific view
 				viewsService.openView(viewDescriptor.id, true);
+			}
+		}
+	});
+
+	// Register a command to change the model
+	registerAction2(class extends Action2 {
+		constructor() {
+			super({
+				id: 'workbench.action.changeDevSphereModel',
+				title: { value: localize('changeDevSphereModel', "Change DevSphere AI Model"), original: 'Change DevSphere AI Model' },
+				category: Categories.View,
+				f1: true
+			});
+		}
+
+		async run(accessor: ServicesAccessor): Promise<void> {
+			const devSphereService = accessor.get(IDevSphereService);
+			const quickInputService = accessor.get(IQuickInputService);
+			const viewsService = accessor.get(IViewsService);
+
+			const availableModels = devSphereService.getAvailableModels();
+			const currentModel = devSphereService.getCurrentModel();
+
+			// Create quick pick items from models with explicit id property
+			const items: ModelQuickPickItem[] = availableModels.map(model => ({
+				label: model.name,
+				description: model.description,
+				detail: model.id === currentModel.id ? 'Currently Selected' : undefined,
+				id: model.id
+			}));
+
+			// Show quick pick UI
+			const selection = await quickInputService.pick<ModelQuickPickItem>(items, {
+				placeHolder: 'Select OpenAI Model',
+				title: 'Change AI Model',
+				activeItem: items.find(item => item.id === currentModel.id)
+			});
+
+			if (selection && selection.id) {
+				// Set the model
+				devSphereService.setCurrentModel(selection.id);
+
+				// Notify in the view
+				const view = viewsService.getActiveViewWithId('devSphereView') as DevSphereView | undefined;
+				if (view) {
+					view.addModelChangeMessage(selection.id);
+				}
 			}
 		}
 	});

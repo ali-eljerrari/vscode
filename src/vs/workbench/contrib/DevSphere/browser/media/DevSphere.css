@@ -10,6 +10,66 @@
     position: relative; /* For proper positioning of sticky elements */
 }
 
+/* Model Selector styles */
+.dev-sphere-model-selector {
+    display: flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: var(--vscode-editorWidget-background);
+    border-bottom: 1px solid var(--vscode-input-border);
+    z-index: 5;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.dev-sphere-model-selector label {
+    font-weight: 500;
+    color: var(--vscode-foreground);
+    white-space: nowrap;
+}
+
+.dev-sphere-model-select {
+    background-color: var(--vscode-dropdown-background);
+    color: var(--vscode-dropdown-foreground);
+    border: 1px solid var(--vscode-dropdown-border);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    flex: 1;
+    height: 28px;
+    outline: none;
+    cursor: pointer;
+}
+
+.dev-sphere-model-select:hover {
+    border-color: var(--vscode-focusBorder);
+}
+
+.dev-sphere-model-select:focus {
+    border-color: var(--vscode-focusBorder);
+    outline: none;
+}
+
+.dev-sphere-model-select option {
+    background-color: var(--vscode-dropdown-listBackground);
+    color: var(--vscode-dropdown-foreground);
+}
+
+/* System message styles */
+.dev-sphere-text-system {
+    background-color: var(--vscode-activityBar-background, #333);
+    color: var(--vscode-activityBar-foreground, #fff);
+    border-radius: 4px;
+    font-style: italic;
+    font-size: 12px;
+    padding: 8px 12px;
+    margin: 4px 0;
+    text-align: center;
+    max-width: 90%;
+    align-self: center;
+    opacity: 0.9;
+}
+
 /* Messages container */
 .dev-sphere-messages {
     display: flex;
@@ -85,6 +145,25 @@
     height: 0;
     border-top: 8px solid var(--vscode-dropdown-border);
     border-left: 8px solid transparent;
+}
+
+/* Loading message styling */
+.dev-sphere-text-loading {
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-descriptionForeground);
+    font-style: italic;
+    text-align: center;
+    max-width: 60%;
+    align-self: center;
+    padding: 8px 16px;
+    border-radius: 12px;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }
 
 /* Code blocks in assistant messages - make softer */

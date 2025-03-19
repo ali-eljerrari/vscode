@@ -7,11 +7,41 @@ import { ISecretStorageService } from '../../../../platform/secrets/common/secre
 import { IQuickInputService } from '../../../../platform/quickinput/common/quickInput.js';
 import { INotificationService } from '../../../../platform/notification/common/notification.js';
 import { createDecorator } from '../../../../platform/instantiation/common/instantiation.js';
+import { IStorageService, StorageScope, StorageTarget } from '../../../../platform/storage/common/storage.js';
+
+// Define available OpenAI models
+export interface OpenAIModel {
+	id: string;
+	name: string;
+	description: string;
+}
+
+export const OPENAI_MODELS: OpenAIModel[] = [
+	// Low cost models
+	{ id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: '$ - Cheapest option for basic tasks' },
+	{ id: 'gpt-4o-mini', name: 'GPT-4o mini', description: '$$ - Affordable small model with good capabilities' },
+	{ id: 'o1-mini', name: 'o1-mini', description: '$$ - Affordable reasoning model' },
+
+	// Mid-range models
+	{ id: 'o3-mini', name: 'o3-mini', description: '$$$ - Mid-range reasoning model' },
+	{ id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: '$$$ - Mid-range versatile model' },
+	{ id: 'gpt-4o', name: 'GPT-4o', description: '$$$ - High-quality versatile model' },
+
+	// Premium models
+	{ id: 'gpt-4', name: 'GPT-4', description: '$$$$ - Premium model for complex tasks' },
+	{ id: 'o1', name: 'o1', description: '$$$$ - Premium reasoning model' },
+	{ id: 'gpt-4.5-preview', name: 'GPT-4.5 Preview', description: '$$$$$ - Most expensive, most capable GPT model' }
+];
 
 export interface IDevSphereService {
 	getOpenAIAPIKey(): Promise<string | undefined>;
 	updateAPIKey(): Promise<void>;
 	fetchAIResponse(prompt: string): Promise<string>;
+
+	// New methods for model management
+	getAvailableModels(): OpenAIModel[];
+	getCurrentModel(): OpenAIModel;
+	setCurrentModel(modelId: string): void;
 }
 
 export const IDevSphereService = createDecorator<IDevSphereService>('devSphereService');
@@ -19,14 +49,49 @@ export const IDevSphereService = createDecorator<IDevSphereService>('devSphereSe
 export class DevSphereService implements IDevSphereService {
 	private readonly OPENAI_API_KEY_SECRET_KEY = 'openai.api.key';
 	private readonly API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
-	private readonly MODEL = 'gpt-4o-mini';
+	private readonly MODEL_STORAGE_KEY = 'openai.model.id';
 	private readonly MAX_TOKENS = 500;
+
+	// Current model, default to gpt-4o-mini
+	private currentModel: OpenAIModel = OPENAI_MODELS[1];
 
 	constructor(
 		@ISecretStorageService private readonly secretStorageService: ISecretStorageService,
 		@IQuickInputService private readonly quickInputService: IQuickInputService,
-		@INotificationService private readonly notificationService: INotificationService
-	) { }
+		@INotificationService private readonly notificationService: INotificationService,
+		@IStorageService private readonly storageService: IStorageService
+	) {
+		// Initialize by loading saved model preference
+		this.loadSavedModel();
+	}
+
+	private loadSavedModel(): void {
+		// Try to get the saved model ID from storage service
+		const savedModelId = this.storageService.get(this.MODEL_STORAGE_KEY, StorageScope.PROFILE);
+		if (savedModelId) {
+			const matchedModel = OPENAI_MODELS.find(model => model.id === savedModelId);
+			if (matchedModel) {
+				this.currentModel = matchedModel;
+			}
+		}
+	}
+
+	public getAvailableModels(): OpenAIModel[] {
+		return OPENAI_MODELS;
+	}
+
+	public getCurrentModel(): OpenAIModel {
+		return this.currentModel;
+	}
+
+	public setCurrentModel(modelId: string): void {
+		const model = OPENAI_MODELS.find(m => m.id === modelId);
+		if (model) {
+			this.currentModel = model;
+			// Save preference to storage service
+			this.storageService.store(this.MODEL_STORAGE_KEY, modelId, StorageScope.PROFILE, StorageTarget.USER);
+		}
+	}
 
 	public async getOpenAIAPIKey(): Promise<string | undefined> {
 		// Try to get the key from secret storage
@@ -85,7 +150,7 @@ export class DevSphereService implements IDevSphereService {
 					'Authorization': `Bearer ${apiKey}`
 				},
 				body: JSON.stringify({
-					model: this.MODEL,
+					model: this.currentModel.id,
 					messages: [
 						{
 							role: 'user',

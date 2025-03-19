@@ -24,6 +24,7 @@ export class DevSphereView extends ViewPane {
 	private container: HTMLElement | undefined;
 	private messagesContainer: HTMLElement | undefined;
 	private inputElement: HTMLInputElement | undefined;
+	private modelSelector: HTMLSelectElement | undefined;
 	private viewModel: DevSphereViewModel;
 
 	constructor(
@@ -54,6 +55,11 @@ export class DevSphereView extends ViewPane {
 			if (button) {
 				button.disabled = isLoading;
 			}
+
+			// Also disable model selector during loading
+			if (this.modelSelector) {
+				this.modelSelector.disabled = isLoading;
+			}
 		}));
 	}
 
@@ -69,11 +75,79 @@ export class DevSphereView extends ViewPane {
 		this.messagesContainer.classList.add('dev-sphere-messages');
 		container.appendChild(this.messagesContainer);
 
+		// Create the model selector at the top
+		this.createModelSelector(container);
+
 		// Create the input section at the bottom
 		this.createInputSection(container);
 
 		// Set focus after a short delay to ensure the DOM is ready
 		setTimeout(() => this.focusInput(), 100);
+	}
+
+	/**
+	 * Creates the model selector dropdown UI
+	 */
+	private createModelSelector(container: HTMLElement): void {
+		const modelSelectorContainer = document.createElement('div');
+		modelSelectorContainer.classList.add('dev-sphere-model-selector');
+
+		// Create the label
+		const label = document.createElement('label');
+		label.textContent = 'Model:';
+		label.htmlFor = 'dev-sphere-model-select';
+		modelSelectorContainer.appendChild(label);
+
+		// Create the dropdown
+		const modelSelect = document.createElement('select');
+		modelSelect.id = 'dev-sphere-model-select';
+		modelSelect.classList.add('dev-sphere-model-select');
+
+		// Store reference for later use
+		this.modelSelector = modelSelect;
+
+		// Populate options
+		const availableModels = this.devSphereService.getAvailableModels();
+		const currentModel = this.devSphereService.getCurrentModel();
+
+		availableModels.forEach(model => {
+			const option = document.createElement('option');
+			option.value = model.id;
+			option.textContent = model.name;
+			option.title = model.description; // Add tooltip
+
+			// Set selected if this is the current model
+			if (model.id === currentModel.id) {
+				option.selected = true;
+			}
+
+			if (this.modelSelector) {
+				this.modelSelector.appendChild(option);
+			}
+		});
+
+		// Add change event handler
+		modelSelect.addEventListener('change', () => {
+			const selectedModelId = modelSelect.value;
+			if (selectedModelId) {
+				this.devSphereService.setCurrentModel(selectedModelId);
+				// Add a system message to indicate the model change
+				this.addModelChangeMessage(selectedModelId);
+			}
+		});
+
+		modelSelectorContainer.appendChild(modelSelect);
+		container.appendChild(modelSelectorContainer);
+	}
+
+	/**
+	 * Adds a system message indicating the model has been changed
+	 */
+	private addModelChangeMessage(modelId: string): void {
+		const model = this.devSphereService.getAvailableModels().find(m => m.id === modelId);
+		if (model) {
+			this.viewModel.addSystemMessage(`Model changed to **${model.name}** (${model.description})`);
+		}
 	}
 
 	private createInputSection(container: HTMLElement): void {
@@ -99,7 +173,8 @@ export class DevSphereView extends ViewPane {
 			if (text) {
 				this.viewModel.sendMessage(text);
 				input.value = '';
-				input.focus();
+				// Ensure input regains focus after sending a message
+				setTimeout(() => input.focus(), 50);
 			}
 		});
 
@@ -110,6 +185,8 @@ export class DevSphereView extends ViewPane {
 				if (text) {
 					this.viewModel.sendMessage(text);
 					input.value = '';
+					// Ensure input regains focus after sending a message
+					setTimeout(() => input.focus(), 50);
 				}
 			}
 		});
@@ -134,6 +211,11 @@ export class DevSphereView extends ViewPane {
 
 		// Scroll to bottom
 		this.scrollToBottom();
+
+		// Ensure input field gets focus after messages are rendered
+		if (!this.viewModel.isLoading) {
+			setTimeout(() => this.focusInput(), 100);
+		}
 	}
 
 	private renderMessage(message: Message): void {
@@ -160,7 +242,16 @@ export class DevSphereView extends ViewPane {
 
 		const roleLabel = document.createElement('span');
 		roleLabel.classList.add(`dev-sphere-${message.role}-label`);
-		roleLabel.textContent = message.role === 'user' ? 'You' : 'Assistant';
+
+		// Set role label text based on message role
+		if (message.role === 'user') {
+			roleLabel.textContent = 'You';
+		} else if (message.role === 'system') {
+			roleLabel.textContent = 'System';
+		} else {
+			roleLabel.textContent = 'Assistant';
+		}
+
 		headerDiv.appendChild(roleLabel);
 
 		messageElement.appendChild(headerDiv);
