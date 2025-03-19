@@ -208,7 +208,7 @@ export class DevSphereHistory extends Disposable {
 		metaElement.classList.add('dev-sphere-history-meta');
 
 		const count = chat.messages.length;
-		const model = chat.modelId.split('-')[0].toUpperCase(); // Simplified model display
+		const model = chat.modelId ? chat.modelId.split('-')[0].toUpperCase() : 'AI'; // Simplified model display
 
 		// Format time
 		const date = new Date(chat.lastModified);
@@ -248,7 +248,7 @@ export class DevSphereHistory extends Disposable {
 			// Only handle clicks on the item itself or title, not buttons
 			if (e.target === historyItem || e.target === titleElement ||
 				(historyItem.contains(target) && !actionButtons.contains(target))) {
-				this.viewModel.switchToChat(chat.id);
+				this.viewModel.loadChat(chat.id);
 				this.updateSelectedItemStyle(chat.id);
 				this.onChatSelected();
 			}
@@ -257,7 +257,7 @@ export class DevSphereHistory extends Disposable {
 		// Open chat
 		openButton.addEventListener('click', (e) => {
 			e.stopPropagation();
-			this.viewModel.switchToChat(chat.id);
+			this.viewModel.loadChat(chat.id);
 			this.updateSelectedItemStyle(chat.id);
 			this.onChatSelected();
 		});

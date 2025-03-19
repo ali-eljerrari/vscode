@@ -180,7 +180,13 @@ export class DevSphereMessages extends Disposable {
 					roleLabel = 'AI Assistant';
 					break;
 				case 'system':
-					roleLabel = 'System';
+					// Check if it's an error message
+					if (message.content.startsWith('**Error')) {
+						roleLabel = 'Error';
+						messageElement.classList.add('dev-sphere-message-error');
+					} else {
+						roleLabel = 'System';
+					}
 					break;
 				default:
 					roleLabel = message.role.charAt(0).toUpperCase() + message.role.slice(1);
@@ -198,11 +204,25 @@ export class DevSphereMessages extends Disposable {
 		const content = document.createElement('div');
 		content.className = 'dev-sphere-message-content';
 
+		// Add retry button for error messages
+		if (message.role === 'system' && message.content.startsWith('**Error')) {
+			// Create a try again button for error messages
+			const retryButton = document.createElement('button');
+			retryButton.className = 'dev-sphere-retry-button';
+			DOM.safeInnerHtml(retryButton, '<span>Retry</span>');
+			retryButton.addEventListener('click', () => {
+				// Call the retry method on the view model
+				this.viewModel.retryLastMessage();
+			});
+
+			content.appendChild(retryButton);
+		}
+
 		// Use renderMarkdown to get the content
 		const htmlContent = `
 			<div class="dev-sphere-message-content-container">
 				<div class="dev-sphere-message-role">
-					${message.role === 'user' ? 'You' : 'AI Assistant'}
+					${message.role === 'user' ? 'You' : message.role === 'system' ? 'System' : 'AI Assistant'}
 				</div>
 				<div class="dev-sphere-message-text">
 					${this.renderMarkdown(message.content)}
@@ -359,12 +379,12 @@ export class DevSphereMessages extends Disposable {
 					const originalSvg = copyButton.innerHTML;
 
 					// Show checkmark
-					copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+					DOM.safeInnerHtml(copyButton, '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
 
 					// Reset after 2 seconds
 					setTimeout(() => {
 						copyButton.classList.remove('copied');
-						copyButton.innerHTML = originalSvg;
+						DOM.safeInnerHtml(copyButton, originalSvg);
 					}, 2000);
 				}).catch(() => {
 					// Handle errors silently

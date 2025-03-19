@@ -1,0 +1,32 @@
+/* Error message styling */
+.dev-sphere-message-error {
+	border-left: 3px solid var(--vscode-errorForeground);
+	background-color: var(--vscode-errorBackground, rgba(255, 0, 0, 0.1));
+}
+
+.dev-sphere-message-error .dev-sphere-message-role-badge {
+	background-color: var(--vscode-errorForeground);
+	color: var(--vscode-editor-background);
+}
+
+.dev-sphere-retry-button {
+	margin-top: 8px;
+	padding: 4px 12px;
+	background-color: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
+	border: none;
+	border-radius: 2px;
+	cursor: pointer;
+	font-size: 12px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.dev-sphere-retry-button:hover {
+	background-color: var(--vscode-button-hoverBackground);
+}
+
+.dev-sphere-retry-button:active {
+	background-color: var(--vscode-button-pressedBackground, var(--vscode-button-background));
+}

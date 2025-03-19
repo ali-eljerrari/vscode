@@ -8,6 +8,9 @@ import { IQuickInputService } from '../../../../platform/quickinput/common/quick
 import { INotificationService } from '../../../../platform/notification/common/notification.js';
 import { createDecorator } from '../../../../platform/instantiation/common/instantiation.js';
 import { IStorageService, StorageScope, StorageTarget } from '../../../../platform/storage/common/storage.js';
+import { DevSphereError, DevSphereErrorCategory, DevSphereErrorHandler } from './devSphereErrorHandler.js';
+import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
+import { ICommandService } from '../../../../platform/commands/common/commands.js';
 
 // Define available OpenAI models
 export interface OpenAIModel {
@@ -180,7 +183,9 @@ export class DevSphereService implements IDevSphereService {
 		@ISecretStorageService private readonly secretStorageService: ISecretStorageService,
 		@IQuickInputService private readonly quickInputService: IQuickInputService,
 		@INotificationService private readonly notificationService: INotificationService,
-		@IStorageService private readonly storageService: IStorageService
+		@IStorageService private readonly storageService: IStorageService,
+		@IConfigurationService private readonly configurationService: IConfigurationService,
+		@ICommandService private readonly commandService: ICommandService
 	) {
 		// Initialize by loading saved model preference
 		this.loadSavedModel();
@@ -493,53 +498,122 @@ export class DevSphereService implements IDevSphereService {
 	}
 
 	public async fetchAIResponse(prompt: string): Promise<string> {
-		const apiKey = await this.getOpenAIAPIKey();
+		// Get the API key from settings
+		const apiKey = this.configurationService.getValue<string>('devSphere.apiKey') || '';
 		if (!apiKey) {
-			throw new Error('No API key available. Please set your OpenAI API key first.');
+			const error: DevSphereError = {
+				category: DevSphereErrorCategory.API_KEY,
+				message: 'No API key found in settings. Please add your API key to access DevSphere features.',
+				provider: 'vscode',
+				modelId: 'default',
+				retryable: true,
+				actionLabel: 'Open Settings',
+				actionFn: () => {
+					this.commandService.executeCommand('workbench.action.openSettings', 'devSphere.apiKey');
+				}
+			};
+
+			return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
 		}
 
 		try {
-			const endpoint = this.getCurrentEndpoint();
-			const requestBody = this.formatRequestBody(prompt);
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
-			// Add appropriate authentication headers based on the model provider
-			const headers: Record<string, string> = {
+			// Get the currently selected model from settings
+			const selectedModel = this.configurationService.getValue<string>('devSphere.model') || 'gpt-3.5-turbo';
+
+			// Set up headers and request body
+			const headers = {
 				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${apiKey}`
 			};
 
-			switch (this.currentModelType) {
-				case 'ChatgptModels':
-					headers['Authorization'] = `Bearer ${apiKey}`;
-					break;
-				case 'AnthropicModels':
-					headers['x-api-key'] = apiKey;
-					headers['anthropic-version'] = '2023-06-01';
-					break;
-				case 'GoogleModels':
-					headers['Authorization'] = `Bearer ${apiKey}`;
-					break;
-			}
+			const requestBody = this.formatRequestBody(prompt);
 
-			const response = await fetch(endpoint, {
+			// Make the API request
+			const response = await fetch(this.getCurrentEndpoint(), {
 				method: 'POST',
 				headers,
-				body: JSON.stringify(requestBody)
+				body: JSON.stringify(requestBody),
+				signal: controller.signal
 			});
 
+			clearTimeout(timeoutId);
+
 			if (!response.ok) {
-				const errorData = await response.json().catch(() => null);
-				const errorMessage = `Error: ${response.status} - ${response.statusText}
-                    ${errorData ? JSON.stringify(errorData, null, 2) : 'No additional error information'}`;
-				throw new Error(errorMessage);
+				const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+				const statusCode = response.status;
+
+				let category: DevSphereErrorCategory;
+				let actionLabel: string | undefined;
+				let actionFn: (() => void) | undefined;
+
+				// Determine the error category based on status code and response
+				if (statusCode === 401 || errorData.error?.code === 'invalid_api_key') {
+					category = DevSphereErrorCategory.AUTHENTICATION;
+					actionLabel = 'Open Settings';
+					actionFn = () => {
+						this.commandService.executeCommand('workbench.action.openSettings', 'devSphere.apiKey');
+					};
+				} else if (statusCode === 429) {
+					category = DevSphereErrorCategory.API_RATE_LIMIT;
+				} else if (statusCode >= 500) {
+					category = DevSphereErrorCategory.API_RESPONSE;
+				} else {
+					category = DevSphereErrorCategory.UNKNOWN;
+				}
+
+				const error: DevSphereError = {
+					category,
+					message: errorData.error?.message || 'Error connecting to API.',
+					provider: 'openai',
+					modelId: selectedModel,
+					retryable: true,
+					actionLabel,
+					actionFn
+				};
+
+				return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
 			}
 
 			const data = await response.json();
 			return this.extractResponseContent(data);
 		} catch (error) {
+			console.error('Error fetching AI response:', error);
+
+			// Handle specific error types
 			if (error instanceof Error) {
-				throw error;
+				if (error.name === 'AbortError') {
+					const timeoutError: DevSphereError = {
+						category: DevSphereErrorCategory.API_REQUEST,
+						message: 'Request timed out after 60 seconds.',
+						provider: 'openai',
+						modelId: this.configurationService.getValue<string>('devSphere.model') || 'default',
+						retryable: true
+					};
+					return DevSphereErrorHandler.formatErrorAsSystemMessage(timeoutError);
+				} else {
+					const networkError: DevSphereError = {
+						category: DevSphereErrorCategory.NETWORK,
+						message: error.message,
+						provider: 'openai',
+						modelId: this.configurationService.getValue<string>('devSphere.model') || 'default',
+						retryable: true
+					};
+					return DevSphereErrorHandler.formatErrorAsSystemMessage(networkError);
+				}
 			}
-			throw new Error('Unknown error occurred while fetching AI response');
+
+			// Generic error fallback
+			const genericError: DevSphereError = {
+				category: DevSphereErrorCategory.UNKNOWN,
+				message: 'An unexpected error occurred.',
+				provider: 'openai',
+				modelId: this.configurationService.getValue<string>('devSphere.model') || 'default',
+				retryable: true
+			};
+			return DevSphereErrorHandler.formatErrorAsSystemMessage(genericError);
 		}
 	}
 
