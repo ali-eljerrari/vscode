@@ -1,36 +1,200 @@
 /* My Panel Styles */
 .my-panel-container {
-    padding: 10px;
-    height: 100%;
     display: flex;
     flex-direction: column;
-}
-
-.my-panel-text {
-    font-size: 14px;
-    margin-bottom: 15px;
-    padding: 10px;
-    border-radius: 6px;
     background-color: var(--vscode-editor-background);
     color: var(--vscode-editor-foreground);
+    font-family: var(--monaco-monospace-font);
+    height: 100%;
+    overflow: hidden; /* Prevent double scrollbars */
+    position: relative; /* For proper positioning of sticky elements */
 }
 
-.my-panel-section {
-    margin-top: 15px;
-    padding: 10px;
+/* Messages container */
+.my-panel-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Ensure there's space for the input at the bottom */
+    padding-bottom: 30px; /* Extra padding at the bottom for better UX */
+}
+
+/* Text content (individual messages) */
+.my-panel-text {
+    line-height: 1.6;
+    padding: 16px;
     border-radius: 6px;
-    background-color: var(--vscode-sideBar-background);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    animation: fade-in 0.3s ease;
+    word-wrap: break-word;
+    max-width: 100%;
+    white-space: pre-wrap;
 }
 
-.my-panel-section h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
+/* User message styling */
+.my-panel-text-user {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border-top-right-radius: 2px;
+    align-self: flex-end;
+    max-width: 80%;
+    margin-left: 20%;
+    position: relative;
+}
+
+.my-panel-text-user::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -8px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid var(--vscode-button-background);
+    border-right: 8px solid transparent;
+}
+
+/* Assistant message styling */
+.my-panel-text-assistant {
+    background-color: var(--vscode-editor-inactiveSelectionBackground);
     color: var(--vscode-editor-foreground);
-    font-size: 16px;
+    border-top-left-radius: 2px;
+    align-self: flex-start;
+    max-width: 90%;
+    margin-right: 10%;
+    position: relative;
+    border-left: 3px solid var(--vscode-activityBarBadge-background);
 }
 
-.my-panel-section p {
-    margin: 0;
+.my-panel-text-assistant::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -8px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid var(--vscode-editor-inactiveSelectionBackground);
+    border-left: 8px solid transparent;
+}
+
+/* Input section - fixed at the bottom */
+.my-panel-section {
+    display: flex;
+    gap: 10px;
+    padding: 12px 20px;
+    background-color: var(--vscode-editorWidget-background);
+    border-top: 1px solid var(--vscode-input-border);
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    min-height: 56px;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: auto; /* Push to bottom if not enough content */
+}
+
+.my-panel-section input {
+    flex: 1;
+    padding: 8px 12px;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 4px;
     font-size: 13px;
+    height: 32px;
+}
+
+.my-panel-section input:focus {
+    border-color: var(--vscode-focusBorder);
+    outline: none;
+}
+
+.my-panel-section input::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+    opacity: 0.8;
+}
+
+.my-panel-section button {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    height: 32px;
+    font-weight: 500;
+    min-width: 80px;
+    transition: background-color 0.2s;
+}
+
+.my-panel-section button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.my-panel-section button:active {
+    transform: translateY(1px);
+}
+
+/* Code blocks in messages */
+.my-panel-text pre {
+    background-color: var(--vscode-textCodeBlock-background);
+    border-radius: 4px;
+    padding: 12px;
+    margin: 8px 0;
+    overflow-x: auto;
+    font-family: var(--monaco-monospace-font);
+    font-size: 12px;
+}
+
+.my-panel-text code {
+    font-family: var(--monaco-monospace-font);
+    background-color: var(--vscode-textCodeBlock-background);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+/* Bold text */
+.my-panel-text strong {
+    font-weight: 600;
+}
+
+/* Animation */
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Empty state when no messages */
+.my-panel-messages:empty::after {
+    content: "No messages yet. Type something below to get started.";
+    display: block;
+    text-align: center;
+    padding: 30px;
     color: var(--vscode-descriptionForeground);
+    font-style: italic;
+}
+
+/* Scrollbar styling */
+.my-panel-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.my-panel-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.my-panel-messages::-webkit-scrollbar-thumb {
+    background-color: var(--vscode-scrollbarSlider-background);
+    border-radius: 4px;
+}
+
+.my-panel-messages::-webkit-scrollbar-thumb:hover {
+    background-color: var(--vscode-scrollbarSlider-hoverBackground);
 }
