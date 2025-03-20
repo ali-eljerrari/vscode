@@ -303,13 +303,6 @@ export class DevSphereViewModel implements IDisposable {
 			this._onCurrentChatChanged.fire();
 			this._onMessagesChanged.fire();
 
-			// Save the reused empty chat to ensure it's persisted properly
-			try {
-				await this.devSphereService.saveChat(emptyChat);
-			} catch (err) {
-				console.error('Error saving reused empty chat', err);
-			}
-
 			// Reset error state
 			this.setError(null);
 			return;

@@ -109,9 +109,6 @@ export class DevSphereHeader extends Disposable {
 
 			// Force new chat if we have user messages in current chat, otherwise reuse empty chats
 			await this.viewModel.createNewChat(hasUserMessages);
-
-			// Focus the input to ensure the chat is saved and UI is updated
-			setTimeout(() => this.container.dispatchEvent(new CustomEvent('focus-input')), 50);
 		});
 		headerActions.appendChild(newChatButton);
 
