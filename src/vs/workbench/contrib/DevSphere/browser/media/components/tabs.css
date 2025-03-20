@@ -356,3 +356,24 @@
         margin-right: 0;
     }
 }
+
+/* Special styling for API Keys tab */
+.dev-sphere-view-tab:nth-child(3) {
+    background-color: var(--dev-sphere-primary);
+    color: white;
+    font-weight: bold;
+    position: relative;
+}
+
+.dev-sphere-view-tab:nth-child(3)::before {
+    content: "NEW";
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: red;
+    color: white;
+    font-size: 8px;
+    padding: 2px 4px;
+    border-radius: 10px;
+    font-weight: bold;
+}
