@@ -203,16 +203,20 @@ class ViewContainersRegistryImpl extends Disposable implements IViewContainersRe
 	private readonly defaultViewContainers: ViewContainer[] = [];
 
 	/**
-	 * this.viewContainers.values() - Returns an iterator of values from the Map object viewContainers
-	 * [...this.viewContainers.values()] - The spread operator (...) is used to expand the iterator into an array. It takes all the values from the iterator and spreads them into the new array.
-	 * .flat() - Flattens the array by one level, combining any nested arrays into a single array.
-	 * Example of Map values, spread operator, and flat() usage:
+	 * Returns a flattened array of all view containers.
 	 *
+	 * This getter performs three operations in sequence:
+	 * 1. Gets an iterator of values from the Map using values()
+	 * 2. Converts the iterator to an array using spread operator
+	 * 3. Flattens the resulting nested array structure
+	 *
+	 * Example transformation:
 	 * ```typescript
-	 * // const viewContainers = new Map([
-	 * //   ['location1', ['container1', 'container2']],
-	 * //   ['location2', ['container3', 'container4']]
-	 * // ]);
+	 * // Input Map structure:
+	 * const viewContainers = new Map([
+	 *   ['location1', ['container1', 'container2']],
+	 *   ['location2', ['container3', 'container4']]
+	 * ]);
 	 *
 	 * // Step 1: viewContainers.values() returns an iterator:
 	 * // Iterator: [[container1, container2], [container3, container4]]
@@ -225,6 +229,8 @@ class ViewContainersRegistryImpl extends Disposable implements IViewContainersRe
 	 *
 	 * const result = [...viewContainers.values()].flat();
 	 * ```
+	 *
+	 * @returns A flattened array of all view containers
 	 */
 	get all(): ViewContainer[] {
 		return [...this.viewContainers.values()].flat();
