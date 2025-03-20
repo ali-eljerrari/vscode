@@ -399,7 +399,12 @@ export class DevSphereHistory extends Disposable {
 		const newChatButton = emptyState.querySelector('.dev-sphere-history-empty-button');
 		if (newChatButton) {
 			newChatButton.addEventListener('click', () => {
-				this.viewModel.createNewChat(false);
+				// Create a new chat if we have a current chat with user messages
+				const currentChat = this.viewModel.currentChat;
+				const hasUserMessages = currentChat?.messages.some(msg => msg.role === 'user');
+
+				// Force new chat if we have user messages in current chat, otherwise reuse empty chats
+				this.viewModel.createNewChat(hasUserMessages);
 				this.onChatSelected();
 			});
 		}

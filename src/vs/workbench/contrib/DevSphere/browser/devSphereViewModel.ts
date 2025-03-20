@@ -270,9 +270,21 @@ export class DevSphereViewModel implements IDisposable {
 	 * @returns The empty chat if found, otherwise null
 	 */
 	public hasEmptyChat(): Chat | null {
-		// Empty chat means a chat with no messages
+		// First check for completely empty chats
 		const emptyChat = this._allChats.find(chat => chat.messages.length === 0);
-		return emptyChat || null;
+		if (emptyChat) {
+			return emptyChat;
+		}
+
+		// Then check if current chat only has system messages (no user interaction yet)
+		if (this._currentChat) {
+			const onlySystemMessages = this._currentChat.messages.every(msg => msg.role === 'system');
+			if (onlySystemMessages) {
+				return this._currentChat;
+			}
+		}
+
+		return null;
 	}
 
 	/**
