@@ -104,6 +104,10 @@ export class DevSphereView extends ViewPane {
 		// Add event listener for focus-input custom event
 		container.addEventListener('focus-input', () => {
 			this.focusInput();
+
+			// Also refresh the history to ensure it shows the latest chats
+			// This is important when a new chat is created
+			this.refreshHistoryView();
 		});
 
 		// Add header
@@ -118,12 +122,12 @@ export class DevSphereView extends ViewPane {
 		this.chatContentContainer.classList.add('dev-sphere-chat-content');
 		mainContent.appendChild(this.chatContentContainer);
 
-		// Create tabs component (chat tabs)
+		// Initialize chat tabs component (this displays individual chat tabs)
 		this.tabsComponent = new DevSphereTabs(
 			this.chatContentContainer,
 			this.viewModel,
 			this.quickInputService,
-			() => this.focusInput() // Call focusInput on tab change to ensure UI is updated
+			() => this.focusInput()
 		);
 
 		// Create messages component
@@ -204,12 +208,22 @@ export class DevSphereView extends ViewPane {
 		} else if (view === DevSphereViewType.History) {
 			console.log('DevSphere BaseView: Showing History view');
 			this.historyComponent?.setVisible(true);
+			// Ensure history is refreshed when switching to the history tab
+			this.refreshHistoryView();
 		} else if (view === DevSphereViewType.APIKeys) {
 			console.log('DevSphere BaseView: Showing API Keys view');
 			this.apiKeysComponent?.setVisible(true);
 		} else {
 			console.error('DevSphere BaseView: Unknown view type', view);
 		}
+	}
+
+	/**
+	 * Refresh the history view to ensure it shows the latest chats
+	 */
+	private refreshHistoryView(): void {
+		// Refresh the history list
+		this.historyComponent?.updateHistoryList();
 	}
 
 	// Method to focus the input
