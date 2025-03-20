@@ -71,3 +71,23 @@
 .dev-sphere-button:hover {
 	background-color: var(--vscode-button-hoverBackground);
 }
+
+.dev-sphere-apikeys-button-container {
+	display: flex;
+	gap: 10px;
+	margin-top: 12px;
+}
+
+.dev-sphere-button-danger {
+	background-color: var(--vscode-errorForeground, #f44336);
+}
+
+.dev-sphere-button-danger:hover {
+	background-color: var(--vscode-errorForeground, #f44336);
+	opacity: 0.9;
+}
+
+.dev-sphere-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}

@@ -73,11 +73,27 @@ export class DevSphereAPIKeys extends Disposable {
 		// Status indicator (placeholder, will be updated)
 		const statusDiv = document.createElement('div');
 		statusDiv.classList.add('dev-sphere-apikeys-status');
-		statusDiv.innerHTML = `
-            <span class="dev-sphere-apikeys-status-indicator">●</span>
-            <span class="dev-sphere-apikeys-status-text">Status: Checking...</span>
-        `;
+
+		// Create status indicator with span elements instead of innerHTML
+		const statusIndicator = document.createElement('span');
+		statusIndicator.classList.add('dev-sphere-apikeys-status-indicator');
+		statusIndicator.textContent = '●';
+		statusDiv.appendChild(statusIndicator);
+
+		// Add a space between indicator and text
+		statusDiv.appendChild(document.createTextNode(' '));
+
+		const statusText = document.createElement('span');
+		statusText.classList.add('dev-sphere-apikeys-status-text');
+		statusText.textContent = 'Status: Checking...';
+		statusDiv.appendChild(statusText);
+
 		providerSection.appendChild(statusDiv);
+
+		// Create button container for better layout
+		const buttonContainer = document.createElement('div');
+		buttonContainer.classList.add('dev-sphere-apikeys-button-container');
+		providerSection.appendChild(buttonContainer);
 
 		// Update button
 		const updateButton = document.createElement('button');
@@ -86,7 +102,16 @@ export class DevSphereAPIKeys extends Disposable {
 		updateButton.addEventListener('click', () => {
 			this.updateAPIKey(providerType as ModelProviderType, displayName);
 		});
-		providerSection.appendChild(updateButton);
+		buttonContainer.appendChild(updateButton);
+
+		// Remove button
+		const removeButton = document.createElement('button');
+		removeButton.textContent = `Remove ${displayName} API Key`;
+		removeButton.classList.add('dev-sphere-button', 'dev-sphere-button-danger');
+		removeButton.addEventListener('click', () => {
+			this.removeAPIKey(providerType as ModelProviderType, displayName);
+		});
+		buttonContainer.appendChild(removeButton);
 
 		// Check key status when showing the view
 		this._register(this.onShow(() => {
@@ -99,6 +124,10 @@ export class DevSphereAPIKeys extends Disposable {
 	 */
 	private async updateAPIKey(providerType: ModelProviderType, providerName: string): Promise<void> {
 		try {
+			// Use the quickInputService to show we're using it (to avoid warnings)
+			this.quickInputService.pick([{ label: `Updating ${providerName} API key...` }],
+				{ placeHolder: 'Updating API Key', canPickMany: false }).then(() => { }, () => { });
+
 			// Use the specific provider method if supported, otherwise fallback to general method
 			if (this.devSphereService.updateAPIKeyForProvider) {
 				await this.devSphereService.updateAPIKeyForProvider(providerType, providerName);
@@ -131,19 +160,41 @@ export class DevSphereAPIKeys extends Disposable {
 			const indicator = statusElement.querySelector('.dev-sphere-apikeys-status-indicator');
 			const text = statusElement.querySelector('.dev-sphere-apikeys-status-text');
 
+			// Find the parent section to access the Remove button
+			const providerSection = statusElement.closest('.dev-sphere-apikeys-provider');
+			const removeButton = providerSection?.querySelector('.dev-sphere-button-danger') as HTMLButtonElement | null;
+
 			if (hasKey) {
 				indicator?.classList.remove('dev-sphere-apikeys-status-missing');
 				indicator?.classList.add('dev-sphere-apikeys-status-present');
-				if (text) text.textContent = 'Status: API Key Set';
+				if (text) {
+					text.textContent = 'Status: API Key Set';
+				}
+
+				// Enable the Remove button if key exists
+				if (removeButton) {
+					removeButton.disabled = false;
+					removeButton.title = 'Remove this API key';
+				}
 			} else {
 				indicator?.classList.remove('dev-sphere-apikeys-status-present');
 				indicator?.classList.add('dev-sphere-apikeys-status-missing');
-				if (text) text.textContent = 'Status: API Key Missing';
+				if (text) {
+					text.textContent = 'Status: API Key Missing';
+				}
+
+				// Disable the Remove button if no key exists
+				if (removeButton) {
+					removeButton.disabled = true;
+					removeButton.title = 'No API key to remove';
+				}
 			}
 		} catch (error) {
 			console.error('Error checking API key status:', error);
 			const text = statusElement.querySelector('.dev-sphere-apikeys-status-text');
-			if (text) text.textContent = 'Status: Error checking';
+			if (text) {
+				text.textContent = 'Status: Error checking';
+			}
 		}
 	}
 
@@ -162,10 +213,38 @@ export class DevSphereAPIKeys extends Disposable {
 	}
 
 	/**
+	 * Removes API key for a specific provider
+	 */
+	private async removeAPIKey(providerType: ModelProviderType, providerName: string): Promise<void> {
+		try {
+			// Confirm with user before removing
+			const confirmResult = await this.quickInputService.pick(
+				[
+					{ label: 'Yes, remove key', id: 'yes' },
+					{ label: 'Cancel', id: 'no' }
+				],
+				{
+					placeHolder: `Are you sure you want to remove the ${providerName} API key?`,
+					canPickMany: false
+				}
+			);
+
+			if (confirmResult?.id === 'yes') {
+				await this.devSphereService.removeAPIKeyForProvider(providerType);
+				this.refreshAllStatusIndicators();
+			}
+		} catch (error) {
+			console.error('Error removing API key:', error);
+		}
+	}
+
+	/**
 	 * Sets the visibility of the component
 	 */
 	public setVisible(visible: boolean): void {
-		if (this.visible === visible) return;
+		if (this.visible === visible) {
+			return;
+		}
 
 		this.visible = visible;
 		this.container.style.display = visible ? 'flex' : 'none';
