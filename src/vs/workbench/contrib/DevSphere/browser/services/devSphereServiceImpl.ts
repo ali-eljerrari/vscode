@@ -3,27 +3,19 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-/*
- * CORS Handling Strategy
- *
- * This file integrates all the service modules to provide a comprehensive solution
- * for interacting with different LLM providers, handling CORS issues, and managing
- * API keys and chat conversations.
- */
-
-import { INotificationService } from '../../../../platform/notification/common/notification.js';
-import { IQuickInputService } from '../../../../platform/quickinput/common/quickInput.js';
-import { ISecretStorageService } from '../../../../platform/secrets/common/secrets.js';
-import { IStorageService } from '../../../../platform/storage/common/storage.js';
-import { DevSphereErrorHandler, DevSphereErrorCategory } from './devSphereErrorHandler.js';
-import { DEFAULT_MAX_TOKENS } from './models/modelData.js';
-import { Chat, DevSphereError, ModelInfoWithProvider, ModelProviderType, ModelWithProvider, OpenAIModel } from './models/types.js';
-import { ApiKeyService } from './services/apiKeyService.js';
-import { ApiProviderFactory } from './services/apiProviders/apiProviderFactory.js';
-import { ChatService } from './services/chatService.js';
-import { CorsHandlerService } from './services/corsHandlerService.js';
-import { IDevSphereService } from './services/devSphereServiceInterface.js';
-import { ModelService } from './services/modelService.js';
+import { INotificationService } from '../../../../../platform/notification/common/notification.js';
+import { IQuickInputService } from '../../../../../platform/quickinput/common/quickInput.js';
+import { ISecretStorageService } from '../../../../../platform/secrets/common/secrets.js';
+import { IStorageService } from '../../../../../platform/storage/common/storage.js';
+import { DevSphereErrorHandler, DevSphereErrorCategory } from '../devSphereErrorHandler.js';
+import { DEFAULT_MAX_TOKENS } from '../models/modelData.js';
+import { Chat, DevSphereError, ModelInfoWithProvider, ModelProviderType, ModelWithProvider, OpenAIModel } from '../models/types.js';
+import { ApiKeyService } from './apiKeyService.js';
+import { ApiProviderFactory } from './apiProviders/apiProviderFactory.js';
+import { ChatService } from './chatService.js';
+import { CorsHandlerService } from './corsHandlerService.js';
+import { IDevSphereService } from './devSphereServiceInterface.js';
+import { ModelService } from './modelService.js';
 
 /**
  * Main service implementation for DevSphere

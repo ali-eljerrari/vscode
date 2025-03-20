@@ -13,7 +13,9 @@ import { Codicon } from '../../../../base/common/codicons.js';
 import { ViewPaneContainer } from '../../../browser/parts/views/viewPaneContainer.js';
 import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
 import { DevSphereView } from './devSphereView.js';
-import { DevSphereService, IDevSphereService } from './devSphereService.js';
+// Import the refactored service implementation and interface
+import { IDevSphereService } from './services/devSphereServiceInterface.js';
+import { DevSphereService } from './services/devSphereServiceImpl.js';
 import { DEV_SPHERE_CONTAINER_ID, registerDevSphereActions } from './devSphereActionCommands.js';
 
 // Register the service using the proper instantiation mechanism
@@ -22,7 +24,7 @@ import { InstantiationType, registerSingleton } from '../../../../platform/insta
 // Import CSS
 import './media/main.css';
 
-
+// Register the refactored service implementation
 registerSingleton(IDevSphereService, DevSphereService, InstantiationType.Delayed);
 
 // Register the view container
