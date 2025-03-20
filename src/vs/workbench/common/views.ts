@@ -175,7 +175,7 @@ export interface IViewContainersRegistry {
 	getDefaultViewContainer(location: ViewContainerLocation): ViewContainer | undefined;
 }
 
-/** Delegate interface for custom view ordering */
+/** Delegate (give authority to something else) interface for custom view ordering */
 interface ViewOrderDelegate {
 	getOrder(group?: string): number | undefined;
 }
@@ -202,6 +202,30 @@ class ViewContainersRegistryImpl extends Disposable implements IViewContainersRe
 	private readonly viewContainers: Map<ViewContainerLocation, ViewContainer[]> = new Map<ViewContainerLocation, ViewContainer[]>();
 	private readonly defaultViewContainers: ViewContainer[] = [];
 
+	/**
+	 * this.viewContainers.values() - Returns an iterator of values from the Map object viewContainers
+	 * [...this.viewContainers.values()] - The spread operator (...) is used to expand the iterator into an array. It takes all the values from the iterator and spreads them into the new array.
+	 * .flat() - Flattens the array by one level, combining any nested arrays into a single array.
+	 * Example of Map values, spread operator, and flat() usage:
+	 *
+	 * ```typescript
+	 * // const viewContainers = new Map([
+	 * //   ['location1', ['container1', 'container2']],
+	 * //   ['location2', ['container3', 'container4']]
+	 * // ]);
+	 *
+	 * // Step 1: viewContainers.values() returns an iterator:
+	 * // Iterator: [[container1, container2], [container3, container4]]
+	 *
+	 * // Step 2: [...viewContainers.values()] converts iterator to array:
+	 * // Array: [[container1, container2], [container3, container4]]
+	 *
+	 * // Step 3: .flat() combines nested arrays into single array:
+	 * // Result: [container1, container2, container3, container4]
+	 *
+	 * const result = [...viewContainers.values()].flat();
+	 * ```
+	 */
 	get all(): ViewContainer[] {
 		return [...this.viewContainers.values()].flat();
 	}
