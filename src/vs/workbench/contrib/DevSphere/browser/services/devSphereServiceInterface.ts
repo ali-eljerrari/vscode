@@ -13,6 +13,8 @@ export interface IDevSphereService {
 	// API key management
 	getProviderAPIKey(): Promise<string | undefined>;
 	updateAPIKey(): Promise<void>;
+	updateAPIKeyForProvider(providerType: ModelProviderType, providerName: string): Promise<void>;
+	hasAPIKeyForProvider(providerType: ModelProviderType): Promise<boolean>;
 
 	// API interaction
 	fetchAIResponse(prompt: string): Promise<string>;

@@ -13,7 +13,7 @@ import { IInstantiationService } from '../../../../../platform/instantiation/com
 import { IOpenerService } from '../../../../../platform/opener/common/opener.js';
 import { IThemeService } from '../../../../../platform/theme/common/themeService.js';
 import { IHoverService } from '../../../../../platform/hover/browser/hover.js';
-import { IDevSphereService } from '../devSphereService.js';
+import { IDevSphereService } from '../services/devSphereServiceInterface.js';
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { INotificationService } from '../../../../../platform/notification/common/notification.js';
 import { IQuickInputService } from '../../../../../platform/quickinput/common/quickInput.js';
@@ -26,6 +26,7 @@ import { DevSphereInput } from './devSphereInput.js';
 import { DevSphereHeader } from './devSphereHeader.js';
 import { DevSphereViewTabs, DevSphereViewType } from './devSphereViewTabs.js';
 import { DevSphereHistory } from './devSphereHistory.js';
+import { DevSphereAPIKeys } from './devSphereAPIKeys.js';
 
 export class DevSphereView extends ViewPane {
 	static readonly ID = 'devSphereView';
@@ -38,6 +39,7 @@ export class DevSphereView extends ViewPane {
 	private headerComponent: DevSphereHeader | undefined;
 	private viewTabsComponent: DevSphereViewTabs | undefined;
 	private historyComponent: DevSphereHistory | undefined;
+	private apiKeysComponent: DevSphereAPIKeys | undefined;
 	private chatContentContainer: HTMLElement | undefined;
 
 	constructor(
@@ -136,6 +138,14 @@ export class DevSphereView extends ViewPane {
 		);
 		this.historyComponent.setVisible(false);
 
+		// Create API Keys component (initially hidden)
+		this.apiKeysComponent = new DevSphereAPIKeys(
+			mainContent,
+			this.devSphereService,
+			this.quickInputService
+		);
+		this.apiKeysComponent.setVisible(false);
+
 		// Create chat selector dialog
 		this.chatSelectorComponent = new DevSphereChatSelector(
 			container,
@@ -149,20 +159,24 @@ export class DevSphereView extends ViewPane {
 	 * Handle view tab change
 	 */
 	private onViewTabChanged(view: DevSphereViewType): void {
+		// Hide all views first
+		if (this.chatContentContainer) {
+			this.chatContentContainer.style.display = 'none';
+		}
+		this.historyComponent?.setVisible(false);
+		this.apiKeysComponent?.setVisible(false);
+
+		// Show the selected view
 		if (view === DevSphereViewType.Chat) {
-			// Show chat view, hide history view
 			if (this.chatContentContainer) {
 				this.chatContentContainer.style.display = 'flex';
 			}
-			this.historyComponent?.setVisible(false);
 			// Focus the input
 			setTimeout(() => this.focusInput(), 50);
-		} else {
-			// Show history view, hide chat view
-			if (this.chatContentContainer) {
-				this.chatContentContainer.style.display = 'none';
-			}
+		} else if (view === DevSphereViewType.History) {
 			this.historyComponent?.setVisible(true);
+		} else if (view === DevSphereViewType.APIKeys) {
+			this.apiKeysComponent?.setVisible(true);
 		}
 	}
 
@@ -176,8 +190,12 @@ export class DevSphereView extends ViewPane {
 		super.setVisible(visible);
 		if (visible) {
 			// Focus the input when the view becomes visible (if in chat view)
-			if (this.viewTabsComponent?.getCurrentView() === DevSphereViewType.Chat) {
+			const currentView = this.viewTabsComponent?.getCurrentView();
+			if (currentView === DevSphereViewType.Chat) {
 				setTimeout(() => this.focusInput(), 100);
+			} else if (currentView === DevSphereViewType.APIKeys) {
+				// Ensure the API Keys component refreshes when becoming visible
+				this.apiKeysComponent?.setVisible(true);
 			}
 		}
 	}

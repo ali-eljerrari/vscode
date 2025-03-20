@@ -225,6 +225,8 @@
     border-right: 1px solid var(--vscode-tab-border);
     position: relative;
     transition: all var(--dev-sphere-transition-base);
+    text-align: center;
+    font-weight: 500;
 }
 
 .dev-sphere-view-tab:hover {
@@ -248,9 +250,8 @@
 }
 
 .dev-sphere-view-tab-active {
-    color: var(--vscode-tab-activeForeground);
     background-color: var(--vscode-tab-activeBackground);
-    font-weight: 500;
+    color: var(--vscode-tab-activeForeground);
 }
 
 .dev-sphere-view-tab-active::after {

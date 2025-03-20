@@ -10,7 +10,7 @@ import { localize } from '../../../../nls.js';
 import { IViewsService } from '../../../services/views/common/viewsService.js';
 import { IViewDescriptorService } from '../../../common/views.js';
 import { DevSphereView } from './devSphereView.js';
-import { IDevSphereService } from './devSphereService.js';
+import { IDevSphereService } from './services/devSphereServiceInterface.js';
 import { IQuickInputService, IQuickPickItem } from '../../../../platform/quickinput/common/quickInput.js';
 import { DevSphereViewType } from './view/devSphereViewTabs.js';
 import { ContextKeyExpr } from '../../../../platform/contextkey/common/contextkey.js';
@@ -103,6 +103,33 @@ export function registerDevSphereActions(): void {
 			if (view) {
 				// Get access to the underlying viewTabs component and switch to History tab
 				(view as any).viewTabsComponent?.switchView(DevSphereViewType.History);
+			}
+		}
+	});
+
+	// Register a command to switch to API Keys tab
+	registerAction2(class extends Action2 {
+		constructor() {
+			super({
+				id: 'workbench.action.devSphere.showAPIKeysTab',
+				title: { value: localize('showDevSphereAPIKeysTab', "DevSphere: Show API Keys Tab"), original: 'DevSphere: Show API Keys Tab' },
+				category: Categories.View,
+				f1: true,
+				keybinding: {
+					primary: 2052, // Ctrl/Cmd+3
+					weight: 200,
+					when: ContextKeyExpr.equals('viewId', 'devSphereView')
+				}
+			});
+		}
+
+		run(accessor: ServicesAccessor): void {
+			const viewsService = accessor.get(IViewsService);
+			// Find the active DevSphere view
+			const view = viewsService.getActiveViewWithId('devSphereView') as DevSphereView | undefined;
+			if (view) {
+				// Get access to the underlying viewTabs component and switch to API Keys tab
+				(view as any).viewTabsComponent?.switchView(DevSphereViewType.APIKeys);
 			}
 		}
 	});

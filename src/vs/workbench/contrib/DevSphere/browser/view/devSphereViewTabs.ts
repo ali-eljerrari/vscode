@@ -7,13 +7,15 @@ import { Disposable } from '../../../../../base/common/lifecycle.js';
 
 export enum DevSphereViewType {
 	Chat = 'chat',
-	History = 'history'
+	History = 'history',
+	APIKeys = 'apikeys',
 }
 
 export class DevSphereViewTabs extends Disposable {
 	private tabsContainer: HTMLDivElement;
 	private chatTab: HTMLDivElement;
 	private historyTab: HTMLDivElement;
+	private apiKeysTab: HTMLDivElement;
 	private currentView: DevSphereViewType = DevSphereViewType.Chat;
 
 	constructor(
@@ -45,6 +47,15 @@ export class DevSphereViewTabs extends Disposable {
 			this.switchView(DevSphereViewType.History);
 		});
 		this.tabsContainer.appendChild(this.historyTab);
+
+		// Create the API Keys tab
+		this.apiKeysTab = document.createElement('div');
+		this.apiKeysTab.classList.add('dev-sphere-view-tab');
+		this.apiKeysTab.textContent = 'API Keys';
+		this.apiKeysTab.addEventListener('click', () => {
+			this.switchView(DevSphereViewType.APIKeys);
+		});
+		this.tabsContainer.appendChild(this.apiKeysTab);
 	}
 
 	/**
@@ -56,12 +67,16 @@ export class DevSphereViewTabs extends Disposable {
 		}
 
 		// Update active tab
+		this.chatTab.classList.remove('dev-sphere-view-tab-active');
+		this.historyTab.classList.remove('dev-sphere-view-tab-active');
+		this.apiKeysTab.classList.remove('dev-sphere-view-tab-active');
+
 		if (view === DevSphereViewType.Chat) {
 			this.chatTab.classList.add('dev-sphere-view-tab-active');
-			this.historyTab.classList.remove('dev-sphere-view-tab-active');
-		} else {
+		} else if (view === DevSphereViewType.History) {
 			this.historyTab.classList.add('dev-sphere-view-tab-active');
-			this.chatTab.classList.remove('dev-sphere-view-tab-active');
+		} else if (view === DevSphereViewType.APIKeys) {
+			this.apiKeysTab.classList.add('dev-sphere-view-tab-active');
 		}
 
 		this.currentView = view;

@@ -6,7 +6,7 @@
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { Disposable } from '../../../../../base/common/lifecycle.js';
 import { IQuickInputService } from '../../../../../platform/quickinput/common/quickInput.js';
-import { Chat } from '../models/devSphereModels.js';
+import { Chat } from '../models/types.js';
 import * as DOM from '../../../../../base/browser/dom.js';
 import { Codicon } from '../../../../../base/common/codicons.js';
 import { ThemeIcon } from '../../../../../base/common/themables.js';

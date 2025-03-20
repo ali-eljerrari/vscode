@@ -5,9 +5,9 @@
 
 import { IDisposable } from '../../../../base/common/lifecycle.js';
 import { Event, Emitter } from '../../../../base/common/event.js';
-import { Chat, Message } from './models/devSphereModels.js';
+import { Chat, Message } from './models/types.js';
 import { INotificationService } from '../../../../platform/notification/common/notification.js';
-import { IDevSphereService } from './devSphereService.js';
+import { IDevSphereService } from './services/devSphereServiceInterface.js';
 /**
  * View model for the DevSphere chat interface
  */

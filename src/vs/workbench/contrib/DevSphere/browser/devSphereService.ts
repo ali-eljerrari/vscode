@@ -140,6 +140,15 @@ export class DevSphereService implements IDevSphereService {
 		await this.apiKeyService.promptForAPIKey(currentModelType, providerName);
 	}
 
+	public async updateAPIKeyForProvider(providerType: ModelProviderType, providerName: string): Promise<void> {
+		await this.apiKeyService.promptForAPIKey(providerType, providerName);
+	}
+
+	public async hasAPIKeyForProvider(providerType: ModelProviderType): Promise<boolean> {
+		const apiKey = await this.apiKeyService.getApiKey(providerType);
+		return !!apiKey;
+	}
+
 	private async promptForAPIKey(modelType: ModelProviderType): Promise<string | undefined> {
 		const providerName = this.getProviderNameFromType(modelType);
 		return this.apiKeyService.promptForAPIKey(modelType, providerName);

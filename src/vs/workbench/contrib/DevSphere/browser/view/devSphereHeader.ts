@@ -6,7 +6,7 @@
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { Disposable } from '../../../../../base/common/lifecycle.js';
 import * as DOM from '../../../../../base/browser/dom.js';
-import { IDevSphereService } from '../devSphereService.js';
+import { IDevSphereService } from '../services/devSphereServiceInterface.js';
 
 export class DevSphereHeader extends Disposable {
 	private headerElement: HTMLElement;

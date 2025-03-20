@@ -1,0 +1,73 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.dev-sphere-apikeys-container {
+	display: flex;
+	flex-direction: column;
+	padding: 16px;
+	overflow-y: auto;
+	height: 100%;
+}
+
+.dev-sphere-apikeys-header {
+	margin-top: 0;
+	margin-bottom: 12px;
+}
+
+.dev-sphere-apikeys-description {
+	margin-bottom: 20px;
+	opacity: 0.8;
+}
+
+.dev-sphere-apikeys-list {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.dev-sphere-apikeys-provider {
+	background-color: var(--vscode-editor-background);
+	border-radius: 6px;
+	padding: 16px;
+	box-shadow: 0 2px 6px var(--vscode-widget-shadow);
+}
+
+.dev-sphere-apikeys-provider h3 {
+	margin-top: 0;
+	margin-bottom: 12px;
+}
+
+.dev-sphere-apikeys-status {
+	display: flex;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.dev-sphere-apikeys-status-indicator {
+	font-size: 14px;
+	margin-right: 8px;
+}
+
+.dev-sphere-apikeys-status-present {
+	color: var(--vscode-testing-iconPassed);
+}
+
+.dev-sphere-apikeys-status-missing {
+	color: var(--vscode-testing-iconErrored);
+}
+
+.dev-sphere-button {
+	background-color: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
+	border: none;
+	border-radius: 2px;
+	padding: 6px 12px;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.dev-sphere-button:hover {
+	background-color: var(--vscode-button-hoverBackground);
+}
