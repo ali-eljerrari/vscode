@@ -18,6 +18,7 @@ export class DevSphereAPIKeys extends Disposable {
 	private visible: boolean = false;
 	private _onShow = this._register(new Emitter<void>());
 	private readonly onShow = this._onShow.event;
+	private removeAllButton: HTMLButtonElement;
 
 	constructor(
 		container: HTMLElement,
@@ -41,13 +42,13 @@ export class DevSphereAPIKeys extends Disposable {
 		this.container.appendChild(header);
 
 		// Remove All button
-		const removeAllButton = document.createElement('button');
-		removeAllButton.textContent = `Remove All API Keys`;
-		removeAllButton.classList.add('dev-sphere-button', 'dev-sphere-button-danger');
-		removeAllButton.addEventListener('click', () => {
+		this.removeAllButton = document.createElement('button');
+		this.removeAllButton.textContent = `Remove All API Keys`;
+		this.removeAllButton.classList.add('dev-sphere-button', 'dev-sphere-button-danger');
+		this.removeAllButton.addEventListener('click', () => {
 			this.removeAllAPIKeys();
 		});
-		header.appendChild(removeAllButton);
+		header.appendChild(this.removeAllButton);
 
 		// Create description
 		const description = document.createElement('p');
@@ -154,7 +155,7 @@ export class DevSphereAPIKeys extends Disposable {
 	/**
 	 * Checks if an API key exists for the given provider
 	 */
-	private async checkAPIKeyStatus(providerType: ModelProviderType, statusElement: HTMLElement): Promise<void> {
+	private async checkAPIKeyStatus(providerType: ModelProviderType, statusElement: HTMLElement): Promise<boolean> {
 		try {
 			// Try to use the specific method if available
 			let hasKey = false;
@@ -198,12 +199,15 @@ export class DevSphereAPIKeys extends Disposable {
 					removeButton.title = 'No API key to remove';
 				}
 			}
+
+			return hasKey;
 		} catch (error) {
 			console.error('Error checking API key status:', error);
 			const text = statusElement.querySelector('.dev-sphere-apikeys-status-text');
 			if (text) {
 				text.textContent = 'Status: Error checking';
 			}
+			return false;
 		}
 	}
 
@@ -214,11 +218,32 @@ export class DevSphereAPIKeys extends Disposable {
 		const statusElements = this.apiKeysContainer.querySelectorAll('.dev-sphere-apikeys-status');
 		const providers = ['ChatgptModels', 'AnthropicModels', 'GoogleModels'];
 
+		// Track if any provider has a key
+		let anyKeyExists = false;
+
+		// Update each provider
 		statusElements.forEach((element, index) => {
 			if (index < providers.length) {
-				this.checkAPIKeyStatus(providers[index] as ModelProviderType, element as HTMLElement);
+				this.checkAPIKeyStatus(providers[index] as ModelProviderType, element as HTMLElement)
+					.then(hasKey => {
+						if (hasKey) {
+							anyKeyExists = true;
+							// Enable the "Remove All" button if at least one key exists
+							if (this.removeAllButton) {
+								this.removeAllButton.disabled = false;
+								this.removeAllButton.title = 'Remove all API keys';
+							}
+						}
+					})
+					.catch(error => console.error('Error checking key status:', error));
 			}
 		});
+
+		// If no keys exist, ensure the "Remove All" button is disabled
+		if (!anyKeyExists && this.removeAllButton) {
+			this.removeAllButton.disabled = true;
+			this.removeAllButton.title = 'No API keys to remove';
+		}
 	}
 
 	/**
