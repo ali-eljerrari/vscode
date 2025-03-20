@@ -3,15 +3,45 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * @file DevSphere Chat Selector Component
+ *
+ * This module implements a modal dialog for selecting from saved chat conversations.
+ * It provides a searchable interface for finding and switching between existing chats,
+ * as well as managing them (like deletion).
+ *
+ * Key features:
+ * - Modal overlay dialog that appears above the main interface
+ * - Searchable list of all saved chat conversations
+ * - Visual indication of the currently active chat
+ * - Delete functionality for removing unwanted chats
+ * - Empty state handling when no chats exist
+ */
+
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { IQuickInputService } from '../../../../../platform/quickinput/common/quickInput.js';
 import { Disposable } from '../../../../../base/common/lifecycle.js';
 import * as DOM from '../../../../../base/browser/dom.js';
 
+/**
+ * Chat selector component that provides a modal dialog for selecting
+ * and managing saved chat conversations.
+ */
 export class DevSphereChatSelector extends Disposable {
+	/** Modal overlay container */
 	private dialogOverlay: HTMLDivElement;
+
+	/** Container for the list of chat items */
 	private chatListContainer: HTMLDivElement;
 
+	/**
+	 * Creates a new instance of the DevSphere chat selector component.
+	 *
+	 * @param container - Parent DOM element to append the dialog overlay to
+	 * @param viewModel - ViewModel instance for accessing chat data and operations
+	 * @param quickInputService - Service for displaying confirmation dialogs
+	 * @param onChatSelected - Callback function to invoke when a chat is selected
+	 */
 	constructor(
 		private readonly container: HTMLElement,
 		private readonly viewModel: DevSphereViewModel,
@@ -68,7 +98,8 @@ export class DevSphereChatSelector extends Disposable {
 	}
 
 	/**
-	 * Shows the chat selector dialog
+	 * Shows the chat selector dialog.
+	 * Makes the overlay visible and focuses the search input for immediate typing.
 	 */
 	public showChatSelector(): void {
 		this.dialogOverlay.classList.add('show');
@@ -81,14 +112,18 @@ export class DevSphereChatSelector extends Disposable {
 	}
 
 	/**
-	 * Hides the chat selector dialog
+	 * Hides the chat selector dialog.
+	 * Removes the visible class from the overlay to hide it.
 	 */
 	public hideChatSelector(): void {
 		this.dialogOverlay.classList.remove('show');
 	}
 
 	/**
-	 * Filters the chat list based on search input
+	 * Filters the chat list based on search input.
+	 * Shows or hides chat items based on whether their titles match the search term.
+	 *
+	 * @param searchTerm - The text to filter chats against
 	 */
 	private filterChatList(searchTerm: string): void {
 		const chatItems = this.chatListContainer.querySelectorAll('.dev-sphere-chat-item');
@@ -113,7 +148,9 @@ export class DevSphereChatSelector extends Disposable {
 	}
 
 	/**
-	 * Updates the chat selector list
+	 * Updates the chat selector list with current chats from the view model.
+	 * Clears and rebuilds the entire list, showing the most recent chats first.
+	 * Displays an empty state message if no chats are available.
 	 */
 	public updateChatSelectorList(): void {
 		// Clear existing chat list items

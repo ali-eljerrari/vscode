@@ -3,19 +3,39 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * @file DevSphere Markdown Formatter
+ *
+ * This module provides simplified markdown formatting capabilities for the DevSphere extension.
+ * It converts markdown-like text syntax into DOM elements for rendering in the UI.
+ *
+ * The formatter supports a subset of markdown features:
+ * - Code blocks with triple backticks (```)
+ * - Inline code with single backticks (`)
+ * - Bold text with double asterisks (**)
+ * - Line breaks
+ *
+ * The implementation focuses on security by using DOM APIs safely and sanitizing
+ * input text to prevent XSS vulnerabilities.
+ */
+
 // Since we're not actually using the trusted types policy in this class,
 // let's remove it to avoid the linter warning
 // import { createTrustedTypesPolicy } from '../../../../base/browser/trustedTypes.js';
 
 /**
- * Utility class for formatting markdown content into DOM elements
+ * Utility class for formatting markdown content into DOM elements.
+ * Provides static methods to convert markdown-like syntax into DOM nodes
+ * that can be appended to the UI.
  */
 export class MarkdownFormatter {
 	// Remove the unused policy definition
 
 	/**
-	 * Converts a markdown-like text string into DOM nodes
-	 * @param text The markdown text to format
+	 * Converts a markdown-like text string into DOM nodes.
+	 * This is the main entry point for converting text to formatted DOM elements.
+	 *
+	 * @param text - The markdown text to format
 	 * @returns An array of DOM nodes representing the formatted content
 	 */
 	public static formatMarkdown(text: string): Node[] {
@@ -25,9 +45,11 @@ export class MarkdownFormatter {
 	}
 
 	/**
-	 * Appends formatted markdown content to a container element
-	 * @param container The DOM element to append content to
-	 * @param text The markdown text to format
+	 * Appends formatted markdown content to a container element.
+	 * This method performs the actual formatting and DOM manipulation.
+	 *
+	 * @param container - The DOM element to append content to
+	 * @param text - The markdown text to format
 	 */
 	public static appendFormattedContent(container: HTMLElement, text: string): void {
 		// Handle null/empty text
@@ -80,8 +102,15 @@ export class MarkdownFormatter {
 	}
 
 	/**
-	 * Processes a line of text into DOM nodes with formatting applied
-	 * @param line A line of text to process
+	 * Processes a line of text into DOM nodes with formatting applied.
+	 * Handles inline formatting such as bold text and inline code.
+	 *
+	 * The method works by:
+	 * 1. Splitting the line by inline code markers
+	 * 2. For non-code segments, splitting by bold markers
+	 * 3. Converting each segment into the appropriate DOM node
+	 *
+	 * @param line - A line of text to process
 	 * @returns An array of DOM nodes representing the formatted line
 	 */
 	private static processLineSegments(line: string): Node[] {

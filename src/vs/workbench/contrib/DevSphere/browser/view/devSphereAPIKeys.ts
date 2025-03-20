@@ -10,7 +10,19 @@ import { IQuickInputService } from '../../../../../platform/quickinput/common/qu
 import { ModelProviderType } from '../models/types.js';
 
 /**
- * Component for managing API keys for different AI providers
+ * Component for managing API keys for different AI providers.
+ * This component provides a user interface for:
+ * - Viewing API key status for each provider
+ * - Adding/updating API keys
+ * - Removing API keys
+ * - Managing all API keys at once
+ *
+ * The component features:
+ * - Secure key storage
+ * - Status indicators
+ * - Confirmation dialogs
+ * - Error handling
+ * - Real-time status updates
  */
 export class DevSphereAPIKeys extends Disposable {
 	private container: HTMLElement;
@@ -73,7 +85,15 @@ export class DevSphereAPIKeys extends Disposable {
 	}
 
 	/**
-	 * Creates a section for each provider with update button
+	 * Creates a section for each provider with update button.
+	 * This method creates the UI elements for each provider including:
+	 * - Provider name header
+	 * - Status indicator
+	 * - Update button
+	 * - Remove button
+	 *
+	 * @param providerType - The type of provider
+	 * @param displayName - The display name of the provider
 	 */
 	private renderProviderSection(providerType: string, displayName: string): void {
 		const providerSection = document.createElement('div');
@@ -135,7 +155,15 @@ export class DevSphereAPIKeys extends Disposable {
 	}
 
 	/**
-	 * Updates API key for a specific provider
+	 * Updates API key for a specific provider.
+	 * This method handles:
+	 * - User input for the new key
+	 * - Key validation
+	 * - Secure storage
+	 * - Status updates
+	 *
+	 * @param providerType - The type of provider
+	 * @param providerName - The display name of the provider
 	 */
 	private async updateAPIKey(providerType: ModelProviderType, providerName: string): Promise<void> {
 		try {
@@ -158,7 +186,15 @@ export class DevSphereAPIKeys extends Disposable {
 	}
 
 	/**
-	 * Checks if an API key exists for the given provider
+	 * Checks if an API key exists for the given provider.
+	 * This method:
+	 * - Checks key existence
+	 * - Updates UI indicators
+	 * - Handles button states
+	 *
+	 * @param providerType - The type of provider
+	 * @param statusElement - The status indicator element
+	 * @returns True if a key exists for the provider
 	 */
 	private async checkAPIKeyStatus(providerType: ModelProviderType, statusElement: HTMLElement): Promise<boolean> {
 		try {
@@ -217,7 +253,11 @@ export class DevSphereAPIKeys extends Disposable {
 	}
 
 	/**
-	 * Refreshes status indicators for all providers
+	 * Refreshes status indicators for all providers.
+	 * This method:
+	 * - Updates all provider statuses
+	 * - Manages the "Remove All" button state
+	 * - Handles error cases
 	 */
 	private refreshAllStatusIndicators(): void {
 		const statusElements = this.apiKeysContainer.querySelectorAll('.dev-sphere-apikeys-status');
@@ -252,7 +292,14 @@ export class DevSphereAPIKeys extends Disposable {
 	}
 
 	/**
-	 * Removes API key for a specific provider
+	 * Removes API key for a specific provider.
+	 * This method:
+	 * - Confirms with the user
+	 * - Removes the key
+	 * - Updates UI state
+	 *
+	 * @param providerType - The type of provider
+	 * @param providerName - The display name of the provider
 	 */
 	private async removeAPIKey(providerType: ModelProviderType, providerName: string): Promise<void> {
 		try {
@@ -278,7 +325,11 @@ export class DevSphereAPIKeys extends Disposable {
 	}
 
 	/**
-	 * Removes all API keys
+	 * Removes all API keys.
+	 * This method:
+	 * - Confirms with the user
+	 * - Removes all keys
+	 * - Updates UI state
 	 */
 	private async removeAllAPIKeys(): Promise<void> {
 		try {
@@ -304,7 +355,12 @@ export class DevSphereAPIKeys extends Disposable {
 	}
 
 	/**
-	 * Sets the visibility of the component
+	 * Sets the visibility of the component.
+	 * This method:
+	 * - Updates visibility state
+	 * - Triggers status refresh when shown
+	 *
+	 * @param visible - Whether the component should be visible
 	 */
 	public setVisible(visible: boolean): void {
 		if (this.visible === visible) {

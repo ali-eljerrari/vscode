@@ -3,14 +3,45 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * @file DevSphere Input Component
+ *
+ * This module implements the input component for the DevSphere extension.
+ * It handles text input, message submission, and auto-resizing of the
+ * text area. The component is integrated with the view model to process
+ * user inputs and send them to the AI service.
+ *
+ * Key features:
+ * - Auto-growing textarea for user input
+ * - Enter key handling for message submission (Shift+Enter for new line)
+ * - Dynamic state management based on loading state
+ * - Focus management for better UX
+ */
+
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { Disposable } from '../../../../../base/common/lifecycle.js';
 
+/**
+ * Input component for DevSphere chat interface.
+ * Provides a textarea for user input and a submit button for sending messages.
+ * Handles auto-resizing of the input area and keyboard shortcuts.
+ */
 export class DevSphereInput extends Disposable {
+	/** The textarea element for user input */
 	private inputElement: HTMLTextAreaElement;
+
+	/** The button element for submitting messages */
 	private submitButton: HTMLButtonElement;
+
+	/** Container div for styling and arranging the input elements */
 	private inputContainer: HTMLDivElement;
 
+	/**
+	 * Creates a new instance of the DevSphere input component.
+	 *
+	 * @param container - Parent DOM element to append the input component to
+	 * @param viewModel - ViewModel instance for handling user actions and message processing
+	 */
 	constructor(
 		private readonly container: HTMLElement,
 		private readonly viewModel: DevSphereViewModel
@@ -64,7 +95,9 @@ export class DevSphereInput extends Disposable {
 	}
 
 	/**
-	 * Focuses the input element
+	 * Focuses the input element.
+	 * Used to programmatically set focus after certain actions like sending a message
+	 * or switching between views.
 	 */
 	public focus(): void {
 		if (this.inputElement) {
@@ -73,7 +106,10 @@ export class DevSphereInput extends Disposable {
 	}
 
 	/**
-	 * Updates the loading state of the input
+	 * Updates the loading state of the input.
+	 * Disables or enables the input and button based on whether a message is being processed.
+	 *
+	 * @param isLoading - Whether the application is currently loading (processing a message)
 	 */
 	public updateLoadingState(isLoading: boolean): void {
 		if (this.inputElement) {
@@ -86,7 +122,9 @@ export class DevSphereInput extends Disposable {
 	}
 
 	/**
-	 * Sends the current message from the input
+	 * Sends the current message from the input.
+	 * Trims the input text, sends it to the view model, clears the input,
+	 * resizes it, and then re-focuses it for the next message.
 	 */
 	private sendMessage(): void {
 		const text = this.inputElement.value.trim();
@@ -100,7 +138,9 @@ export class DevSphereInput extends Disposable {
 	}
 
 	/**
-	 * Resizes the input based on content
+	 * Resizes the input based on content.
+	 * Adjusts the height of the textarea to match its content,
+	 * with a maximum height of 200px.
 	 */
 	private resizeInput(): void {
 		if (this.inputElement) {

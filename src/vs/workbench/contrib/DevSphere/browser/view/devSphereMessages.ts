@@ -3,15 +3,47 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * @file DevSphere Messages Component
+ *
+ * This module implements the message display component for the DevSphere extension,
+ * responsible for rendering and managing the chat conversation UI. It handles:
+ *
+ * 1. Message rendering with role-based styling (user, assistant, system)
+ * 2. Markdown formatting of message content
+ * 3. Code block handling with syntax highlighting and copy functionality
+ * 4. Loading states and animations
+ * 5. Empty state display when no messages exist
+ * 6. Auto-scrolling behavior and scroll state management
+ *
+ * The component dynamically updates as new messages are added to the conversation
+ * and provides interactive elements like copy buttons for code and retry buttons
+ * for error messages.
+ */
+
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { Disposable } from '../../../../../base/common/lifecycle.js';
 import * as DOM from '../../../../../base/browser/dom.js';
 import { Message } from '../models/types.js';
 
+/**
+ * Messages component for the DevSphere chat interface.
+ * Renders and manages chat messages, including formatting, code blocks,
+ * and scrolling behavior.
+ */
 export class DevSphereMessages extends Disposable {
+	/** Container element for all message content */
 	private messagesContainer: HTMLElement;
+
+	/** Observer to detect changes in message container size */
 	private resizeObserver: ResizeObserver;
 
+	/**
+	 * Creates a new instance of the DevSphere messages component.
+	 *
+	 * @param container - Parent DOM element to append the messages component to
+	 * @param viewModel - ViewModel instance for accessing message data
+	 */
 	constructor(
 		private readonly container: HTMLElement,
 		private readonly viewModel: DevSphereViewModel
@@ -38,7 +70,9 @@ export class DevSphereMessages extends Disposable {
 	}
 
 	/**
-	 * Updates the messages displayed in the container
+	 * Updates the messages displayed in the container.
+	 * Clears and rebuilds the entire message list from the view model,
+	 * preserving scroll position and grouping messages by role.
 	 */
 	public updateMessages(): void {
 		if (!this.messagesContainer) {
@@ -98,7 +132,9 @@ export class DevSphereMessages extends Disposable {
 	}
 
 	/**
-	 * Updates the scrollable state of code blocks
+	 * Updates the scrollable state of code blocks.
+	 * Adds appropriate CSS classes to code blocks based on their content size,
+	 * enabling scrolling for overflow content and limiting very tall blocks.
 	 */
 	private updateCodeBlocksScrollState(): void {
 		// Find all pre elements
@@ -129,7 +165,9 @@ export class DevSphereMessages extends Disposable {
 	}
 
 	/**
-	 * Renders the empty state when no messages exist
+	 * Renders the empty state when no messages exist.
+	 * Creates a friendly UI with helpful guidance and shortcuts
+	 * to encourage the user to start a conversation.
 	 */
 	private renderEmptyState(): void {
 		const emptyState = document.createElement('div');
@@ -160,7 +198,13 @@ export class DevSphereMessages extends Disposable {
 	}
 
 	/**
-	 * Renders a single message element
+	 * Renders a single message element.
+	 * Creates a DOM structure for the message including role indicator,
+	 * formatted content, and any interactive elements like retry buttons.
+	 *
+	 * @param message - The message object to render
+	 * @param showHeader - Whether to show the role header (typically for first message in a group)
+	 * @returns The constructed message DOM element
 	 */
 	private renderMessage(message: Message, showHeader: boolean): HTMLElement {
 		const messageElement = document.createElement('div');
@@ -238,7 +282,11 @@ export class DevSphereMessages extends Disposable {
 	}
 
 	/**
-	 * Renders the loading message indicator
+	 * Renders the loading message indicator.
+	 * Creates an animated loading indicator to show that the AI is generating a response.
+	 *
+	 * @param message - The loading message object
+	 * @returns The constructed loading indicator DOM element
 	 */
 	private renderLoadingMessage(message: Message): HTMLElement {
 		const element = document.createElement('div');
@@ -261,7 +309,10 @@ export class DevSphereMessages extends Disposable {
 	}
 
 	/**
-	 * Updates the loading state of messages
+	 * Updates the loading state of messages.
+	 * Shows or hides loading indicators based on the current loading state.
+	 *
+	 * @param isLoading - Whether the application is currently loading (processing a message)
 	 */
 	public updateLoadingState(isLoading: boolean): void {
 		// Find the loading message if there is one
@@ -278,7 +329,8 @@ export class DevSphereMessages extends Disposable {
 	}
 
 	/**
-	 * Scrolls the messages container to the bottom
+	 * Scrolls the messages container to the bottom.
+	 * Used after new messages are added to ensure the latest content is visible.
 	 */
 	private scrollToBottom(): void {
 		this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
@@ -286,7 +338,10 @@ export class DevSphereMessages extends Disposable {
 	}
 
 	/**
-	 * Checks if the messages container is scrolled to the bottom
+	 * Checks if the messages container is scrolled to the bottom.
+	 * Used to determine whether to auto-scroll after content changes.
+	 *
+	 * @returns Whether the container is scrolled near the bottom
 	 */
 	private isScrolledToBottom(): boolean {
 		const scrollPosition = this.messagesContainer.scrollTop + this.messagesContainer.clientHeight;
@@ -296,7 +351,9 @@ export class DevSphereMessages extends Disposable {
 	}
 
 	/**
-	 * Updates the scrollable class based on content overflow
+	 * Updates the scrollable class based on content overflow.
+	 * Adds or removes CSS classes to indicate scrollability and updates
+	 * code block scroll states.
 	 */
 	private updateScrollableClass(): void {
 		// Check if content is scrollable
@@ -313,7 +370,14 @@ export class DevSphereMessages extends Disposable {
 		this.updateCodeBlocksScrollState();
 	}
 
-	// Simple markdown renderer - would be replaced with a proper markdown formatting module
+	/**
+	 * Renders markdown text into HTML.
+	 * Handles formatting for code blocks, line breaks, and other markdown features.
+	 * This is a simplified markdown renderer focused on the key formatting needs.
+	 *
+	 * @param text - The markdown text to format
+	 * @returns HTML string with formatted content
+	 */
 	private renderMarkdown(text: string): string {
 		// A more advanced placeholder implementation with code block handling
 		let formattedText = text.replace(/\n/g, '<br/>');
@@ -349,11 +413,13 @@ export class DevSphereMessages extends Disposable {
 		return formattedText;
 	}
 
-	// Track if we've added the event handlers
+	/** Tracks whether copy functionality event handlers have been added */
 	private hasCopyHandlersAdded: boolean = false;
 
 	/**
-	 * Initialize copy button functionality using DOM events instead of script injection
+	 * Initialize copy button functionality using DOM events.
+	 * Sets up event delegation for code block interactions including
+	 * copy-to-clipboard functionality and scroll detection.
 	 */
 	private initializeCopyFunctionality(): void {
 		// Use event delegation for efficiency
@@ -430,7 +496,11 @@ export class DevSphereMessages extends Disposable {
 	}
 
 	/**
-	 * Helper to escape HTML special characters
+	 * Helper to escape HTML special characters.
+	 * Prevents XSS vulnerabilities and rendering issues in code content.
+	 *
+	 * @param text - The text to escape
+	 * @returns HTML-escaped text
 	 */
 	private escapeHTML(text: string): string {
 		return text

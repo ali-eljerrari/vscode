@@ -3,14 +3,44 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * @file DevSphere View Tabs Module
+ *
+ * This module defines the UI component for switching between different views
+ * within the DevSphere panel. It contains:
+ *
+ * 1. The DevSphereViewType enum - Defines the available view types that can
+ *    be displayed in the DevSphere panel
+ *
+ * 2. The DevSphereViewTabs class - A UI component that renders tabs for
+ *    switching between different views and handles the view switching logic
+ *
+ * This component is used by the main DevSphereView to allow users to switch
+ * between chat, history, and API key management views.
+ */
+
 import { Disposable } from '../../../../../base/common/lifecycle.js';
 
+/**
+ * Enumeration of the different view types available in the DevSphere panel.
+ * Used to control which view is currently active and to switch between views.
+ */
 export enum DevSphereViewType {
+	/** The main chat interface where users interact with AI models */
 	Chat = 'chat',
+
+	/** History view showing past conversations */
 	History = 'history',
+
+	/** API key management view for configuring AI provider credentials */
 	APIKeys = 'apikeys',
 }
 
+/**
+ * Component that renders a set of tabs for switching between different DevSphere views.
+ * This is displayed at the top of the DevSphere panel and allows users to navigate
+ * between the chat interface, conversation history, and API key management.
+ */
 export class DevSphereViewTabs extends Disposable {
 	private tabsContainer: HTMLDivElement;
 	private chatTab: HTMLDivElement;
@@ -18,6 +48,12 @@ export class DevSphereViewTabs extends Disposable {
 	private apiKeysTab: HTMLDivElement;
 	private currentView: DevSphereViewType = DevSphereViewType.Chat;
 
+	/**
+	 * Creates a new instance of the DevSphereViewTabs component.
+	 *
+	 * @param container - The parent DOM element to append the tabs to
+	 * @param onViewChange - Callback function that is invoked when the user switches views
+	 */
 	constructor(
 		container: HTMLElement,
 		private readonly onViewChange: (view: DevSphereViewType) => void
@@ -67,38 +103,51 @@ export class DevSphereViewTabs extends Disposable {
 	}
 
 	/**
-	 * Switches the active view tab
+	 * Switches the active view to the specified view type.
+	 * Updates the UI to show the selected tab as active and invokes the onViewChange callback.
+	 *
+	 * @param viewType - The view type to switch to
 	 */
-	public switchView(view: DevSphereViewType): void {
-		console.log('DevSphere: Switching to tab', view);
+	public switchView(viewType: DevSphereViewType): void {
+		console.log('DevSphere: Switching to tab', viewType);
 
-		if (this.currentView === view) {
-			console.log('DevSphere: Already on tab', view);
+		if (this.currentView === viewType) {
+			console.log('DevSphere: Already on tab', viewType);
 			return; // Already on this view
 		}
 
-		// Update active tab
+		// Update the current view
+		this.currentView = viewType;
+
+		// Update tab classes
 		this.chatTab.classList.remove('dev-sphere-view-tab-active');
 		this.historyTab.classList.remove('dev-sphere-view-tab-active');
 		this.apiKeysTab.classList.remove('dev-sphere-view-tab-active');
 
-		if (view === DevSphereViewType.Chat) {
-			this.chatTab.classList.add('dev-sphere-view-tab-active');
-			console.log('DevSphere: Activated Chat tab');
-		} else if (view === DevSphereViewType.History) {
-			this.historyTab.classList.add('dev-sphere-view-tab-active');
-			console.log('DevSphere: Activated History tab');
-		} else if (view === DevSphereViewType.APIKeys) {
-			this.apiKeysTab.classList.add('dev-sphere-view-tab-active');
-			console.log('DevSphere: Activated API Keys tab');
+		// Add active class to the selected tab
+		switch (viewType) {
+			case DevSphereViewType.Chat:
+				this.chatTab.classList.add('dev-sphere-view-tab-active');
+				console.log('DevSphere: Activated Chat tab');
+				break;
+			case DevSphereViewType.History:
+				this.historyTab.classList.add('dev-sphere-view-tab-active');
+				console.log('DevSphere: Activated History tab');
+				break;
+			case DevSphereViewType.APIKeys:
+				this.apiKeysTab.classList.add('dev-sphere-view-tab-active');
+				console.log('DevSphere: Activated API Keys tab');
+				break;
 		}
 
-		this.currentView = view;
-		this.onViewChange(view);
+		// Call the onViewChange callback
+		this.onViewChange(viewType);
 	}
 
 	/**
-	 * Returns the current active view
+	 * Returns the currently active view type.
+	 *
+	 * @returns The currently active DevSphereViewType
 	 */
 	public getCurrentView(): DevSphereViewType {
 		return this.currentView;

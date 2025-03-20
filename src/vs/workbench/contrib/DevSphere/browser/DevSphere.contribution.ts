@@ -3,6 +3,26 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * @file DevSphere Contribution Module
+ *
+ * This module is the extension entry point that registers the DevSphere feature
+ * in VS Code. It handles:
+ *
+ * 1. Service registration - Registers the DevSphere service using the VS Code
+ *    dependency injection system
+ *
+ * 2. View container registration - Creates and registers the DevSphere view container
+ *    that appears in the auxiliary sidebar
+ *
+ * 3. View registration - Registers the main DevSphere view within the container
+ *
+ * 4. Command registration - Registers all DevSphere-related commands and their handlers
+ *
+ * This is where the extension bootstraps all its components and makes them available
+ * to the VS Code workbench.
+ */
+
 import { IViewsRegistry, ViewContainerLocation, IViewContainersRegistry, Extensions as ViewContainerExtensions } from '../../../common/views.js';
 import { localize } from '../../../../nls.js';
 import { SyncDescriptor } from '../../../../platform/instantiation/common/descriptors.js';
@@ -24,10 +44,18 @@ import { InstantiationType, registerSingleton } from '../../../../platform/insta
 // Import CSS
 import './media/main.css';
 
-// Register the refactored service implementation
+/**
+ * Register the DevSphere service as a singleton with delayed instantiation
+ * to improve startup performance. The service will only be created when
+ * it's first requested by a component.
+ */
 registerSingleton(IDevSphereService, DevSphereService, InstantiationType.Delayed);
 
-// Register the view container
+/**
+ * Register the DevSphere view container in the auxiliary sidebar.
+ * This container will hold the main DevSphere view and defines its appearance
+ * in the workbench.
+ */
 const DEV_SPHERE_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainerExtensions.ViewContainersRegistry).registerViewContainer({
 	id: DEV_SPHERE_CONTAINER_ID,
 	title: { value: localize('devSphere', "DevSphere"), original: 'DevSphere' },
@@ -36,7 +64,10 @@ const DEV_SPHERE_CONTAINER = Registry.as<IViewContainersRegistry>(ViewContainerE
 	storageId: DEV_SPHERE_CONTAINER_ID,
 }, ViewContainerLocation.AuxiliaryBar);
 
-// Register the view
+/**
+ * Register the main DevSphere view within the container.
+ * This defines the view's properties and behavior within the container.
+ */
 Registry.as<IViewsRegistry>(ViewContainerExtensions.ViewsRegistry).registerViews([{
 	id: DevSphereView.ID,
 	name: { value: localize('devSphereView', "DevSphere"), original: 'DevSphere' },
@@ -45,7 +76,13 @@ Registry.as<IViewsRegistry>(ViewContainerExtensions.ViewsRegistry).registerViews
 	canMoveView: true,
 }], DEV_SPHERE_CONTAINER);
 
-// Register DevSphere contribution
+/**
+ * DevSphere workbench contribution class that initializes the extension
+ * when the workbench is ready (in the Restored lifecycle phase).
+ *
+ * This registers all DevSphere actions and commands that can be invoked
+ * by users through the command palette, context menus, and keybindings.
+ */
 class DevSphereContribution implements IWorkbenchContribution {
 	constructor(
 		@IInstantiationService instantiationService: IInstantiationService
@@ -55,7 +92,10 @@ class DevSphereContribution implements IWorkbenchContribution {
 	}
 }
 
-// Register the contribution
+/**
+ * Register the DevSphere contribution to be initialized in the Restored lifecycle phase,
+ * which occurs after the workbench UI is fully visible to the user.
+ */
 Registry.as<IWorkbenchContributionsRegistry>(WorkbenchExtensions.Workbench).registerWorkbenchContribution(
 	DevSphereContribution,
 	LifecyclePhase.Restored

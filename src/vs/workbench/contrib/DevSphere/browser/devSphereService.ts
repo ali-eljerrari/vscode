@@ -3,12 +3,21 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-/*
- * CORS Handling Strategy
+/**
+ * @file DevSphere Service Implementation
  *
- * This file integrates all the service modules to provide a comprehensive solution
- * for interacting with different LLM providers, handling CORS issues, and managing
- * API keys and chat conversations.
+ * This module implements the core service layer for the DevSphere extension,
+ * providing a unified API for all AI model integrations. It:
+ *
+ * 1. Manages API connections to multiple AI providers (OpenAI, Anthropic, etc.)
+ * 2. Handles API key storage and retrieval securely
+ * 3. Implements CORS error handling strategies
+ * 4. Manages chat persistence (load/save/create)
+ * 5. Provides model selection and management
+ *
+ * The service layer acts as a bridge between the UI and the AI providers,
+ * abstracting away the implementation details of each provider and providing
+ * a consistent interface for the UI to interact with.
  */
 
 import { INotificationService } from '../../../../platform/notification/common/notification.js';
@@ -26,16 +35,48 @@ import { IDevSphereService } from './services/devSphereServiceInterface.js';
 import { ModelService } from './services/modelService.js';
 
 /**
- * Main service implementation for DevSphere
+ * Main service implementation for DevSphere.
+ *
+ * This class implements the IDevSphereService interface and coordinates
+ * all the subsystems needed to provide a complete AI assistant experience.
+ * It manages model selection, API key handling, chat persistence, and
+ * communication with AI providers.
  */
 export class DevSphereService implements IDevSphereService {
-	// Service dependencies
+	/**
+	 * Service for model management (selection, retrieval, etc.)
+	 */
 	private readonly modelService: ModelService;
+
+	/**
+	 * Service for securely storing and retrieving API keys
+	 */
 	private readonly apiKeyService: ApiKeyService;
+
+	/**
+	 * Service for chat persistence (save, load, delete)
+	 */
 	private readonly chatService: ChatService;
+
+	/**
+	 * Service for handling CORS errors and providing fallback mechanisms
+	 */
 	private readonly corsHandler: CorsHandlerService;
+
+	/**
+	 * Factory for creating API provider instances based on provider type
+	 */
 	private readonly apiProviderFactory: ApiProviderFactory;
 
+	/**
+	 * Creates a new instance of the DevSphere service.
+	 * Initializes all subsystems and dependencies.
+	 *
+	 * @param secretStorageService - VS Code's secret storage for API keys
+	 * @param quickInputService - VS Code's input service for user prompts
+	 * @param notificationService - VS Code's notification service for user feedback
+	 * @param storageService - VS Code's storage service for persistent data
+	 */
 	constructor(
 		@ISecretStorageService secretStorageService: ISecretStorageService,
 		@IQuickInputService quickInputService: IQuickInputService,
@@ -49,55 +90,127 @@ export class DevSphereService implements IDevSphereService {
 		this.chatService = new ChatService(storageService, notificationService);
 		this.apiProviderFactory = new ApiProviderFactory(this.corsHandler);
 	}
+
+	/**
+	 * Removes the API key for a specific provider.
+	 *
+	 * @param providerType - The type of provider to remove the key for
+	 * @returns A promise that resolves when the key is removed
+	 */
 	removeAPIKeyForProvider(providerType: ModelProviderType): Promise<void> {
 		throw new Error('Method not implemented.');
 	}
+
+	/**
+	 * Removes all stored API keys from secure storage.
+	 *
+	 * @returns A promise that resolves when all keys are removed
+	 */
 	removeAllAPIKeys(): Promise<void> {
 		throw new Error('Method not implemented.');
 	}
 
 	// #region Model Management
 
+	/**
+	 * Gets a list of all available models across all providers.
+	 *
+	 * @returns An array of all available models
+	 */
 	public getAvailableModels(): OpenAIModel[] {
 		return this.modelService.getAvailableModels();
 	}
 
+	/**
+	 * Gets the currently selected model.
+	 *
+	 * @returns The currently selected model
+	 */
 	public getCurrentModel(): OpenAIModel {
 		return this.modelService.getCurrentModel();
 	}
 
+	/**
+	 * Sets the current model by ID.
+	 *
+	 * @param modelId - The ID of the model to set as current
+	 */
 	public setCurrentModel(modelId: string): void {
 		this.modelService.setCurrentModel(modelId);
 	}
 
+	/**
+	 * Gets the ID of the currently selected model.
+	 *
+	 * @returns The ID of the current model
+	 */
 	public getCurrentModelId(): string {
 		return this.modelService.getCurrentModelId();
 	}
 
+	/**
+	 * Gets the type of the currently selected model.
+	 *
+	 * @returns The type of the current model (e.g., 'OpenAI', 'Anthropic')
+	 */
 	public getCurrentModelType(): string {
 		return this.modelService.getCurrentModelType();
 	}
 
+	/**
+	 * Gets the display name of the currently selected model.
+	 *
+	 * @returns The display name of the current model
+	 */
 	public getCurrentModelName(): string {
 		return this.modelService.getCurrentModelName();
 	}
 
+	/**
+	 * Gets the display name of the provider for the current model.
+	 *
+	 * @returns The display name of the current provider
+	 */
 	public getCurrentProviderName(): string {
 		return this.modelService.getCurrentProviderName();
 	}
 
+	/**
+	 * Gets all available models for a specific provider.
+	 *
+	 * @param providerType - The type of provider to get models for
+	 * @returns An array of models from the specified provider
+	 */
 	public getAvailableModelsByProvider(providerType: ModelProviderType): ModelInfoWithProvider[] {
 		return this.modelService.getAvailableModelsByProvider(providerType);
 	}
 
+	/**
+	 * Gets model information by ID.
+	 *
+	 * @param modelId - The ID of the model to get information for
+	 * @returns The model information or null if not found
+	 */
 	public getModelInfoById(modelId: string): ModelWithProvider | null {
 		return this.modelService.getModelInfoById(modelId);
 	}
 
+	/**
+	 * Gets the display name of a provider from its type.
+	 *
+	 * @param providerType - The type of provider
+	 * @returns The display name of the provider
+	 */
 	public getProviderNameFromType(providerType: ModelProviderType): string {
 		return this.modelService.getProviderNameFromType(providerType);
 	}
 
+	/**
+	 * Finds models that excel at a particular capability.
+	 *
+	 * @param capability - The capability to find models for
+	 * @returns An array of models that excel at the specified capability
+	 */
 	public findModelsByCapability(capability: 'coding' | 'reasoning' | 'speed' | 'cost-effective'): ModelInfoWithProvider[] {
 		return this.modelService.findModelsByCapability(capability);
 	}
@@ -106,22 +219,50 @@ export class DevSphereService implements IDevSphereService {
 
 	// #region Chat Management
 
+	/**
+	 * Saves a chat conversation to storage.
+	 *
+	 * @param chat - The chat to save
+	 * @returns A promise that resolves when the chat is saved
+	 */
 	public async saveChat(chat: Chat): Promise<void> {
 		await this.chatService.saveChat(chat, (modelId) => this.getModelInfoById(modelId));
 	}
 
+	/**
+	 * Loads a chat conversation from storage by ID.
+	 *
+	 * @param chatId - The ID of the chat to load
+	 * @returns A promise that resolves with the loaded chat or undefined if not found
+	 */
 	public async loadChat(chatId: string): Promise<Chat | undefined> {
 		return this.chatService.loadChat(chatId);
 	}
 
+	/**
+	 * Gets all saved chat conversations.
+	 *
+	 * @returns A promise that resolves with an array of all saved chats
+	 */
 	public async getAllChats(): Promise<Chat[]> {
 		return this.chatService.getAllChats();
 	}
 
+	/**
+	 * Deletes a chat conversation from storage by ID.
+	 *
+	 * @param chatId - The ID of the chat to delete
+	 * @returns A promise that resolves when the chat is deleted
+	 */
 	public async deleteChat(chatId: string): Promise<void> {
 		await this.chatService.deleteChat(chatId);
 	}
 
+	/**
+	 * Creates a new empty chat conversation.
+	 *
+	 * @returns The newly created chat
+	 */
 	public createNewChat(): Chat {
 		return this.chatService.createNewChat(
 			this.getCurrentModelId(),
@@ -135,26 +276,55 @@ export class DevSphereService implements IDevSphereService {
 
 	// #region API Key Management
 
+	/**
+	 * Gets the API key for the current provider.
+	 *
+	 * @returns A promise that resolves with the API key or undefined if not found
+	 */
 	public async getProviderAPIKey(): Promise<string | undefined> {
 		const currentModelType = this.modelService.getCurrentModelType() as ModelProviderType;
 		return this.apiKeyService.getApiKey(currentModelType);
 	}
 
+	/**
+	 * Updates the API key for the current provider.
+	 *
+	 * @returns A promise that resolves when the API key is updated
+	 */
 	public async updateAPIKey(): Promise<void> {
 		const currentModelType = this.modelService.getCurrentModelType() as ModelProviderType;
 		const providerName = this.getProviderNameFromType(currentModelType);
 		await this.apiKeyService.promptForAPIKey(currentModelType, providerName);
 	}
 
+	/**
+	 * Updates the API key for a specific provider.
+	 *
+	 * @param providerType - The type of provider to update the key for
+	 * @param providerName - The display name of the provider
+	 * @returns A promise that resolves when the API key is updated
+	 */
 	public async updateAPIKeyForProvider(providerType: ModelProviderType, providerName: string): Promise<void> {
 		await this.apiKeyService.promptForAPIKey(providerType, providerName);
 	}
 
+	/**
+	 * Checks if an API key exists for a specific provider.
+	 *
+	 * @param providerType - The type of provider to check
+	 * @returns A promise that resolves with true if an API key exists, false otherwise
+	 */
 	public async hasAPIKeyForProvider(providerType: ModelProviderType): Promise<boolean> {
 		const apiKey = await this.apiKeyService.getApiKey(providerType);
 		return !!apiKey;
 	}
 
+	/**
+	 * Prompts the user to enter an API key for a specific provider.
+	 *
+	 * @param modelType - The type of provider to prompt for
+	 * @returns A promise that resolves with the entered API key or undefined if cancelled
+	 */
 	private async promptForAPIKey(modelType: ModelProviderType): Promise<string | undefined> {
 		const providerName = this.getProviderNameFromType(modelType);
 		return this.apiKeyService.promptForAPIKey(modelType, providerName);
@@ -164,6 +334,19 @@ export class DevSphereService implements IDevSphereService {
 
 	// #region API Interaction
 
+	/**
+	 * Sends a prompt to the AI and receives a response.
+	 * This is the main method for interacting with the AI.
+	 *
+	 * It handles:
+	 * 1. API key validation and prompting
+	 * 2. Request formatting for the selected model
+	 * 3. Error handling, including CORS errors
+	 * 4. Response parsing and formatting
+	 *
+	 * @param prompt - The user's prompt to send to the AI
+	 * @returns A promise that resolves with the AI's response text
+	 */
 	public async fetchAIResponse(prompt: string): Promise<string> {
 		// Get provider and model information
 		const modelType = this.modelService.getCurrentModelType() as ModelProviderType;
@@ -219,16 +402,22 @@ To use ${providerName} models, you need to add your API key first. Please click 
 						);
 					}
 				}
-				throw error;
+				throw error; // Re-throw if not handled
 			});
 
-			// Clear the timeout since we received a response
+			// Clear timeout since request completed
 			clearTimeout(timeoutId);
 
-			// Check for errors in the response
+			// Check response status
 			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
 				const statusCode = response.status;
+				let errorData: any = {};
+
+				try {
+					errorData = await response.json();
+				} catch (e) {
+					// If we can't parse the error as JSON, continue with empty error data
+				}
 
 				// Handle different error types
 				if (statusCode === 401 || statusCode === 403 ||

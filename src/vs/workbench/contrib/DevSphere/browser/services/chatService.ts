@@ -9,7 +9,18 @@ import { STORAGE_KEYS } from '../models/modelData.js';
 import { Chat, ModelCapabilities, ModelProviderType, ModelWithProvider } from '../models/types.js';
 
 /**
- * Service for managing chat operations and persistence
+ * Service for managing chat operations and persistence.
+ * This service handles all aspects of chat management including:
+ * - Chat creation and initialization
+ * - Chat storage and retrieval
+ * - Chat deletion
+ * - Model capability detection
+ *
+ * The service ensures that chats are:
+ * - Persisted securely using VS Code's storage system
+ * - Properly associated with their models
+ * - Maintained with appropriate metadata
+ * - Handled with proper error management
  */
 export class ChatService {
 	constructor(
@@ -18,7 +29,20 @@ export class ChatService {
 	) { }
 
 	/**
-	 * Creates a new chat with default settings
+	 * Creates a new chat with default settings.
+	 * This method initializes a new chat with:
+	 * - Unique ID generation
+	 * - Default title based on model
+	 * - Empty messages array
+	 * - Current timestamp
+	 * - Model information
+	 * - Model capabilities
+	 *
+	 * @param modelId - The ID of the model to use
+	 * @param providerType - The type of AI provider
+	 * @param providerName - Display name of the provider
+	 * @param modelName - Display name of the model
+	 * @returns A new Chat object with default settings
 	 */
 	public createNewChat(
 		modelId: string,
@@ -42,7 +66,15 @@ export class ChatService {
 	}
 
 	/**
-	 * Saves a chat to storage
+	 * Saves a chat to storage.
+	 * This method handles:
+	 * - Updating last modified timestamp
+	 * - Ensuring provider information is set
+	 * - Merging with existing chats
+	 * - Persistent storage
+	 *
+	 * @param chat - The chat to save
+	 * @param modelFinder - Function to find model information
 	 */
 	public async saveChat(chat: Chat, modelFinder: (modelId: string) => ModelWithProvider | null): Promise<void> {
 		// Update last modified time
@@ -78,7 +110,11 @@ export class ChatService {
 	}
 
 	/**
-	 * Loads a specific chat by ID
+	 * Loads a specific chat by ID.
+	 * This method retrieves a single chat from storage based on its ID.
+	 *
+	 * @param chatId - The ID of the chat to load
+	 * @returns Promise resolving to the chat or undefined if not found
 	 */
 	public async loadChat(chatId: string): Promise<Chat | undefined> {
 		const chats = await this.getAllChats();
@@ -86,7 +122,13 @@ export class ChatService {
 	}
 
 	/**
-	 * Gets all saved chats
+	 * Gets all saved chats.
+	 * This method retrieves all chats from storage and handles:
+	 * - JSON parsing
+	 * - Error handling
+	 * - Empty state handling
+	 *
+	 * @returns Promise resolving to an array of all saved chats
 	 */
 	public async getAllChats(): Promise<Chat[]> {
 		const chatsJson = this.storageService.get(STORAGE_KEYS.CHATS, StorageScope.PROFILE);
@@ -103,7 +145,11 @@ export class ChatService {
 	}
 
 	/**
-	 * Deletes a chat by ID
+	 * Deletes a chat by ID.
+	 * This method removes a specific chat from storage and updates
+	 * the stored chat list accordingly.
+	 *
+	 * @param chatId - The ID of the chat to delete
 	 */
 	public async deleteChat(chatId: string): Promise<void> {
 		const chats = await this.getAllChats();
@@ -118,7 +164,16 @@ export class ChatService {
 	}
 
 	/**
-	 * Determines the capabilities of a model based on its ID and provider
+	 * Determines the capabilities of a model based on its ID and provider.
+	 * This method analyzes the model ID and provider to determine:
+	 * - Image processing capabilities
+	 * - Code handling capabilities
+	 * - Thinking process capabilities
+	 * - Function calling capabilities
+	 *
+	 * @param modelId - The ID of the model
+	 * @param providerType - The type of AI provider
+	 * @returns Object describing the model's capabilities
 	 */
 	private getModelCapabilities(modelId: string, providerType: ModelProviderType): ModelCapabilities {
 		// Base capabilities - conservative defaults

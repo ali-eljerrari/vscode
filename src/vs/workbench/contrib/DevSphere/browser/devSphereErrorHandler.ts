@@ -3,220 +3,324 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * @file DevSphere Error Handler
+ *
+ * This module provides comprehensive error handling for the DevSphere extension.
+ * It includes:
+ *
+ * 1. Error categorization - Classifying errors into specific categories for
+ *    targeted handling and user communication
+ *
+ * 2. Error processing - Converting various error types (API errors, network errors,
+ *    etc.) into a standardized DevSphereError format
+ *
+ * 3. Error presentation - Converting errors into user-friendly notifications
+ *    and system messages
+ *
+ * The error handler centralizes error management to ensure consistent handling
+ * and messaging throughout the extension.
+ */
+
 import { INotificationService } from '../../../../platform/notification/common/notification.js';
 
 /**
- * Error categories for DevSphere
+ * Error categories for DevSphere.
+ * Categorizes errors by their source and type to enable specific handling
+ * strategies for different error scenarios.
  */
 export enum DevSphereErrorCategory {
+	/** API key missing, invalid, or expired */
 	API_KEY = 'api_key',
+
+	/** Error in constructing or sending API request */
 	API_REQUEST = 'api_request',
+
+	/** Error in the API response format or content */
 	API_RESPONSE = 'api_response',
+
+	/** Rate limit exceeded for API calls */
 	API_RATE_LIMIT = 'api_rate_limit',
+
+	/** Usage quota exceeded for the API service */
 	API_QUOTA = 'api_quota',
+
+	/** Network connectivity issues */
 	NETWORK = 'network',
+
+	/** Authentication problems (beyond API key issues) */
 	AUTHENTICATION = 'authentication',
+
+	/** Problems with the AI model itself */
 	MODEL = 'model',
+
+	/** Content was filtered by the AI provider's content policy */
 	CONTENT_FILTER = 'content_filter',
+
+	/** Unclassified or unexpected errors */
 	UNKNOWN = 'unknown'
 }
 
 /**
- * Interface for DevSphere error details
+ * Standardized error object for DevSphere.
+ * Provides a consistent structure for all errors in the system,
+ * regardless of their original source.
  */
 export interface DevSphereError {
+	/** The category of the error */
 	category: DevSphereErrorCategory;
+
+	/** User-friendly error message */
 	message: string;
+
+	/** Additional technical details (for logs/debugging) */
 	details?: string;
+
+	/** HTTP status code (for API errors) */
 	statusCode?: number;
+
+	/** Which provider caused the error */
 	provider?: string;
+
+	/** Which model caused the error */
 	modelId?: string;
+
+	/** Whether the operation can be retried */
 	retryable?: boolean;
+
+	/** Label for action button (if applicable) */
 	actionLabel?: string;
+
+	/** Function to call when action is clicked */
 	actionFn?: () => void;
+
+	/** Original exception object */
 	originalError?: Error;
 }
 
 /**
- * Utility to handle DevSphere service errors
+ * Utility class to handle DevSphere service errors.
+ * Provides static methods for processing errors, displaying notifications,
+ * and formatting error messages.
  */
 export class DevSphereErrorHandler {
 	/**
-	 * Process an API error and convert it to a standardized DevSphereError
+	 * Processes an API error and converts it to a standardized DevSphereError.
+	 * Analyzes the error to determine its category and extracts relevant information.
+	 *
+	 * @param error - The original error from the API call
+	 * @param modelId - ID of the model that was being used
+	 * @param provider - Name of the provider that was being used
+	 * @returns A standardized DevSphereError object
 	 */
 	public static processApiError(error: unknown, modelId: string, provider: string): DevSphereError {
-		// Default error in case we can't extract more specific information
-		const result: DevSphereError = {
+		// Default error structure
+		const devSphereError: DevSphereError = {
 			category: DevSphereErrorCategory.UNKNOWN,
-			message: 'An unknown error occurred',
+			message: 'An unexpected error occurred',
 			provider,
 			modelId,
-			retryable: false
+			retryable: false,
+			originalError: error instanceof Error ? error : undefined
 		};
 
+		// Handle different error types
 		if (error instanceof Error) {
-			// Extract the raw error message
-			result.message = error.message;
-			result.originalError = error;
+			devSphereError.message = error.message;
+			devSphereError.details = error.stack;
 
-			const errorMessage = error.message.toLowerCase();
-
-			// Check for common API errors
-			if (errorMessage.includes('authentication') || errorMessage.includes('api key') ||
-				errorMessage.includes('unauthorized') || errorMessage.includes('auth') ||
-				errorMessage.includes('invalid key')) {
-				result.category = DevSphereErrorCategory.AUTHENTICATION;
-				result.message = 'Authentication failed. Please check your API key.';
-				result.retryable = false;
-				result.actionLabel = 'Update API Key';
-
-			} else if (errorMessage.includes('exceeded') || errorMessage.includes('rate limit') ||
-				errorMessage.includes('too many requests') || errorMessage.includes('429')) {
-				result.category = DevSphereErrorCategory.API_RATE_LIMIT;
-				result.message = 'Rate limit exceeded. Please try again later.';
-				result.retryable = true;
-
-			} else if (errorMessage.includes('model') &&
-				(errorMessage.includes('not found') || errorMessage.includes('unavailable'))) {
-				result.category = DevSphereErrorCategory.MODEL;
-				result.message = `Model "${modelId}" is not available. Please select a different model.`;
-				result.retryable = false;
-
-			} else if (errorMessage.includes('content') && errorMessage.includes('filter')) {
-				result.category = DevSphereErrorCategory.CONTENT_FILTER;
-				result.message = 'Your request was flagged by content filters. Please modify your prompt and try again.';
-				result.retryable = true;
-
-			} else if (errorMessage.includes('quota') || errorMessage.includes('insufficient') ||
-				errorMessage.includes('budget') || errorMessage.includes('credits')) {
-				result.category = DevSphereErrorCategory.API_QUOTA;
-				result.message = 'Your API quota or credits have been exhausted.';
-				result.retryable = false;
-
-			} else if (errorMessage.includes('network') || errorMessage.includes('connection') ||
-				errorMessage.includes('timeout') || errorMessage.includes('connect')) {
-				result.category = DevSphereErrorCategory.NETWORK;
-				result.message = 'Network error. Please check your internet connection.';
-				result.retryable = true;
+			// Check for network errors
+			if (error.message.includes('Failed to fetch') || error.message.includes('Network Error') || error.message.includes('ECONNREFUSED')) {
+				devSphereError.category = DevSphereErrorCategory.NETWORK;
+				devSphereError.message = 'Network connection error. Please check your internet connection.';
+				devSphereError.retryable = true;
 			}
+		} else if (typeof error === 'object' && error !== null) {
+			// Handle response-like errors with status codes
+			const errorObj = error as Record<string, any>;
 
-			// Try to extract response status code if available in the error message
-			const statusCodeMatch = errorMessage.match(/(\b[45]\d\d\b)/);
-			if (statusCodeMatch) {
-				result.statusCode = parseInt(statusCodeMatch[1], 10);
+			if ('status' in errorObj && typeof errorObj.status === 'number') {
+				devSphereError.statusCode = errorObj.status;
 
-				// Refine error further based on status code
-				if (result.statusCode === 401 || result.statusCode === 403) {
-					result.category = DevSphereErrorCategory.AUTHENTICATION;
-					result.message = 'Authentication failed. Please check your API key.';
-					result.retryable = false;
-					result.actionLabel = 'Update API Key';
-				} else if (result.statusCode === 429) {
-					result.category = DevSphereErrorCategory.API_RATE_LIMIT;
-					result.message = 'Rate limit exceeded. Please try again later.';
-					result.retryable = true;
-				} else if (result.statusCode === 404 && errorMessage.includes('model')) {
-					result.category = DevSphereErrorCategory.MODEL;
-					result.message = `Model "${modelId}" is not available. Please select a different model.`;
-					result.retryable = false;
+				// Handle specific HTTP status codes
+				if (errorObj.status === 401 || errorObj.status === 403) {
+					devSphereError.category = DevSphereErrorCategory.API_KEY;
+					devSphereError.message = 'Authentication failed. Please check your API key.';
+					devSphereError.retryable = false;
+					devSphereError.actionLabel = 'Update API Key';
+				} else if (errorObj.status === 429) {
+					devSphereError.category = DevSphereErrorCategory.API_RATE_LIMIT;
+					devSphereError.message = 'Rate limit exceeded. Please try again later.';
+					devSphereError.retryable = true;
+				} else if (errorObj.status >= 500) {
+					devSphereError.category = DevSphereErrorCategory.API_RESPONSE;
+					devSphereError.message = 'The AI service is currently unavailable. Please try again later.';
+					devSphereError.retryable = true;
 				}
 			}
 
-			// Add detailed explanation
-			result.details = error.message;
+			// Handle provider-specific error formats
+			if ('error' in errorObj && typeof errorObj.error === 'object' && errorObj.error !== null) {
+				const errorDetails = errorObj.error;
+
+				if (typeof errorDetails.message === 'string') {
+					devSphereError.details = errorDetails.message;
+				}
+
+				if (typeof errorDetails.type === 'string') {
+					// OpenAI-style error types
+					if (errorDetails.type.includes('rate_limit_exceeded')) {
+						devSphereError.category = DevSphereErrorCategory.API_RATE_LIMIT;
+						devSphereError.message = 'Rate limit exceeded. Please try again later.';
+						devSphereError.retryable = true;
+					} else if (errorDetails.type.includes('invalid_api_key')) {
+						devSphereError.category = DevSphereErrorCategory.API_KEY;
+						devSphereError.message = 'Invalid API key. Please update your API key.';
+						devSphereError.retryable = false;
+						devSphereError.actionLabel = 'Update API Key';
+					} else if (errorDetails.type.includes('insufficient_quota')) {
+						devSphereError.category = DevSphereErrorCategory.API_QUOTA;
+						devSphereError.message = 'You have exceeded your current quota. Please check your plan and billing details.';
+						devSphereError.retryable = false;
+					} else if (errorDetails.type.includes('content_filter')) {
+						devSphereError.category = DevSphereErrorCategory.CONTENT_FILTER;
+						devSphereError.message = 'Your request was blocked by the AI provider\'s content filter.';
+						devSphereError.retryable = false;
+					}
+				}
+			}
 		} else if (typeof error === 'string') {
 			// Handle string errors
-			result.message = error;
-			result.details = error;
-		} else if (error && typeof error === 'object') {
-			// Try to extract information from error objects
-			const errorObj = error as Record<string, any>;
+			devSphereError.message = error;
 
-			if (errorObj.message) {
-				result.message = String(errorObj.message);
-				result.details = JSON.stringify(errorObj, null, 2);
-			} else {
-				result.message = 'Unknown error occurred';
-				result.details = JSON.stringify(errorObj, null, 2);
+			// Check for common error patterns in string messages
+			if (error.includes('API key') || error.includes('authentication')) {
+				devSphereError.category = DevSphereErrorCategory.API_KEY;
+				devSphereError.retryable = false;
+				devSphereError.actionLabel = 'Update API Key';
+			} else if (error.includes('rate limit') || error.includes('too many requests')) {
+				devSphereError.category = DevSphereErrorCategory.API_RATE_LIMIT;
+				devSphereError.message = 'Rate limit exceeded. Please try again later.';
+				devSphereError.retryable = true;
 			}
 		}
 
-		return result;
+		return devSphereError;
 	}
 
 	/**
-	 * Display an error notification to the user
+	 * Displays an error notification to the user.
+	 * Shows a notification with appropriate actions based on the error category.
+	 *
+	 * @param error - The standardized DevSphere error
+	 * @param notificationService - VS Code's notification service
 	 */
 	public static showErrorNotification(error: DevSphereError, notificationService: INotificationService): void {
-		// Format the title based on category
-		let title: string;
-		switch (error.category) {
-			case DevSphereErrorCategory.AUTHENTICATION:
-				title = `Authentication Error (${error.provider})`;
-				break;
-			case DevSphereErrorCategory.API_RATE_LIMIT:
-				title = `Rate Limit Exceeded (${error.provider})`;
-				break;
-			case DevSphereErrorCategory.MODEL:
-				title = `Model Error (${error.provider})`;
-				break;
-			case DevSphereErrorCategory.CONTENT_FILTER:
-				title = `Content Filter (${error.provider})`;
-				break;
-			case DevSphereErrorCategory.NETWORK:
-				title = 'Network Error';
-				break;
-			default:
-				title = `AI Service Error (${error.provider})`;
+		const message = error.message;
+		const actions = [];
+
+		// Add action button if specified
+		if (error.actionLabel && error.actionFn) {
+			actions.push({
+				label: error.actionLabel,
+				run: error.actionFn
+			});
 		}
 
-		// Create notification based on error details
-		const message = `${title}: ${error.message}`;
+		// Add retry button for retryable errors
+		if (error.retryable) {
+			actions.push({
+				label: 'Retry',
+				run: () => {
+					// The retry logic should be handled by the caller
+					console.log('User clicked retry for error:', error);
+				}
+			});
+		}
 
-		if (error.actionLabel && error.actionFn) {
-			notificationService.prompt(
-				1, // Severity.Error
-				message,
-				[{
-					label: error.actionLabel,
-					run: () => error.actionFn?.()
-				}],
-				{ sticky: true }
-			);
-		} else {
-			notificationService.error(message);
+		// Show different notification types based on error category
+		switch (error.category) {
+			case DevSphereErrorCategory.API_KEY:
+			case DevSphereErrorCategory.AUTHENTICATION:
+				notificationService.error(message);
+				break;
+
+			case DevSphereErrorCategory.API_RATE_LIMIT:
+			case DevSphereErrorCategory.API_QUOTA:
+			case DevSphereErrorCategory.NETWORK:
+				notificationService.error(message);
+				break;
+
+			case DevSphereErrorCategory.CONTENT_FILTER:
+				notificationService.error(message);
+				break;
+
+			default:
+				notificationService.error(message);
 		}
 	}
 
 	/**
-	 * Format error as a system message for display in the chat
+	 * Formats an error as a system message for display in the chat.
+	 * Creates a markdown-formatted error message that can be added to the chat.
+	 *
+	 * @param error - The standardized DevSphere error
+	 * @returns A markdown-formatted error message
 	 */
 	public static formatErrorAsSystemMessage(error: DevSphereError): string {
-		let message = `**Error ${error.provider ? `from ${error.provider}` : ''}**: ${error.message}`;
+		// Basic error message
+		let message = `**Error**: ${error.message}`;
 
-		if (error.details && error.details !== error.message) {
-			message += `\n\n\`\`\`\n${error.details}\n\`\`\``;
+		// Add category info
+		message += `\n\n**Type**: ${this.getCategoryDisplayName(error.category)}`;
+
+		// Add provider info if available
+		if (error.provider) {
+			message += `\n\n**Provider**: ${error.provider}`;
 		}
 
-		// Add helpful tips based on error category
-		switch (error.category) {
-			case DevSphereErrorCategory.AUTHENTICATION:
-				message += '\n\n**Tip**: Check that your API key is correct and has not expired.';
-				break;
-			case DevSphereErrorCategory.API_RATE_LIMIT:
-				message += '\n\n**Tip**: Wait a few moments and try again, or switch to a different model.';
-				break;
-			case DevSphereErrorCategory.MODEL:
-				message += '\n\n**Tip**: Try selecting a different model from the dropdown menu.';
-				break;
-			case DevSphereErrorCategory.CONTENT_FILTER:
-				message += '\n\n**Tip**: Rephrase your request to avoid potentially sensitive content.';
-				break;
-			case DevSphereErrorCategory.NETWORK:
-				message += '\n\n**Tip**: Check your internet connection and try again.';
-				break;
+		// Add status code if available
+		if (error.statusCode) {
+			message += `\n\n**Status Code**: ${error.statusCode}`;
+		}
+
+		// Add retry information
+		if (error.retryable) {
+			message += '\n\n*You can try again later or try a different query.*';
 		}
 
 		return message;
+	}
+
+	/**
+	 * Gets a user-friendly display name for an error category.
+	 *
+	 * @param category - The error category enum value
+	 * @returns A human-readable category name
+	 */
+	private static getCategoryDisplayName(category: DevSphereErrorCategory): string {
+		switch (category) {
+			case DevSphereErrorCategory.API_KEY:
+				return 'API Key Issue';
+			case DevSphereErrorCategory.API_REQUEST:
+				return 'Request Error';
+			case DevSphereErrorCategory.API_RESPONSE:
+				return 'Response Error';
+			case DevSphereErrorCategory.API_RATE_LIMIT:
+				return 'Rate Limit Exceeded';
+			case DevSphereErrorCategory.API_QUOTA:
+				return 'Quota Exceeded';
+			case DevSphereErrorCategory.NETWORK:
+				return 'Network Error';
+			case DevSphereErrorCategory.AUTHENTICATION:
+				return 'Authentication Error';
+			case DevSphereErrorCategory.MODEL:
+				return 'Model Error';
+			case DevSphereErrorCategory.CONTENT_FILTER:
+				return 'Content Filtered';
+			case DevSphereErrorCategory.UNKNOWN:
+			default:
+				return 'Unknown Error';
+		}
 	}
 }

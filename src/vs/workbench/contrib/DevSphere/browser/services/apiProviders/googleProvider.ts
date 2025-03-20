@@ -7,7 +7,18 @@ import { CorsHandlerService } from '../corsHandlerService.js';
 import { IAPIProvider } from './apiProviderInterface.js';
 
 /**
- * API provider for Google
+ * API provider implementation for Google's AI models.
+ * This provider handles all interactions with Google's AI API, including:
+ * - Request formatting
+ * - Response parsing
+ * - CORS handling
+ * - Error management
+ *
+ * The provider is designed to work with Google's Gemini models and handles
+ * the specific requirements of Google's API, such as:
+ * - API key placement in URL
+ * - Specific request/response formats
+ * - Error handling patterns
  */
 export class GoogleProvider implements IAPIProvider {
 	constructor(
@@ -16,7 +27,14 @@ export class GoogleProvider implements IAPIProvider {
 	) { }
 
 	/**
-	 * Formats a request body for the Google API
+	 * Formats a request body for the Google API.
+	 * Google's API requires a specific format with:
+	 * - contents: Array of message objects with role and parts
+	 * - generationConfig: Configuration for token limits
+	 *
+	 * @param prompt - The user's input text
+	 * @param maxTokens - Maximum number of tokens to generate
+	 * @returns Formatted request body matching Google's API requirements
 	 */
 	formatRequestBody(prompt: string, maxTokens: number): any {
 		// Google API format is different when using the API key in the URL
@@ -35,7 +53,16 @@ export class GoogleProvider implements IAPIProvider {
 	}
 
 	/**
-	 * Extracts the response content from the Google API response
+	 * Extracts the response content from the Google API response.
+	 * Handles various response formats and error cases:
+	 * - Standard response format with candidates
+	 * - Alternative response formats
+	 * - Error messages
+	 * - Plain text responses
+	 *
+	 * @param data - Raw response data from the API
+	 * @returns Extracted text content or error message
+	 * @throws Error if response cannot be parsed
 	 */
 	extractResponseContent(data: any): string {
 		// Handle Google API response with key in URL
@@ -75,7 +102,15 @@ export class GoogleProvider implements IAPIProvider {
 	}
 
 	/**
-	 * Makes a request to the Google API, handling CORS issues
+	 * Makes a request to the Google API, handling CORS issues.
+	 * Uses a proxy URL approach to avoid CORS restrictions and includes
+	 * the API key in the URL as required by Google's API.
+	 *
+	 * @param endpoint - The API endpoint URL
+	 * @param apiKey - The Google API key
+	 * @param requestBody - Formatted request body
+	 * @param abortSignal - Signal for request cancellation
+	 * @returns Promise resolving to the API response
 	 */
 	async makeRequest(
 		endpoint: string,

@@ -10,7 +10,18 @@ import { STORAGE_KEYS } from '../models/modelData.js';
 import { ModelProviderType } from '../models/types.js';
 
 /**
- * Service for managing API keys
+ * Service for managing API keys for different AI providers.
+ * This service handles all aspects of API key management including:
+ * - Secure storage of API keys using VS Code's secret storage
+ * - User interaction for key input and updates
+ * - Validation of key formats
+ * - Provider-specific key handling
+ *
+ * The service ensures that API keys are:
+ * - Stored securely using VS Code's built-in secret storage
+ * - Validated before storage
+ * - Easily accessible when needed
+ * - Properly managed across different providers
  */
 export class ApiKeyService {
 	constructor(
@@ -20,7 +31,12 @@ export class ApiKeyService {
 	) { }
 
 	/**
-	 * Retrieves the API key for the specified provider
+	 * Retrieves the API key for the specified provider.
+	 * This method securely retrieves the stored API key from VS Code's
+	 * secret storage system.
+	 *
+	 * @param providerType - The type of AI provider to get the key for
+	 * @returns Promise resolving to the stored API key or undefined if not found
 	 */
 	public async getApiKey(providerType: ModelProviderType): Promise<string | undefined> {
 		const secretKey = this.getSecretKeyForProvider(providerType);
@@ -28,7 +44,15 @@ export class ApiKeyService {
 	}
 
 	/**
-	 * Prompts the user to enter an API key for the specified provider
+	 * Prompts the user to enter an API key for the specified provider.
+	 * This method handles the user interaction for API key input, including:
+	 * - Input validation
+	 * - Secure storage
+	 * - User feedback
+	 *
+	 * @param modelType - The type of AI provider
+	 * @param providerName - Display name of the provider
+	 * @returns Promise resolving to the entered API key or undefined if cancelled
 	 */
 	public async promptForAPIKey(
 		modelType: ModelProviderType,
@@ -76,7 +100,11 @@ export class ApiKeyService {
 	}
 
 	/**
-	 * Gets the secret storage key for the specified provider
+	 * Gets the secret storage key for the specified provider.
+	 * This method maps provider types to their corresponding storage keys.
+	 *
+	 * @param providerType - The type of AI provider
+	 * @returns The storage key for the provider's API key
 	 */
 	private getSecretKeyForProvider(providerType: ModelProviderType): string {
 		switch (providerType) {
@@ -92,7 +120,11 @@ export class ApiKeyService {
 	}
 
 	/**
-	 * Clears the API key for the specified provider
+	 * Clears the API key for the specified provider.
+	 * This method securely removes the stored API key from VS Code's
+	 * secret storage system.
+	 *
+	 * @param providerType - The type of AI provider to clear the key for
 	 */
 	public async clearApiKey(providerType: ModelProviderType): Promise<void> {
 		const secretKey = this.getSecretKeyForProvider(providerType);

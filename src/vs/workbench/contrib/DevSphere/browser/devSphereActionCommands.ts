@@ -3,6 +3,21 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * @file DevSphere Action Commands
+ *
+ * This module defines and registers all the actions and commands available
+ * in the DevSphere extension. These include:
+ *
+ * 1. Global commands - Commands available from the command palette
+ * 2. View commands - Commands related to showing and manipulating the DevSphere view
+ * 3. Model commands - Commands for selecting and changing AI models
+ * 4. Chat commands - Commands for managing chat conversations
+ *
+ * All commands use VS Code's Action2 system for registration and follow
+ * the command pattern for consistent behavior and discoverability.
+ */
+
 import { registerAction2, Action2 } from '../../../../platform/actions/common/actions.js';
 import { ServicesAccessor } from '../../../../platform/instantiation/common/instantiation.js';
 import { Categories } from '../../../../platform/action/common/actionCommonCategories.js';
@@ -15,20 +30,32 @@ import { IQuickInputService, IQuickPickItem } from '../../../../platform/quickin
 import { DevSphereViewType } from './view/devSphereViewTabs.js';
 import { ContextKeyExpr } from '../../../../platform/contextkey/common/contextkey.js';
 
-// Constants
+/**
+ * Unique identifier for the DevSphere view container.
+ * Used throughout the extension to reference the container.
+ */
 export const DEV_SPHERE_CONTAINER_ID = 'devSphere';
 
-// Define an extended QuickPickItem interface that includes the model ID
+/**
+ * Extended quick pick item interface that includes model ID.
+ * Used for model selection quick picks to associate each item with its model ID.
+ */
 interface ModelQuickPickItem extends IQuickPickItem {
 	id: string;
 }
 
 /**
- * Registers all DevSphere-related commands and actions
+ * Registers all DevSphere-related commands and actions.
+ * This function is called during extension activation to make all
+ * DevSphere commands available to the user.
  */
 export function registerDevSphereActions(): void {
 	// Register a command to show the panel
 	registerAction2(class extends Action2 {
+		/**
+		 * Constructs the "Show DevSphere" command.
+		 * This command is available in the command palette and opens the DevSphere view.
+		 */
 		constructor() {
 			super({
 				id: 'workbench.action.showDevSphere',
@@ -38,6 +65,12 @@ export function registerDevSphereActions(): void {
 			});
 		}
 
+		/**
+		 * Shows the DevSphere view.
+		 * This is executed when the user runs the "Show DevSphere" command.
+		 *
+		 * @param accessor - Service accessor for dependency injection
+		 */
 		run(accessor: ServicesAccessor): void {
 			const viewsService = accessor.get(IViewsService);
 			const viewDescriptorService = accessor.get(IViewDescriptorService);

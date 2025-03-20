@@ -3,6 +3,22 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * @file DevSphere History Component
+ *
+ * This module implements the history view for the DevSphere extension, providing
+ * a searchable, organized list of past conversations. Key features include:
+ *
+ * 1. Time-based grouping (Today, Yesterday, Last 7 Days, Older)
+ * 2. Search functionality for finding specific conversations
+ * 3. Chat metadata display (message count, time, model used)
+ * 4. Action buttons for opening or deleting chats
+ * 5. Empty state handling for new users
+ *
+ * The history component appears when the user switches to the History tab in the
+ * DevSphere panel and provides a convenient way to manage and access past interactions.
+ */
+
 import { DevSphereViewModel } from '../devSphereViewModel.js';
 import { Disposable } from '../../../../../base/common/lifecycle.js';
 import { IQuickInputService } from '../../../../../platform/quickinput/common/quickInput.js';
@@ -11,12 +27,32 @@ import * as DOM from '../../../../../base/browser/dom.js';
 import { Codicon } from '../../../../../base/common/codicons.js';
 import { ThemeIcon } from '../../../../../base/common/themables.js';
 
+/**
+ * History component for the DevSphere extension.
+ * Manages a searchable view of past conversations with time-based grouping
+ * and operations for managing chat history.
+ */
 export class DevSphereHistory extends Disposable {
+	/** Main container for the history view */
 	private container: HTMLDivElement;
+
+	/** Container for the list of chat history items */
 	private historyList: HTMLDivElement;
+
+	/** Search input field for filtering chats */
 	private searchInput: HTMLInputElement;
+
+	/** Container for search input and related elements */
 	private searchContainer: HTMLDivElement;
 
+	/**
+	 * Creates a new instance of the DevSphere history component.
+	 *
+	 * @param parentContainer - Parent DOM element to append the history component to
+	 * @param viewModel - ViewModel instance for accessing chat data
+	 * @param quickInputService - Service for displaying confirmation dialogs
+	 * @param onChatSelected - Callback function to invoke when a chat is selected
+	 */
 	constructor(
 		parentContainer: HTMLElement,
 		private readonly viewModel: DevSphereViewModel,
@@ -84,7 +120,9 @@ export class DevSphereHistory extends Disposable {
 	}
 
 	/**
-	 * Updates the history list with all chats
+	 * Updates the history list with all chats.
+	 * Clears and rebuilds the entire list, grouping chats by time periods
+	 * (Today, Yesterday, Last 7 Days, Older).
 	 */
 	public updateHistoryList(): void {
 		// Clear existing history items
@@ -147,7 +185,11 @@ export class DevSphereHistory extends Disposable {
 	}
 
 	/**
-	 * Creates a date section with header and chat items
+	 * Creates a date section with header and chat items.
+	 * Groups chats under a common time-based header for better organization.
+	 *
+	 * @param title - The section title (e.g., "Today", "Yesterday")
+	 * @param chats - Array of chat objects to include in this section
 	 */
 	private createDateSection(title: string, chats: Chat[]): void {
 		// Create section container
@@ -174,7 +216,11 @@ export class DevSphereHistory extends Disposable {
 	}
 
 	/**
-	 * Creates a single chat history item
+	 * Creates a single chat history item.
+	 * Builds a UI element representing a chat with title, metadata, and action buttons.
+	 *
+	 * @param chat - The chat object to create an item for
+	 * @returns A DOM element representing the chat history item
 	 */
 	private createChatHistoryItem(chat: Chat): HTMLDivElement {
 		const historyItem = document.createElement('div');
@@ -288,7 +334,10 @@ export class DevSphereHistory extends Disposable {
 	}
 
 	/**
-	 * Updates the selected item style after switching chats
+	 * Updates the selected item style after switching chats.
+	 * Ensures the correct visual highlighting of the currently active chat.
+	 *
+	 * @param selectedChatId - The ID of the newly selected chat
 	 */
 	private updateSelectedItemStyle(selectedChatId: string): void {
 		const items = this.historyList.querySelectorAll('.dev-sphere-history-item');
@@ -305,7 +354,11 @@ export class DevSphereHistory extends Disposable {
 	}
 
 	/**
-	 * Filters the history list based on search input
+	 * Filters the history list based on search input.
+	 * Shows or hides chat items based on whether their titles match the search term.
+	 * Also handles section visibility and empty search results state.
+	 *
+	 * @param searchTerm - The text to filter chats against
 	 */
 	private filterChatList(searchTerm: string): void {
 		const sections = this.historyList.querySelectorAll('.dev-sphere-history-section');
@@ -376,7 +429,9 @@ export class DevSphereHistory extends Disposable {
 	}
 
 	/**
-	 * Renders empty state when no chats exist
+	 * Renders empty state when no chats exist.
+	 * Creates a friendly UI when the user has no chat history yet,
+	 * with guidance and a button to start a new conversation.
 	 */
 	private renderEmptyState(): void {
 		const emptyState = document.createElement('div');
@@ -413,7 +468,10 @@ export class DevSphereHistory extends Disposable {
 	}
 
 	/**
-	 * Sets the visibility of the history view
+	 * Sets the visibility of the history view.
+	 * Shows or hides the component and updates the list when becoming visible.
+	 *
+	 * @param visible - Whether the history component should be visible
 	 */
 	public setVisible(visible: boolean): void {
 		this.container.style.display = visible ? 'flex' : 'none';

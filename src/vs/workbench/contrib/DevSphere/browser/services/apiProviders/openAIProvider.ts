@@ -6,11 +6,30 @@
 import { IAPIProvider } from './apiProviderInterface.js';
 
 /**
- * API provider for OpenAI
+ * API provider implementation for OpenAI's models.
+ * This provider handles all interactions with OpenAI's API, including:
+ * - Request formatting
+ * - Response parsing
+ * - Authentication
+ * - Error management
+ *
+ * The provider is designed to work with OpenAI's GPT models and handles
+ * the specific requirements of OpenAI's API, such as:
+ * - Bearer token authentication
+ * - Message-based request format
+ * - Token-based response format
  */
 export class OpenAIProvider implements IAPIProvider {
 	/**
-	 * Formats a request body for the OpenAI API
+	 * Formats a request body for the OpenAI API.
+	 * OpenAI's API requires a specific format with:
+	 * - model: The specific model to use
+	 * - messages: Array of message objects with role and content
+	 * - max_tokens: Maximum number of tokens to generate
+	 *
+	 * @param prompt - The user's input text
+	 * @param maxTokens - Maximum number of tokens to generate
+	 * @returns Formatted request body matching OpenAI's API requirements
 	 */
 	formatRequestBody(prompt: string, maxTokens: number): any {
 		return {
@@ -26,7 +45,14 @@ export class OpenAIProvider implements IAPIProvider {
 	}
 
 	/**
-	 * Extracts the response content from the OpenAI API response
+	 * Extracts the response content from the OpenAI API response.
+	 * Handles OpenAI's standard response format which includes:
+	 * - choices array with message objects
+	 * - content field within messages
+	 *
+	 * @param data - Raw response data from the API
+	 * @returns Extracted text content
+	 * @throws Error if response cannot be parsed
 	 */
 	extractResponseContent(data: any): string {
 		if (data.choices && data.choices.length > 0) {
@@ -42,7 +68,15 @@ export class OpenAIProvider implements IAPIProvider {
 	}
 
 	/**
-	 * Makes a request to the OpenAI API
+	 * Makes a request to the OpenAI API.
+	 * Handles authentication using Bearer token and includes
+	 * proper headers for JSON content.
+	 *
+	 * @param endpoint - The API endpoint URL
+	 * @param apiKey - The OpenAI API key
+	 * @param requestBody - Formatted request body
+	 * @param abortSignal - Signal for request cancellation
+	 * @returns Promise resolving to the API response
 	 */
 	async makeRequest(
 		endpoint: string,

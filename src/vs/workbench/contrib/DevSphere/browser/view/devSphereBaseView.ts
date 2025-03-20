@@ -3,6 +3,24 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * @file DevSphere Base View
+ *
+ * This is the main view component for the DevSphere extension. It serves as the
+ * central UI container that orchestrates all the sub-components and manages
+ * the overall DevSphere user interface.
+ *
+ * The view extends VS Code's ViewPane class and implements:
+ *
+ * 1. The main container UI for all DevSphere components
+ * 2. View tab switching between Chat, History, and API Keys views
+ * 3. Management of all sub-components (messages, input, history, etc.)
+ * 4. Event handling and coordination between components
+ *
+ * This component is instantiated by the VS Code workbench as part of the
+ * view registration in DevSphere.contribution.ts.
+ */
+
 import { IViewPaneOptions, ViewPane } from '../../../../browser/parts/views/viewPane.js';
 import { IKeybindingService } from '../../../../../platform/keybinding/common/keybinding.js';
 import { IContextMenuService } from '../../../../../platform/contextview/browser/contextView.js';
@@ -28,20 +46,65 @@ import { DevSphereViewTabs, DevSphereViewType } from './devSphereViewTabs.js';
 import { DevSphereHistory } from './devSphereHistory.js';
 import { DevSphereAPIKeys } from './devSphereAPIKeys.js';
 
+/**
+ * Main view component for the DevSphere extension.
+ * This class extends the VS Code ViewPane class and serves as the container
+ * for all DevSphere UI components.
+ */
 export class DevSphereView extends ViewPane {
+	/** Unique identifier for the DevSphere view */
 	static readonly ID = 'devSphereView';
 
+	/**
+	 * View model that manages the state and data for the DevSphere UI
+	 * and provides methods for interacting with the AI models
+	 */
 	private viewModel: DevSphereViewModel;
+
+	/** Component for selecting and managing chat conversations */
 	private chatSelectorComponent: DevSphereChatSelector | undefined;
+
+	/** Component for displaying chat messages */
 	private messagesComponent: DevSphereMessages | undefined;
+
+	/** Component for managing chat tabs */
 	private tabsComponent: DevSphereTabs | undefined;
+
+	/** Component for user input and sending messages */
 	private inputComponent: DevSphereInput | undefined;
+
+	/** Component for the header area with controls */
 	private headerComponent: DevSphereHeader | undefined;
+
+	/** Component for switching between different views */
 	private viewTabsComponent: DevSphereViewTabs | undefined;
+
+	/** Component for displaying chat history */
 	private historyComponent: DevSphereHistory | undefined;
+
+	/** Component for managing API keys */
 	private apiKeysComponent: DevSphereAPIKeys | undefined;
+
+	/** Container for chat-related UI components */
 	private chatContentContainer: HTMLElement | undefined;
 
+	/**
+	 * Creates a new instance of the DevSphere view.
+	 *
+	 * @param options - View pane options from VS Code
+	 * @param keybindingService - Service for handling keyboard shortcuts
+	 * @param contextMenuService - Service for context menus
+	 * @param configurationService - Service for accessing configuration
+	 * @param contextKeyService - Service for context keys
+	 * @param viewDescriptorService - Service for view descriptors
+	 * @param instantiationService - Service for instantiating components
+	 * @param openerService - Service for opening links
+	 * @param themeService - Service for theming
+	 * @param hoverService - Service for hover tooltips
+	 * @param devSphereService - Service for DevSphere functionality
+	 * @param notificationService - Service for showing notifications
+	 * @param quickInputService - Service for quick input dialogs
+	 */
 	constructor(
 		options: IViewPaneOptions,
 		@IKeybindingService keybindingService: IKeybindingService,
@@ -87,6 +150,12 @@ export class DevSphereView extends ViewPane {
 		}));
 	}
 
+	/**
+	 * Renders the main view body.
+	 * This is called by VS Code when the view is being created and displayed.
+	 *
+	 * @param container - The DOM element to render the view into
+	 */
 	protected override renderBody(container: HTMLElement): void {
 		container.classList.add('dev-sphere-container');
 
@@ -156,7 +225,10 @@ export class DevSphereView extends ViewPane {
 	}
 
 	/**
-	 * Handle view tab change
+	 * Handles tab changes in the view.
+	 * Shows/hides the appropriate components based on the selected view.
+	 *
+	 * @param view - The view type that was selected
 	 */
 	private onViewTabChanged(view: DevSphereViewType): void {
 		console.log('DevSphere BaseView: View tab changed to', view);
@@ -199,12 +271,20 @@ export class DevSphereView extends ViewPane {
 		}
 	}
 
-	// Method to focus the input
+	/**
+	 * Focuses the input component.
+	 * Used to automatically focus the chat input field when appropriate.
+	 */
 	private focusInput(): void {
 		this.inputComponent?.focus();
 	}
 
-	// Override the setVisible method to focus the input when the view becomes visible
+	/**
+	 * Overrides the setVisible method to handle visibility changes.
+	 * Manages component visibility and focus when the view becomes visible.
+	 *
+	 * @param visible - Whether the view is visible
+	 */
 	override setVisible(visible: boolean): void {
 		super.setVisible(visible);
 		if (visible) {
@@ -226,18 +306,27 @@ export class DevSphereView extends ViewPane {
 		}
 	}
 
-	// Method to explicitly set or update the API key
+	/**
+	 * Updates the API key.
+	 * Public method that can be called from commands to trigger the API key update dialog.
+	 */
 	public async updateAPIKey(): Promise<void> {
 		await this.devSphereService.updateAPIKey();
 	}
 
-	// Method to clear all messages
+	/**
+	 * Clears all messages in the current chat.
+	 * Public method that can be called from commands.
+	 */
 	public clearChat(): void {
 		this.viewModel.clearMessages();
 	}
 
 	/**
-	 * Adds a system message indicating the model has been changed
+	 * Adds a system message indicating the model has been changed.
+	 * Displays information about the newly selected model.
+	 *
+	 * @param modelId - The ID of the new model
 	 */
 	public addModelChangeMessage(modelId: string): void {
 		// Get model info using the service's helper method
@@ -250,7 +339,8 @@ export class DevSphereView extends ViewPane {
 	}
 
 	/**
-	 * Updates the chat count in the header
+	 * Updates the chat count displayed in the header.
+	 * Called when the number of chats changes.
 	 */
 	private updateChatCount(): void {
 		this.headerComponent?.updateChatCount();

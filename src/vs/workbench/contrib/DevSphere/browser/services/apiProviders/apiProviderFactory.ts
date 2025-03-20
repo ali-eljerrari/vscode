@@ -11,13 +11,30 @@ import { IAPIProvider } from './apiProviderInterface.js';
 import { OpenAIProvider } from './openAIProvider.js';
 
 /**
- * Factory for creating API providers
+ * Factory class for creating API providers.
+ * This factory implements the Factory pattern to create appropriate API providers
+ * based on the model type. It handles:
+ * - Provider instantiation
+ * - CORS handler injection
+ * - Provider type validation
+ *
+ * The factory supports three types of providers:
+ * - OpenAI (ChatgptModels)
+ * - Anthropic (AnthropicModels)
+ * - Google (GoogleModels)
  */
 export class ApiProviderFactory {
 	constructor(private readonly corsHandler: CorsHandlerService) { }
 
 	/**
-	 * Creates the appropriate API provider based on the model type
+	 * Creates the appropriate API provider based on the model type.
+	 * This method implements the factory pattern to instantiate the correct
+	 * provider implementation for the specified model type.
+	 *
+	 * @param modelType - The type of model provider to create
+	 * @param modelId - The specific model ID to use
+	 * @returns An instance of the appropriate API provider
+	 * @throws Error if the model type is not supported
 	 */
 	createProvider(modelType: ModelProviderType, modelId: string): IAPIProvider {
 		switch (modelType) {

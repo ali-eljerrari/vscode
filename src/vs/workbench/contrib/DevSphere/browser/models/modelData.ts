@@ -6,7 +6,19 @@
 import { OpenAIModel } from './types.js';
 
 /**
- * Default available models for the DevSphere service
+ * Default available models for the DevSphere service.
+ * This configuration defines all supported AI models across different providers (OpenAI, Anthropic, Google).
+ * Each model is categorized by cost and capability tiers:
+ * - Low cost models: Suitable for basic tasks and cost-sensitive applications
+ * - Mid-range models: Balanced performance and cost for general use cases
+ * - Premium models: High-performance models for complex tasks requiring advanced capabilities
+ *
+ * Each model entry includes:
+ * - id: Unique identifier for the model
+ * - name: Display name with descriptive information
+ * - description: Detailed description of the model's capabilities and use cases
+ *
+ * The configuration also includes endpoint URLs for each provider's API.
  */
 export const OPENAI_MODELS: OpenAIModel[] = [
 	{
@@ -60,22 +72,41 @@ export const OPENAI_MODELS: OpenAIModel[] = [
 ];
 
 /**
- * Default token limit for API requests
+ * Default token limit for API requests.
+ * This value represents the maximum number of tokens that can be generated in a single API response.
+ * Tokens are the basic units of text that the AI models process, with approximately 4 characters per token.
  */
 export const DEFAULT_MAX_TOKENS = 500;
 
 /**
- * Default model ID to use if none is specified
+ * Default model ID to use if none is specified.
+ * This model is selected as the default because it provides a good balance of:
+ * - Performance
+ * - Cost efficiency
+ * - Availability
+ * - Response speed
  */
 export const DEFAULT_MODEL_ID = 'gpt-4o-mini';
 
 /**
- * Default model provider to use if none is specified
+ * Default model provider to use if none is specified.
+ * OpenAI is selected as the default provider because:
+ * - It has the most stable API
+ * - Offers good documentation
+ * - Has consistent availability
+ * - Provides reliable performance
  */
 export const DEFAULT_MODEL_PROVIDER = 'ChatgptModels';
 
 /**
- * Storage keys used by the DevSphere service
+ * Storage keys used by the DevSphere service.
+ * These keys are used to securely store:
+ * - API keys for different providers
+ * - Selected model preferences
+ * - Chat history and settings
+ *
+ * All sensitive data (like API keys) are stored using the VS Code secrets storage
+ * for enhanced security.
  */
 export const STORAGE_KEYS = {
 	OPENAI_API_KEY: 'openai.api.key',

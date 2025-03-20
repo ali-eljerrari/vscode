@@ -12,8 +12,23 @@ import { ModelInfo, ModelInfoWithProvider, ModelProviderType, ModelWithProvider,
  */
 export class ModelService {
 	// Current model state
+	/**
+	 * The current model
+	 *
+	 * @type {OpenAIModel}
+	 */
 	private currentModel: OpenAIModel;
+	/**
+	 * The current model ID
+	 *
+	 * @type {string}
+	 */
 	private currentModelId: string = DEFAULT_MODEL_ID;
+	/**
+	 * The current model type
+	 *
+	 * @type {ModelProviderType}
+	 */
 	private currentModelType: ModelProviderType = DEFAULT_MODEL_PROVIDER;
 
 	constructor(
@@ -250,8 +265,8 @@ export class ModelService {
 		this.storageService.store(
 			STORAGE_KEYS.MODEL_ID,
 			this.currentModelId,
-			StorageScope.PROFILE,
-			StorageTarget.USER
+			StorageScope.APPLICATION,
+			StorageTarget.MACHINE
 		);
 	}
 }
