@@ -49,6 +49,12 @@ export class DevSphereService implements IDevSphereService {
 		this.chatService = new ChatService(storageService, notificationService);
 		this.apiProviderFactory = new ApiProviderFactory(this.corsHandler);
 	}
+	removeAPIKeyForProvider(providerType: ModelProviderType): Promise<void> {
+		throw new Error('Method not implemented.');
+	}
+	removeAllAPIKeys(): Promise<void> {
+		throw new Error('Method not implemented.');
+	}
 
 	// #region Model Management
 

@@ -35,12 +35,6 @@ export class DevSphereHeader extends Disposable {
 		const headerLeft = document.createElement('div');
 		headerLeft.className = 'dev-sphere-header-left';
 
-		// Add title
-		const title = document.createElement('div');
-		title.className = 'dev-sphere-header-title';
-		title.textContent = 'DevSphere AI';
-		headerLeft.appendChild(title);
-
 		// Model selector container
 		const modelSelectorContainer = document.createElement('div');
 		modelSelectorContainer.className = 'dev-sphere-model-selector-container';
@@ -162,5 +156,12 @@ export class DevSphereHeader extends Disposable {
 			const providerName = this.devSphereService.getProviderNameFromType(provider);
 			this.viewModel.addSystemMessage(`Model changed to **${info.name}** (${providerName})`);
 		}
+	}
+
+	/**
+	 * Sets the visibility of the header element
+	 */
+	public setVisible(visible: boolean): void {
+		this.headerElement.style.display = visible ? 'flex' : 'none';
 	}
 }

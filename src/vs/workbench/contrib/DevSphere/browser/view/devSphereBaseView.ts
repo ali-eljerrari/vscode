@@ -173,6 +173,12 @@ export class DevSphereView extends ViewPane {
 		this.apiKeysComponent?.setVisible(false);
 		console.log('DevSphere BaseView: Hidden API keys component');
 
+		// Hide/show header based on view type
+		if (this.headerComponent) {
+			this.headerComponent.setVisible(view === DevSphereViewType.Chat);
+			console.log(`DevSphere BaseView: ${view === DevSphereViewType.Chat ? 'Showing' : 'Hiding'} header`);
+		}
+
 		// Show the selected view
 		if (view === DevSphereViewType.Chat) {
 			console.log('DevSphere BaseView: Showing Chat view');
@@ -202,8 +208,15 @@ export class DevSphereView extends ViewPane {
 	override setVisible(visible: boolean): void {
 		super.setVisible(visible);
 		if (visible) {
-			// Focus the input when the view becomes visible (if in chat view)
+			// Get current view
 			const currentView = this.viewTabsComponent?.getCurrentView();
+
+			// Set header visibility based on current view
+			if (this.headerComponent) {
+				this.headerComponent.setVisible(currentView === DevSphereViewType.Chat);
+			}
+
+			// Focus the input when the view becomes visible (if in chat view)
 			if (currentView === DevSphereViewType.Chat) {
 				setTimeout(() => this.focusInput(), 100);
 			} else if (currentView === DevSphereViewType.APIKeys) {
