@@ -115,7 +115,8 @@ export class DevSphereTabs extends Disposable {
 		newChatTab.appendChild(newChatLabel);
 
 		newChatTab.addEventListener('click', async () => {
-			await this.viewModel.createNewChat();
+			// Pass false to reuse empty chat if one exists
+			await this.viewModel.createNewChat(false);
 			this.onTabChange();
 		});
 

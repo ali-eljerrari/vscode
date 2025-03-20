@@ -399,7 +399,7 @@ export class DevSphereHistory extends Disposable {
 		const newChatButton = emptyState.querySelector('.dev-sphere-history-empty-button');
 		if (newChatButton) {
 			newChatButton.addEventListener('click', () => {
-				this.viewModel.createNewChat();
+				this.viewModel.createNewChat(false);
 				this.onChatSelected();
 			});
 		}

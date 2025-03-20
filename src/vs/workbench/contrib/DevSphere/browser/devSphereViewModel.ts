@@ -266,9 +266,35 @@ export class DevSphereViewModel implements IDisposable {
 	}
 
 	/**
-	 * Create a new chat
+	 * Checks if there's already an empty chat that can be reused
+	 * @returns The empty chat if found, otherwise null
 	 */
-	public createNewChat(): void {
+	public hasEmptyChat(): Chat | null {
+		// Empty chat means a chat with no messages
+		const emptyChat = this._allChats.find(chat => chat.messages.length === 0);
+		return emptyChat || null;
+	}
+
+	/**
+	 * Create a new chat or reuse an empty one
+	 * @param force If true, always creates a new chat even if an empty one exists
+	 */
+	public createNewChat(force: boolean = false): void {
+		// Check if there's an empty chat we can reuse
+		const emptyChat = this.hasEmptyChat();
+
+		if (!force && emptyChat) {
+			// Reuse the empty chat
+			this._currentChat = emptyChat;
+			this._messages = [];
+			this._onCurrentChatChanged.fire();
+			this._onMessagesChanged.fire();
+
+			// Reset error state
+			this.setError(null);
+			return;
+		}
+
 		// Create a new chat
 		const newChat = this.devSphereService.createNewChat();
 

@@ -103,8 +103,8 @@ export class DevSphereHeader extends Disposable {
 		newChatButton.title = 'New Chat';
 		DOM.safeInnerHtml(newChatButton, '<span>New Chat</span>');
 		newChatButton.addEventListener('click', () => {
-			// Create a new chat
-			this.viewModel.createNewChat();
+			// Create a new chat (specify false to reuse empty chat if one exists)
+			this.viewModel.createNewChat(false);
 		});
 		headerActions.appendChild(newChatButton);
 
