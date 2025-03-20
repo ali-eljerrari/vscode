@@ -102,13 +102,13 @@ export class DevSphereHeader extends Disposable {
 		newChatButton.className = 'dev-sphere-action-button dev-sphere-new-chat-button';
 		newChatButton.title = 'New Chat';
 		DOM.safeInnerHtml(newChatButton, '<span>New Chat</span>');
-		newChatButton.addEventListener('click', () => {
+		newChatButton.addEventListener('click', async () => {
 			// Create a new chat if we have a current chat with user messages
 			const currentChat = this.viewModel.currentChat;
 			const hasUserMessages = currentChat?.messages.some(msg => msg.role === 'user');
 
 			// Force new chat if we have user messages in current chat, otherwise reuse empty chats
-			this.viewModel.createNewChat(hasUserMessages);
+			await this.viewModel.createNewChat(hasUserMessages);
 		});
 		headerActions.appendChild(newChatButton);
 

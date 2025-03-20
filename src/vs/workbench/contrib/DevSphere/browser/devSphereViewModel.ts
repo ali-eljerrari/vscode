@@ -290,15 +290,16 @@ export class DevSphereViewModel implements IDisposable {
 	/**
 	 * Create a new chat or reuse an empty one
 	 * @param force If true, always creates a new chat even if an empty one exists
+	 * @returns Promise that resolves when the chat is created and saved
 	 */
-	public createNewChat(force: boolean = false): void {
+	public async createNewChat(force: boolean = false): Promise<void> {
 		// Check if there's an empty chat we can reuse
 		const emptyChat = this.hasEmptyChat();
 
 		if (!force && emptyChat) {
 			// Reuse the empty chat
 			this._currentChat = emptyChat;
-			this._messages = [];
+			this._messages = emptyChat.messages || [];
 			this._onCurrentChatChanged.fire();
 			this._onMessagesChanged.fire();
 
@@ -321,9 +322,11 @@ export class DevSphereViewModel implements IDisposable {
 		this._onChatsChanged.fire();
 
 		// Save the new chat
-		this.devSphereService.saveChat(newChat).catch(err => {
+		try {
+			await this.devSphereService.saveChat(newChat);
+		} catch (err) {
 			console.error('Error saving new chat', err);
-		});
+		}
 
 		// Reset error state
 		this.setError(null);
