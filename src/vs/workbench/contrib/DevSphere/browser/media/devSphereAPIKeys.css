@@ -21,6 +21,13 @@
 	opacity: 0.8;
 }
 
+.dev-sphere-apikeys-actions {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 16px;
+	padding: 0 8px;
+}
+
 .dev-sphere-apikeys-list {
 	display: flex;
 	flex-direction: column;

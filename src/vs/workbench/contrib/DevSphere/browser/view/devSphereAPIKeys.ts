@@ -41,6 +41,17 @@ export class DevSphereAPIKeys extends Disposable {
 		header.classList.add('dev-sphere-apikeys-header');
 		this.container.appendChild(header);
 
+		// Create description
+		const description = document.createElement('p');
+		description.textContent = 'Configure API keys for different AI providers to use in DevSphere. Keys are stored securely.';
+		description.classList.add('dev-sphere-apikeys-description');
+		this.container.appendChild(description);
+
+		// Remove All button in its own container
+		const actionContainer = document.createElement('div');
+		actionContainer.classList.add('dev-sphere-apikeys-actions');
+		this.container.appendChild(actionContainer);
+
 		// Remove All button
 		this.removeAllButton = document.createElement('button');
 		this.removeAllButton.textContent = `Remove All API Keys`;
@@ -48,13 +59,7 @@ export class DevSphereAPIKeys extends Disposable {
 		this.removeAllButton.addEventListener('click', () => {
 			this.removeAllAPIKeys();
 		});
-		header.appendChild(this.removeAllButton);
-
-		// Create description
-		const description = document.createElement('p');
-		description.textContent = 'Configure API keys for different AI providers to use in DevSphere. Keys are stored securely.';
-		description.classList.add('dev-sphere-apikeys-description');
-		this.container.appendChild(description);
+		actionContainer.appendChild(this.removeAllButton);
 
 		// Create API keys container
 		this.apiKeysContainer = document.createElement('div');
