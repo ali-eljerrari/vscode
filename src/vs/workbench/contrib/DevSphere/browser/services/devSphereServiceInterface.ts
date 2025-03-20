@@ -16,6 +16,7 @@ export interface IDevSphereService {
 	updateAPIKeyForProvider(providerType: ModelProviderType, providerName: string): Promise<void>;
 	hasAPIKeyForProvider(providerType: ModelProviderType): Promise<boolean>;
 	removeAPIKeyForProvider(providerType: ModelProviderType): Promise<void>;
+	removeAllAPIKeys(): Promise<void>;
 
 	// API interaction
 	fetchAIResponse(prompt: string): Promise<string>;

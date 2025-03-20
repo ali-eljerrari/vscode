@@ -40,6 +40,15 @@ export class DevSphereAPIKeys extends Disposable {
 		header.classList.add('dev-sphere-apikeys-header');
 		this.container.appendChild(header);
 
+		// Remove All button
+		const removeAllButton = document.createElement('button');
+		removeAllButton.textContent = `Remove All API Keys`;
+		removeAllButton.classList.add('dev-sphere-button', 'dev-sphere-button-danger');
+		removeAllButton.addEventListener('click', () => {
+			this.removeAllAPIKeys();
+		});
+		header.appendChild(removeAllButton);
+
 		// Create description
 		const description = document.createElement('p');
 		description.textContent = 'Configure API keys for different AI providers to use in DevSphere. Keys are stored securely.';
@@ -235,6 +244,32 @@ export class DevSphereAPIKeys extends Disposable {
 			}
 		} catch (error) {
 			console.error('Error removing API key:', error);
+		}
+	}
+
+	/**
+	 * Removes all API keys
+	 */
+	private async removeAllAPIKeys(): Promise<void> {
+		try {
+			// Confirm with user before removing
+			const confirmResult = await this.quickInputService.pick(
+				[
+					{ label: 'Yes, remove all keys', id: 'yes' },
+					{ label: 'Cancel', id: 'no' }
+				],
+				{
+					placeHolder: 'Are you sure you want to remove all API keys?',
+					canPickMany: false
+				}
+			);
+
+			if (confirmResult?.id === 'yes') {
+				await this.devSphereService.removeAllAPIKeys();
+				this.refreshAllStatusIndicators();
+			}
+		} catch (error) {
+			console.error('Error removing all API keys:', error);
 		}
 	}
 

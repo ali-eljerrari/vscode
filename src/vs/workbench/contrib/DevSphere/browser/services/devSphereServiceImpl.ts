@@ -146,6 +146,15 @@ export class DevSphereService implements IDevSphereService {
 		this.notificationService.info(`${this.getProviderNameFromType(providerType)} API key has been removed.`);
 	}
 
+	public async removeAllAPIKeys(): Promise<void> {
+		// Clear API keys for all provider types
+		const providerTypes: ModelProviderType[] = ['ChatgptModels', 'AnthropicModels', 'GoogleModels'];
+		for (const providerType of providerTypes) {
+			await this.apiKeyService.clearApiKey(providerType);
+		}
+		this.notificationService.info('All API keys have been removed.');
+	}
+
 	private async promptForAPIKey(modelType: ModelProviderType): Promise<string | undefined> {
 		const providerName = this.getProviderNameFromType(modelType);
 		return this.apiKeyService.promptForAPIKey(modelType, providerName);
