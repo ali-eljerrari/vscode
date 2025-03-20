@@ -405,6 +405,8 @@ export class DevSphereHistory extends Disposable {
 
 				// Force new chat if we have user messages in current chat, otherwise reuse empty chats
 				await this.viewModel.createNewChat(hasUserMessages);
+
+				// Call the onChatSelected callback to switch to chat view
 				this.onChatSelected();
 			});
 		}

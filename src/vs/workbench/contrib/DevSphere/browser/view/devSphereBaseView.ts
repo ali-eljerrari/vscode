@@ -101,6 +101,11 @@ export class DevSphereView extends ViewPane {
 		mainContent.classList.add('dev-sphere-main-content');
 		container.appendChild(mainContent);
 
+		// Add event listener for focus-input custom event
+		container.addEventListener('focus-input', () => {
+			this.focusInput();
+		});
+
 		// Add header
 		this.headerComponent = new DevSphereHeader(
 			mainContent,
@@ -112,6 +117,14 @@ export class DevSphereView extends ViewPane {
 		this.chatContentContainer = document.createElement('div');
 		this.chatContentContainer.classList.add('dev-sphere-chat-content');
 		mainContent.appendChild(this.chatContentContainer);
+
+		// Create tabs component (chat tabs)
+		this.tabsComponent = new DevSphereTabs(
+			this.chatContentContainer,
+			this.viewModel,
+			this.quickInputService,
+			() => this.focusInput() // Call focusInput on tab change to ensure UI is updated
+		);
 
 		// Create messages component
 		this.messagesComponent = new DevSphereMessages(
