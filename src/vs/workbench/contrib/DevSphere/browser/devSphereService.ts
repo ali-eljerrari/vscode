@@ -20,19 +20,19 @@
  * a consistent interface for the UI to interact with.
  */
 
-import { INotificationService } from '../../../../platform/notification/common/notification.js';
 import { IQuickInputService } from '../../../../platform/quickinput/common/quickInput.js';
+import { INotificationService } from '../../../../platform/notification/common/notification.js';
 import { ISecretStorageService } from '../../../../platform/secrets/common/secrets.js';
 import { IStorageService } from '../../../../platform/storage/common/storage.js';
-import { DevSphereErrorHandler, DevSphereErrorCategory } from './devSphereErrorHandler.js';
+import { DevSphereErrorHandler } from './devSphereErrorHandler.js';
 import { DEFAULT_MAX_TOKENS } from './models/modelData.js';
-import { Chat, DevSphereError, ModelInfoWithProvider, ModelProviderType, ModelWithProvider, OpenAIModel } from './models/types.js';
+import { Chat, ModelInfoWithProvider, ModelProviderType, ModelWithProvider, OpenAIModel } from './models/types.js';
 import { ApiKeyService } from './services/apiKeyService.js';
-import { ApiProviderFactory } from './services/apiProviders/apiProviderFactory.js';
 import { ChatService } from './services/chatService.js';
-import { CorsHandlerService } from './services/corsHandlerService.js';
 import { IDevSphereService } from './services/devSphereServiceInterface.js';
 import { ModelService } from './services/modelService.js';
+import { CorsHandlerService } from './services/corsHandlerService.js';
+import { ApiProviderFactory } from './services/apiProviders/apiProviderFactory.js';
 
 /**
  * Main service implementation for DevSphere.
@@ -59,12 +59,12 @@ export class DevSphereService implements IDevSphereService {
 	private readonly chatService: ChatService;
 
 	/**
-	 * Service for handling CORS errors and providing fallback mechanisms
+	 * Service for CORS error handling
 	 */
 	private readonly corsHandler: CorsHandlerService;
 
 	/**
-	 * Factory for creating API provider instances based on provider type
+	 * Service for API provider factory
 	 */
 	private readonly apiProviderFactory: ApiProviderFactory;
 
@@ -80,10 +80,9 @@ export class DevSphereService implements IDevSphereService {
 	constructor(
 		@ISecretStorageService secretStorageService: ISecretStorageService,
 		@IQuickInputService quickInputService: IQuickInputService,
-		@INotificationService private readonly notificationService: INotificationService,
+		@INotificationService notificationService: INotificationService,
 		@IStorageService storageService: IStorageService
 	) {
-		// Initialize service components
 		this.corsHandler = new CorsHandlerService();
 		this.modelService = new ModelService(storageService);
 		this.apiKeyService = new ApiKeyService(secretStorageService, quickInputService, notificationService);
@@ -319,17 +318,6 @@ export class DevSphereService implements IDevSphereService {
 		return !!apiKey;
 	}
 
-	/**
-	 * Prompts the user to enter an API key for a specific provider.
-	 *
-	 * @param modelType - The type of provider to prompt for
-	 * @returns A promise that resolves with the entered API key or undefined if cancelled
-	 */
-	private async promptForAPIKey(modelType: ModelProviderType): Promise<string | undefined> {
-		const providerName = this.getProviderNameFromType(modelType);
-		return this.apiKeyService.promptForAPIKey(modelType, providerName);
-	}
-
 	// #endregion
 
 	// #region API Interaction
@@ -354,21 +342,12 @@ export class DevSphereService implements IDevSphereService {
 		const modelId = this.getCurrentModelId();
 
 		// Check if we have an API key
-		let apiKey = await this.getProviderAPIKey();
+		const apiKey = await this.getProviderAPIKey();
 
 		// Prompt for API key if not found
 		if (!apiKey) {
-			this.notificationService.info(`No ${providerName} API key found. Please enter your API key.`);
-			apiKey = await this.promptForAPIKey(modelType);
-
-			// If user cancelled, early return
-			if (!apiKey) {
-				return `**${providerName} API Key Required**
-
-To use ${providerName} models, you need to add your API key first. Please click the "Add API Key" button to continue.`;
-			}
-
-			this.notificationService.info(`${providerName} API key added successfully. Processing your request...`);
+			const processedError = DevSphereErrorHandler.processApiError('No API key found', modelId, providerName);
+			return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
 		}
 
 		try {
@@ -388,106 +367,15 @@ To use ${providerName} models, you need to add your API key first. Please click 
 				apiKey,
 				requestBody,
 				controller.signal
-			).catch(async (error) => {
-				// Special handling for Anthropic alternative endpoint
-				if (modelType === 'AnthropicModels' && this.corsHandler.isCORSError(error)) {
-					const anthropicProvider = this.apiProviderFactory.createProvider(modelType, modelId);
-					if ('makeAlternativeRequest' in anthropicProvider) {
-						// Try the alternative endpoint approach
-						return (anthropicProvider as any).makeAlternativeRequest(
-							this.modelService.getCurrentEndpoint(),
-							apiKey,
-							requestBody,
-							controller.signal
-						);
-					}
-				}
-				throw error; // Re-throw if not handled
-			});
+			);
 
 			// Clear timeout since request completed
 			clearTimeout(timeoutId);
 
 			// Check response status
 			if (!response.ok) {
-				const statusCode = response.status;
-				let errorData: any = {};
-
-				try {
-					errorData = await response.json();
-				} catch (e) {
-					// If we can't parse the error as JSON, continue with empty error data
-				}
-
-				// Handle different error types
-				if (statusCode === 401 || statusCode === 403 ||
-					errorData.error?.code === 'invalid_api_key' ||
-					errorData.error?.message?.toLowerCase().includes('api key') ||
-					errorData.error?.message?.toLowerCase().includes('authentication')) {
-
-					// Authentication error - prompt for a new key
-					this.notificationService.info(`${providerName} API key is invalid or unauthorized. Please enter a new key.`);
-					const newKey = await this.promptForAPIKey(modelType);
-
-					// If user provided a new key, retry the request
-					if (newKey) {
-						return this.fetchAIResponse(prompt);
-					}
-
-					// Return a formatted authentication error
-					const error: DevSphereError = {
-						category: DevSphereErrorCategory.AUTHENTICATION,
-						message: `**Invalid ${providerName} API Key**
-
-The API request failed with an authentication error (${statusCode}). This typically happens when:
-- The API key is incorrect or has been revoked
-- The API key doesn't have permission for the selected model
-- The API key has expired or reached its quota limit
-
-Please update your API key to continue using ${providerName} models.`,
-						provider: providerName,
-						modelId: modelId,
-						retryable: true,
-						actionLabel: `Update ${providerName} API Key`,
-						actionFn: async () => {
-							await this.promptForAPIKey(modelType);
-						}
-					};
-
-					return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
-				} else if (statusCode === 429) {
-					// Rate limit error
-					const error: DevSphereError = {
-						category: DevSphereErrorCategory.API_RATE_LIMIT,
-						message: `**Rate Limit Exceeded for ${providerName}**
-
-The API request was rejected because you've reached the rate limit (${statusCode}). This typically happens when:
-- You've sent too many requests in a short period of time
-- You've exceeded your tier's usage quota or billing limits
-- The service is experiencing high demand
-
-Please wait a moment before trying again.`,
-						provider: providerName,
-						modelId: modelId,
-						retryable: true
-					};
-
-					return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
-				} else {
-					// Generic API error
-					const errorMessage = errorData.error?.message || `API error (${statusCode})`;
-					const error: DevSphereError = {
-						category: DevSphereErrorCategory.API_RESPONSE,
-						message: `**Error from ${providerName} API**
-
-The API returned an error: ${errorMessage}`,
-						provider: providerName,
-						modelId: modelId,
-						retryable: true
-					};
-
-					return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
-				}
+				const processedError = DevSphereErrorHandler.processApiError('API request failed', modelId, providerName);
+				return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
 			}
 
 			// Process the successful response
@@ -499,28 +387,9 @@ The API returned an error: ${errorMessage}`,
 			// Handle unexpected errors, including CORS errors
 			console.error('Error in fetchAIResponse:', error);
 
-			// Check if this is a CORS error
-			if (error instanceof Error && this.corsHandler.isCORSError(error)) {
-				// Create a CORS error with a switch model action
-				const corsError = this.corsHandler.createCORSErrorMessage(
-					providerName,
-					modelId,
-					error.message || 'CORS error',
-					() => {
-						// Switch to OpenAI model
-						this.setCurrentModel('gpt-4o-mini');
-						this.notificationService.info(`Switched to OpenAI GPT-4o mini to avoid CORS issues.`);
-					}
-				);
-
-				return DevSphereErrorHandler.formatErrorAsSystemMessage(corsError);
-			}
-
 			// Process other errors
 			const processedError = DevSphereErrorHandler.processApiError(error, modelId, providerName);
 			return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
 		}
 	}
-
-	// #endregion
 }

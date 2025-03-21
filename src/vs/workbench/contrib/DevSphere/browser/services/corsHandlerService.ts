@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CorsProxyOptions, DevSphereError } from '../models/types.js';
-import { DevSphereErrorCategory } from '../devSphereErrorHandler.js';
+
 
 /**
  * Service for handling CORS (Cross-Origin Resource Sharing) issues with API requests.
@@ -106,27 +106,12 @@ export class CorsHandlerService {
 	public createCORSErrorMessage(
 		provider: string,
 		modelId: string,
-		errorDetail: string,
 		actionFn: () => void
 	): DevSphereError {
-		const message = `**CORS Error Connecting to ${provider}**
-
-VS Code cannot directly connect to the ${provider} API due to browser security restrictions (CORS policy).
-
-**Technical Details:**
-CORS (Cross-Origin Resource Sharing) prevents web applications from making requests to different domains for security reasons. The ${provider} API doesn't include the necessary headers to allow requests from VS Code.
-
-**To resolve this issue, you can:**
-
-1. **Switch to OpenAI** - Click the button below to switch to an OpenAI model (recommended)
-2. **For developers:** Run VS Code with the '--disable-web-security' flag (testing only!)
-3. **For advanced users:** Set up a proxy server that adds CORS headers to ${provider} API responses
-
-Error details: ${errorDetail}`;
 
 		return {
-			category: DevSphereErrorCategory.NETWORK,
-			message,
+			category: 'NETWORK',
+			message: `VS Code cannot directly connect to the ${provider} API due to browser security restrictions (CORS policy).`,
 			provider,
 			modelId,
 			retryable: true,

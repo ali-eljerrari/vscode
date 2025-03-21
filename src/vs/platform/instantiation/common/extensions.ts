@@ -6,8 +6,14 @@
 import { SyncDescriptor } from './descriptors.js';
 import { BrandedService, ServiceIdentifier } from './instantiation.js';
 
+/**
+ * Registry of service descriptors
+ */
 const _registry: [ServiceIdentifier<any>, SyncDescriptor<any>][] = [];
 
+/**
+ * Instantiation type enum
+ */
 export const enum InstantiationType {
 	/**
 	 * Instantiate this service as soon as a consumer depends on it. _Note_ that this
@@ -22,8 +28,19 @@ export const enum InstantiationType {
 	Delayed = 1
 }
 
+/**
+ * Register a singleton service
+ */
 export function registerSingleton<T, Services extends BrandedService[]>(id: ServiceIdentifier<T>, ctor: new (...services: Services) => T, supportsDelayedInstantiation: InstantiationType): void;
+
+/**
+ * Register a singleton service
+ */
 export function registerSingleton<T, Services extends BrandedService[]>(id: ServiceIdentifier<T>, descriptor: SyncDescriptor<any>): void;
+
+/**
+ * Register a singleton service
+ */
 export function registerSingleton<T, Services extends BrandedService[]>(id: ServiceIdentifier<T>, ctorOrDescriptor: { new(...services: Services): T } | SyncDescriptor<any>, supportsDelayedInstantiation?: boolean | InstantiationType): void {
 	if (!(ctorOrDescriptor instanceof SyncDescriptor)) {
 		ctorOrDescriptor = new SyncDescriptor<T>(ctorOrDescriptor as new (...args: any[]) => T, [], Boolean(supportsDelayedInstantiation));
@@ -32,6 +49,9 @@ export function registerSingleton<T, Services extends BrandedService[]>(id: Serv
 	_registry.push([id, ctorOrDescriptor]);
 }
 
+/**
+ * Get singleton service descriptors
+ */
 export function getSingletonServiceDescriptors(): [ServiceIdentifier<any>, SyncDescriptor<any>][] {
 	return _registry;
 }

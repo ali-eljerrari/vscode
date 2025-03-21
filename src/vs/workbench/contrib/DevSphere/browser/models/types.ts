@@ -20,7 +20,7 @@
  * consistency in data handling throughout the extension.
  */
 
-import { DevSphereErrorCategory } from '../devSphereErrorHandler.js';
+
 
 /**
  * Model provider types supported by DevSphere.
@@ -122,7 +122,7 @@ export interface Chat {
  * Standardizes error handling across the extension.
  */
 export interface DevSphereError {
-	category: DevSphereErrorCategory;  // Type of error (API, authentication, etc.)
+	category: string;                   // Type of error (API, authentication, etc.)
 	message: string;                   // User-friendly error message
 	details?: string;                  // Additional technical details
 	statusCode?: number;               // HTTP status code (for API errors)
