@@ -616,31 +616,75 @@ function compareViewContentDescriptors(a: IViewContentDescriptor, b: IViewConten
  */
 class ViewsRegistry extends Disposable implements IViewsRegistry {
 
+	/**
+	 * Event fired when views are registered
+	 */
 	private readonly _onViewsRegistered = this._register(new Emitter<{ views: IViewDescriptor[]; viewContainer: ViewContainer }[]>());
 	readonly onViewsRegistered = this._onViewsRegistered.event;
 
+	/**
+	 * Event fired when views are deregistered
+	 */
 	private readonly _onViewsDeregistered: Emitter<{ views: IViewDescriptor[]; viewContainer: ViewContainer }> = this._register(new Emitter<{ views: IViewDescriptor[]; viewContainer: ViewContainer }>());
+	/**
+	 * Event fired when views are deregistered
+	 */
 	readonly onViewsDeregistered: Event<{ views: IViewDescriptor[]; viewContainer: ViewContainer }> = this._onViewsDeregistered.event;
 
+	/**
+	 * Event fired when the container of views changes
+	 */
 	private readonly _onDidChangeContainer: Emitter<{ views: IViewDescriptor[]; from: ViewContainer; to: ViewContainer }> = this._register(new Emitter<{ views: IViewDescriptor[]; from: ViewContainer; to: ViewContainer }>());
+	/**
+	 * Event fired when the container of views changes
+	 */
 	readonly onDidChangeContainer: Event<{ views: IViewDescriptor[]; from: ViewContainer; to: ViewContainer }> = this._onDidChangeContainer.event;
 
+	/**
+	 * Event fired when the welcome content of a view changes
+	 */
 	private readonly _onDidChangeViewWelcomeContent: Emitter<string> = this._register(new Emitter<string>());
+	/**
+	 * Event fired when the welcome content of a view changes
+	 */
 	readonly onDidChangeViewWelcomeContent: Event<string> = this._onDidChangeViewWelcomeContent.event;
 
+	/**
+	 * List of view containers
+	 */
 	private _viewContainers: ViewContainer[] = [];
+	/**
+	 * Map of views in each container
+	 */
 	private _views: Map<ViewContainer, IViewDescriptor[]> = new Map<ViewContainer, IViewDescriptor[]>();
+	/**
+	 * Map of welcome content for each view
+	 */
 	private _viewWelcomeContents = new SetMap<string, IViewContentDescriptor>();
 
+	/**
+	 * Registers views in a container
+	 * @param views The views to register
+	 * @param viewContainer The container to add them to
+	 */
 	registerViews(views: IViewDescriptor[], viewContainer: ViewContainer): void {
 		this.registerViews2([{ views, viewContainer }]);
 	}
 
+	/**
+	 * Registers multiple sets of views
+	 * @param views Array of view sets to register
+	 */
 	registerViews2(views: { views: IViewDescriptor[]; viewContainer: ViewContainer }[]): void {
 		views.forEach(({ views, viewContainer }) => this.addViews(views, viewContainer));
 		this._onViewsRegistered.fire(views);
 	}
 
+	/**
+	 * Deregisters views from a container
+	 * @param viewDescriptors The views to deregister
+	 * @param viewContainer The container to remove them from
+	 */
 	deregisterViews(viewDescriptors: IViewDescriptor[], viewContainer: ViewContainer): void {
 		const views = this.removeViews(viewDescriptors, viewContainer);
 		if (views.length) {
@@ -648,6 +692,11 @@ class ViewsRegistry extends Disposable implements IViewsRegistry {
 		}
 	}
 
+	/**
+	 * Moves views to a new container
+	 * @param viewsToMove The views to move
+	 * @param viewContainer The target container
+	 */
 	moveViews(viewsToMove: IViewDescriptor[], viewContainer: ViewContainer): void {
 		for (const container of this._views.keys()) {
 			if (container !== viewContainer) {
@@ -660,10 +709,20 @@ class ViewsRegistry extends Disposable implements IViewsRegistry {
 		}
 	}
 
+	/**
+	 * Gets all views in a specific container
+	 * @param loc The container to get views from
+	 * @returns Array of views in the container
+	 */
 	getViews(loc: ViewContainer): IViewDescriptor[] {
 		return this._views.get(loc) || [];
 	}
 
+	/**
+	 * Gets a view by ID
+	 * @param id The ID of the view to get
+	 * @returns The view if found, null otherwise
+	 */
 	getView(id: string): IViewDescriptor | null {
 		for (const viewContainer of this._viewContainers) {
 			const viewDescriptor = (this._views.get(viewContainer) || []).filter(v => v.id === id)[0];
@@ -674,6 +733,11 @@ class ViewsRegistry extends Disposable implements IViewsRegistry {
 		return null;
 	}
 
+	/**
+	 * Gets the container of a view by ID
+	 * @param viewId The ID of the view to get the container for
+	 * @returns The container if found, null otherwise
+	 */
 	getViewContainer(viewId: string): ViewContainer | null {
 		for (const viewContainer of this._viewContainers) {
 			const viewDescriptor = (this._views.get(viewContainer) || []).filter(v => v.id === viewId)[0];
@@ -684,6 +748,12 @@ class ViewsRegistry extends Disposable implements IViewsRegistry {
 		return null;
 	}
 
+	/**
+	 * Registers welcome content for a view
+	 * @param id The ID of the view to register welcome content for
+	 * @param viewContent The welcome content to register
+	 * @returns A disposable to unregister the welcome content
+	 */
 	registerViewWelcomeContent(id: string, viewContent: IViewContentDescriptor): IDisposable {
 		this._viewWelcomeContents.add(id, viewContent);
 		this._onDidChangeViewWelcomeContent.fire(id);
@@ -694,6 +764,12 @@ class ViewsRegistry extends Disposable implements IViewsRegistry {
 		});
 	}
 
+	/**
+	 * Registers welcome content for a view
+	 * @param id The ID of the view to register welcome content for
+	 * @param viewContentMap The welcome content to register
+	 * @returns A map of disposables to unregister the welcome content
+	 */
 	registerViewWelcomeContent2<TKey>(id: string, viewContentMap: Map<TKey, IViewContentDescriptor>): Map<TKey, IDisposable> {
 		const disposables = new Map<TKey, IDisposable>();
 
@@ -710,12 +786,22 @@ class ViewsRegistry extends Disposable implements IViewsRegistry {
 		return disposables;
 	}
 
+	/**
+	 * Gets welcome content for a view
+	 * @param id The ID of the view to get welcome content for
+	 * @returns Array of welcome content descriptors
+	 */
 	getViewWelcomeContent(id: string): IViewContentDescriptor[] {
 		const result: IViewContentDescriptor[] = [];
 		this._viewWelcomeContents.forEach(id, descriptor => result.push(descriptor));
 		return result.sort(compareViewContentDescriptors);
 	}
 
+	/**
+	 * Adds views to a container
+	 * @param viewDescriptors The views to add
+	 * @param viewContainer The container to add them to
+	 */
 	private addViews(viewDescriptors: IViewDescriptor[], viewContainer: ViewContainer): void {
 		let views = this._views.get(viewContainer);
 		if (!views) {
@@ -731,6 +817,12 @@ class ViewsRegistry extends Disposable implements IViewsRegistry {
 		}
 	}
 
+	/**
+	 * Removes views from a container
+	 * @param viewDescriptors The views to remove
+	 * @param viewContainer The container to remove them from
+	 * @returns Array of views that were removed
+	 */
 	private removeViews(viewDescriptors: IViewDescriptor[], viewContainer: ViewContainer): IViewDescriptor[] {
 		const views = this._views.get(viewContainer);
 		if (!views) {
@@ -757,6 +849,9 @@ class ViewsRegistry extends Disposable implements IViewsRegistry {
 	}
 }
 
+/**
+ * Registry for views
+ */
 Registry.add(Extensions.ViewsRegistry, new ViewsRegistry());
 
 /**

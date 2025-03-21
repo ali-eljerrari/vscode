@@ -33,12 +33,10 @@ import { Codicon } from '../../../../base/common/codicons.js';
 import { ViewPaneContainer } from '../../../browser/parts/views/viewPaneContainer.js';
 import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
 import { DevSphereView } from './devSphereView.js';
-// Import the refactored service implementation and interface
 import { IDevSphereService } from './services/devSphereServiceInterface.js';
 import { DevSphereService } from './services/devSphereServiceImpl.js';
 import { DEV_SPHERE_CONTAINER_ID, registerDevSphereActions } from './devSphereActionCommands.js';
 
-// Register the service using the proper instantiation mechanism
 import { InstantiationType, registerSingleton } from '../../../../platform/instantiation/common/extensions.js';
 
 // Import CSS
