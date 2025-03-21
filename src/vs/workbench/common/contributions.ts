@@ -21,6 +21,9 @@ export interface IWorkbenchContribution {
 	// Marker Interface
 }
 
+/**
+ * Namespace for extensions
+ */
 export namespace Extensions {
 	/**
 	 * @deprecated use `registerWorkbenchContribution2` instead.
@@ -28,6 +31,9 @@ export namespace Extensions {
 	export const Workbench = 'workbench.contributions.kind';
 }
 
+/**
+ * Enum for workbench phases
+ */
 export const enum WorkbenchPhase {
 
 	/**
@@ -77,13 +83,26 @@ export interface IOnEditorWorkbenchContributionInstantiation {
 	readonly editorTypeId: string;
 }
 
+/**
+ * Checks if an object is an instance of IOnEditorWorkbenchContributionInstantiation
+ * @param obj The object to check
+ * @returns True if the object is an instance of IOnEditorWorkbenchContributionInstantiation, false otherwise
+ */
 function isOnEditorWorkbenchContributionInstantiation(obj: unknown): obj is IOnEditorWorkbenchContributionInstantiation {
 	const candidate = obj as IOnEditorWorkbenchContributionInstantiation | undefined;
 	return !!candidate && typeof candidate.editorTypeId === 'string';
 }
 
+/**
+ * Type for workbench contribution instantiation
+ */
 export type WorkbenchContributionInstantiation = WorkbenchPhase | ILazyWorkbenchContributionInstantiation | IOnEditorWorkbenchContributionInstantiation;
 
+/**
+ * Converts a lifecycle phase to a workbench phase
+ * @param phase The lifecycle phase to convert
+ * @returns The workbench phase
+ */
 function toWorkbenchPhase(phase: LifecyclePhase.Restored | LifecyclePhase.Eventually): WorkbenchPhase.AfterRestored | WorkbenchPhase.Eventually {
 	switch (phase) {
 		case LifecyclePhase.Restored:
@@ -93,6 +112,11 @@ function toWorkbenchPhase(phase: LifecyclePhase.Restored | LifecyclePhase.Eventu
 	}
 }
 
+/**
+ * Converts a workbench phase to a lifecycle phase
+ * @param instantiation The workbench phase to convert
+ * @returns The lifecycle phase
+ */
 function toLifecyclePhase(instantiation: WorkbenchPhase): LifecyclePhase {
 	switch (instantiation) {
 		case WorkbenchPhase.BlockStartup:
@@ -106,8 +130,14 @@ function toLifecyclePhase(instantiation: WorkbenchPhase): LifecyclePhase {
 	}
 }
 
+/**
+ * Type for workbench contribution signature
+ */
 type IWorkbenchContributionSignature<Service extends BrandedService[]> = new (...services: Service) => IWorkbenchContribution;
 
+/**
+ * Interface for workbench contributions registry
+ */
 export interface IWorkbenchContributionsRegistry {
 
 	/**
@@ -133,41 +163,127 @@ export interface IWorkbenchContributionsRegistry {
 	readonly timings: Map<LifecyclePhase, Array<[string /* ID */, number /* Creation Time */]>>;
 }
 
+/**
+ * Interface for workbench contribution registration
+ */
 interface IWorkbenchContributionRegistration {
 	readonly id: string | undefined;
 	readonly ctor: IConstructorSignature<IWorkbenchContribution>;
 }
 
+/**
+ * Workbench contributions registry
+ */
 export class WorkbenchContributionsRegistry extends Disposable implements IWorkbenchContributionsRegistry {
 
+	/**
+	 * Singleton instance of WorkbenchContributionsRegistry
+	 */
 	static readonly INSTANCE = new WorkbenchContributionsRegistry();
 
+	/**
+	 * Threshold for warning about contributions blocking restore
+	 */
 	private static readonly BLOCK_BEFORE_RESTORE_WARN_THRESHOLD = 20;
+
+	/**
+	 * Threshold for warning about contributions blocking restore
+	 */
 	private static readonly BLOCK_AFTER_RESTORE_WARN_THRESHOLD = 100;
 
+	/**
+	 * Instantiation service
+	 */
 	private instantiationService: IInstantiationService | undefined;
+
+	/**
+	 * Lifecycle service
+	 */
 	private lifecycleService: ILifecycleService | undefined;
+
+	/**
+	 * Log service
+	 */
 	private logService: ILogService | undefined;
+
+	/**
+	 * Environment service
+	 */
 	private environmentService: IEnvironmentService | undefined;
+
+	/**
+	 * Editor pane service
+	 */
 	private editorPaneService: IEditorPaneService | undefined;
 
+	/**
+	 * Contributions by phase
+	 */
 	private readonly contributionsByPhase = new Map<LifecyclePhase, IWorkbenchContributionRegistration[]>();
+
+	/**
+	 * Contributions by editor
+	 */
 	private readonly contributionsByEditor = new Map<string, IWorkbenchContributionRegistration[]>();
+
+	/**
+	 * Contributions by id
+	 */
 	private readonly contributionsById = new Map<string, IWorkbenchContributionRegistration>();
 
+	/**
+	 * Instances by id
+	 */
 	private readonly instancesById = new Map<string, IWorkbenchContribution>();
+
+	/**
+	 * Instance disposables
+	 */
 	private readonly instanceDisposables = this._register(new DisposableStore());
 
+	/**
+	 * Timings by phase
+	 */
 	private readonly timingsByPhase = new Map<LifecyclePhase, Array<[string /* ID */, number /* Creation Time */]>>();
+
+	/**
+	 * Timings by phase
+	 */
 	get timings() { return this.timingsByPhase; }
 
+	/**
+	 * Pending restored contributions
+	 */
 	private readonly pendingRestoredContributions = new DeferredPromise<void>();
+
+	/**
+	 * When restored
+	 */
 	readonly whenRestored = this.pendingRestoredContributions.p;
 
+	/**
+	 * Register a workbench contribution
+	 */
 	registerWorkbenchContribution2(id: string, ctor: IConstructorSignature<IWorkbenchContribution>, phase: WorkbenchPhase.BlockStartup | WorkbenchPhase.BlockRestore): void;
+
+	/**
+	 * Register a workbench contribution
+	 */
 	registerWorkbenchContribution2(id: string | undefined, ctor: IConstructorSignature<IWorkbenchContribution>, phase: WorkbenchPhase.AfterRestored | WorkbenchPhase.Eventually): void;
+
+	/**
+	 * Register a workbench contribution
+	 */
 	registerWorkbenchContribution2(id: string, ctor: IConstructorSignature<IWorkbenchContribution>, lazy: ILazyWorkbenchContributionInstantiation): void;
+
+	/**
+	 * Register a workbench contribution
+	 */
 	registerWorkbenchContribution2(id: string, ctor: IConstructorSignature<IWorkbenchContribution>, onEditor: IOnEditorWorkbenchContributionInstantiation): void;
+
+	/**
+	 * Register a workbench contribution
+	 */
 	registerWorkbenchContribution2(id: string | undefined, ctor: IConstructorSignature<IWorkbenchContribution>, instantiation: WorkbenchContributionInstantiation): void {
 		const contribution: IWorkbenchContributionRegistration = { id, ctor };
 
@@ -207,10 +323,16 @@ export class WorkbenchContributionsRegistry extends Disposable implements IWorkb
 		}
 	}
 
+	/**
+	 * Register a workbench contribution
+	 */
 	registerWorkbenchContribution(ctor: IConstructorSignature<IWorkbenchContribution>, phase: LifecyclePhase.Restored | LifecyclePhase.Eventually): void {
 		this.registerWorkbenchContribution2(undefined, ctor, toWorkbenchPhase(phase));
 	}
 
+	/**
+	 * Get a workbench contribution
+	 */
 	getWorkbenchContribution<T extends IWorkbenchContribution>(id: string): T {
 		if (this.instancesById.has(id)) {
 			return this.instancesById.get(id) as T;
@@ -243,6 +365,9 @@ export class WorkbenchContributionsRegistry extends Disposable implements IWorkb
 		return instance as T;
 	}
 
+	/**
+	 * Start the registry
+	 */
 	start(accessor: ServicesAccessor): void {
 		const instantiationService = this.instantiationService = accessor.get(IInstantiationService);
 		const lifecycleService = this.lifecycleService = accessor.get(ILifecycleService);
@@ -269,6 +394,9 @@ export class WorkbenchContributionsRegistry extends Disposable implements IWorkb
 		this._register(editorPaneService.onWillInstantiateEditorPane(e => this.onEditor(e.typeId, instantiationService, lifecycleService, logService, environmentService)));
 	}
 
+	/**
+	 * On editor
+	 */
 	private onEditor(editorTypeId: string, instantiationService: IInstantiationService, lifecycleService: ILifecycleService, logService: ILogService, environmentService: IEnvironmentService): void {
 		const contributions = this.contributionsByEditor.get(editorTypeId);
 		if (contributions) {
@@ -280,6 +408,9 @@ export class WorkbenchContributionsRegistry extends Disposable implements IWorkb
 		}
 	}
 
+	/**
+	 * Instantiate by phase
+	 */
 	private instantiateByPhase(instantiationService: IInstantiationService, lifecycleService: ILifecycleService, logService: ILogService, environmentService: IEnvironmentService, phase: LifecyclePhase): void {
 
 		// Instantiate contributions directly when phase is already reached
@@ -293,6 +424,9 @@ export class WorkbenchContributionsRegistry extends Disposable implements IWorkb
 		}
 	}
 
+	/**
+	 * Do instantiate by phase
+	 */
 	private async doInstantiateByPhase(instantiationService: IInstantiationService, logService: ILogService, environmentService: IEnvironmentService, phase: LifecyclePhase): Promise<void> {
 		const contributions = this.contributionsByPhase.get(phase);
 		if (contributions) {
@@ -337,6 +471,9 @@ export class WorkbenchContributionsRegistry extends Disposable implements IWorkb
 		}
 	}
 
+	/**
+	 * Do instantiate when idle
+	 */
 	private doInstantiateWhenIdle(contributions: IWorkbenchContributionRegistration[], instantiationService: IInstantiationService, logService: ILogService, environmentService: IEnvironmentService, phase: LifecyclePhase): void {
 		mark(`code/willCreateWorkbenchContributions/${phase}`);
 
@@ -366,6 +503,9 @@ export class WorkbenchContributionsRegistry extends Disposable implements IWorkb
 		runWhenGlobalIdle(instantiateSome, forcedTimeout);
 	}
 
+	/**
+	 * Safe create contribution
+	 */
 	private safeCreateContribution(instantiationService: IInstantiationService, logService: ILogService, environmentService: IEnvironmentService, contribution: IWorkbenchContributionRegistration, phase: LifecyclePhase): void {
 		if (typeof contribution.id === 'string' && this.instancesById.has(contribution.id)) {
 			return;
@@ -431,4 +571,7 @@ export const registerWorkbenchContribution2 = WorkbenchContributionsRegistry.INS
  */
 export const getWorkbenchContribution = WorkbenchContributionsRegistry.INSTANCE.getWorkbenchContribution.bind(WorkbenchContributionsRegistry.INSTANCE);
 
+/**
+ * Add the workbench contributions registry to the registry
+ */
 Registry.add(Extensions.Workbench, WorkbenchContributionsRegistry.INSTANCE);
