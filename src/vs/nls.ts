@@ -8,18 +8,34 @@ import { getNLSLanguage, getNLSMessages } from './nls.messages.js';
 // eslint-disable-next-line local/code-import-patterns
 export { getNLSLanguage, getNLSMessages } from './nls.messages.js';
 
+/**
+ * Checks if the current language is pseudo
+ * @returns True if the language is pseudo, false otherwise
+ */
 const isPseudo = getNLSLanguage() === 'pseudo' || (typeof document !== 'undefined' && document.location && typeof document.location.hash === 'string' && document.location.hash.indexOf('pseudo=true') >= 0);
 
+/**
+ * Interface for localizing information
+ */
 export interface ILocalizeInfo {
 	key: string;
 	comment: string[];
 }
 
+/**
+ * Interface for localized strings
+ */
 export interface ILocalizedString {
 	original: string;
 	value: string;
 }
 
+/**
+ * Formats a message with arguments
+ * @param message The message to format
+ * @param args The arguments to format the message with
+ * @returns The formatted message
+ */
 function _format(message: string, args: (string | number | boolean | undefined | null)[]): string {
 	let result: string;
 
@@ -150,6 +166,9 @@ export function localize2(data: ILocalizeInfo | string /* | number when built */
 	};
 }
 
+/**
+ * Interface for NLS language pack configuration
+ */
 export interface INLSLanguagePackConfiguration {
 
 	/**
@@ -172,6 +191,9 @@ export interface INLSLanguagePackConfiguration {
 	readonly corruptMarkerFile: string;
 }
 
+/**
+ * Interface for NLS configuration
+ */
 export interface INLSConfiguration {
 
 	/**
@@ -227,6 +249,9 @@ export interface INLSConfiguration {
 	readonly _corruptedFile?: string;
 }
 
+/**
+ * Interface for language pack
+ */
 export interface ILanguagePack {
 	readonly hash: string;
 	readonly label: string | undefined;
