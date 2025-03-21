@@ -25,8 +25,6 @@ import { localize } from '../../../../nls.js';
 import { IViewsService } from '../../../services/views/common/viewsService.js';
 import { IViewDescriptorService } from '../../../common/views.js';
 import { DevSphereView } from './devSphereView.js';
-import { IDevSphereService } from './services/devSphereServiceInterface.js';
-import { IQuickInputService, IQuickPickItem } from '../../../../platform/quickinput/common/quickInput.js';
 import { DevSphereViewType } from './view/devSphereViewTabs.js';
 import { ContextKeyExpr } from '../../../../platform/contextkey/common/contextkey.js';
 
@@ -35,14 +33,6 @@ import { ContextKeyExpr } from '../../../../platform/contextkey/common/contextke
  * Used throughout the extension to reference the container.
  */
 export const DEV_SPHERE_CONTAINER_ID = 'devSphere';
-
-/**
- * Extended quick pick item interface that includes model ID.
- * Used for model selection quick picks to associate each item with its model ID.
- */
-interface ModelQuickPickItem extends IQuickPickItem {
-	id: string;
-}
 
 /**
  * Registers all DevSphere-related commands and actions.
@@ -61,7 +51,12 @@ export function registerDevSphereActions(): void {
 				id: 'workbench.action.showDevSphere',
 				title: { value: localize('showDevSphere', "Show DevSphere"), original: 'Show DevSphere' },
 				category: Categories.View,
-				f1: true
+				f1: true,
+				keybinding: {
+					primary: 2049, // Ctrl/Cmd+0
+					weight: 200,
+					when: ContextKeyExpr.equals('viewId', 'devSphereView')
+				}
 			});
 		}
 
@@ -83,6 +78,28 @@ export function registerDevSphereActions(): void {
 				// Then focus the specific view
 				viewsService.openView(viewDescriptor.id, true);
 			}
+		}
+	});
+
+	// Register a command to close the DevSphere view
+	registerAction2(class extends Action2 {
+		constructor() {
+			super({
+				id: 'workbench.action.closeDevSphere',
+				title: { value: localize('closeDevSphere', "Close DevSphere"), original: 'Close DevSphere' },
+				category: Categories.View,
+				f1: true,
+				keybinding: {
+					primary: 2053, // Ctrl/Cmd+4
+					weight: 200,
+					when: ContextKeyExpr.equals('viewId', 'devSphereView')
+				}
+			});
+		}
+
+		run(accessor: ServicesAccessor): void {
+			const viewsService = accessor.get(IViewsService);
+			viewsService.closeView('devSphereView');
 		}
 	});
 
@@ -163,105 +180,6 @@ export function registerDevSphereActions(): void {
 			if (view) {
 				// Get access to the underlying viewTabs component and switch to API Keys tab
 				(view as any).viewTabsComponent?.switchView(DevSphereViewType.APIKeys);
-			}
-		}
-	});
-
-	// Register a command to change the model
-	registerAction2(class extends Action2 {
-		constructor() {
-			super({
-				id: 'workbench.action.changeDevSphereModel',
-				title: { value: localize('changeDevSphereModel', "Change DevSphere AI Model"), original: 'Change DevSphere AI Model' },
-				category: Categories.View,
-				f1: true
-			});
-		}
-
-		async run(accessor: ServicesAccessor): Promise<void> {
-			const devSphereService = accessor.get(IDevSphereService);
-			const quickInputService = accessor.get(IQuickInputService);
-			const viewsService = accessor.get(IViewsService);
-
-			// Get all models from all providers
-			const openaiModels = devSphereService.getAvailableModelsByProvider('ChatgptModels');
-			const anthropicModels = devSphereService.getAvailableModelsByProvider('AnthropicModels');
-			const googleModels = devSphereService.getAvailableModelsByProvider('GoogleModels');
-
-			// Combine all models
-			const allModels = [...openaiModels, ...anthropicModels, ...googleModels];
-			const currentModelId = devSphereService.getCurrentModelId();
-
-			// Create quick pick items from flattened model objects
-			const items: ModelQuickPickItem[] = allModels.map(model => ({
-				label: model.name,
-				description: model.description,
-				detail: model.id === currentModelId ? 'Currently Selected' : undefined,
-				id: model.id
-			}));
-
-			// Show quick pick UI
-			const selection = await quickInputService.pick<ModelQuickPickItem>(items, {
-				placeHolder: 'Select OpenAI Model',
-				title: 'Change AI Model',
-				activeItem: items.find(item => item.id === currentModelId)
-			});
-
-			if (selection && selection.id) {
-				// Set the model
-				devSphereService.setCurrentModel(selection.id);
-
-				// Notify in the view
-				const view = viewsService.getActiveViewWithId('devSphereView') as DevSphereView | undefined;
-				if (view) {
-					view.addModelChangeMessage(selection.id);
-				}
-			}
-		}
-	});
-
-	// Register a command to update the API key
-	registerAction2(class extends Action2 {
-		constructor() {
-			super({
-				id: 'workbench.action.updateOpenAIAPIKey',
-				title: { value: localize('updateOpenAIAPIKey', "Update OpenAI API Key"), original: 'Update OpenAI API Key' },
-				category: Categories.View,
-				f1: true
-			});
-		}
-
-		async run(accessor: ServicesAccessor): Promise<void> {
-			const viewsService = accessor.get(IViewsService);
-			const devSphereService = accessor.get(IDevSphereService);
-			const view = viewsService.getActiveViewWithId('devSphereView') as DevSphereView | undefined;
-
-			if (view) {
-				await view.updateAPIKey();
-			} else {
-				// If view is not active, use the service directly
-				await devSphereService.updateAPIKey();
-			}
-		}
-	});
-
-	// Register a command to clear chat
-	registerAction2(class extends Action2 {
-		constructor() {
-			super({
-				id: 'workbench.action.clearDevSphereChat',
-				title: { value: localize('clearDevSphereChat', "Clear DevSphere Chat"), original: 'Clear DevSphere Chat' },
-				category: Categories.View,
-				f1: true
-			});
-		}
-
-		run(accessor: ServicesAccessor): void {
-			const viewsService = accessor.get(IViewsService);
-			const view = viewsService.getActiveViewWithId('devSphereView') as DevSphereView | undefined;
-
-			if (view) {
-				view.clearChat();
 			}
 		}
 	});
