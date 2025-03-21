@@ -290,8 +290,8 @@ export class DevSphereService implements IDevSphereService {
 		const apiKey = await this.getProviderAPIKey();
 
 		if (!apiKey) {
-			const error = DevSphereErrorHandler.processApiError('No API key found', modelId, providerName);
-			return DevSphereErrorHandler.formatErrorAsSystemMessage(error);
+			const processedError = DevSphereErrorHandler.processApiError('No API key found, please check your API key, or try again later', modelId, providerName);
+			return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
 		}
 		try {
 			const controller = new AbortController();
@@ -310,7 +310,7 @@ export class DevSphereService implements IDevSphereService {
 			clearTimeout(timeoutId);
 
 			if (!response.ok) {
-				const processedError = DevSphereErrorHandler.processApiError('API request failed', modelId, providerName);
+				const processedError = DevSphereErrorHandler.processApiError('API request failed, please check your API key, or try again later', modelId, providerName);
 				return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
 			}
 

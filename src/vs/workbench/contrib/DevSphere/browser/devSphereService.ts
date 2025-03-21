@@ -346,7 +346,7 @@ export class DevSphereService implements IDevSphereService {
 
 		// Prompt for API key if not found
 		if (!apiKey) {
-			const processedError = DevSphereErrorHandler.processApiError('No API key found', modelId, providerName);
+			const processedError = DevSphereErrorHandler.processApiError('No API key found, please check your API key, or try again later', modelId, providerName);
 			return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
 		}
 
@@ -374,7 +374,7 @@ export class DevSphereService implements IDevSphereService {
 
 			// Check response status
 			if (!response.ok) {
-				const processedError = DevSphereErrorHandler.processApiError('API request failed', modelId, providerName);
+				const processedError = DevSphereErrorHandler.processApiError('API request failed, please check your API key, or try again later', modelId, providerName);
 				return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
 			}
 

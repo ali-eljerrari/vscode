@@ -39,7 +39,6 @@ export interface DevSphereError {
 	/** User-friendly error message */
 	message: string;
 
-
 	/** Which provider caused the error */
 	provider: string;
 
