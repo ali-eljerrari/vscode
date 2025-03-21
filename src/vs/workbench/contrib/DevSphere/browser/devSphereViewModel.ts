@@ -94,7 +94,7 @@ export class DevSphereViewModel implements IDisposable {
 		private readonly notificationService: INotificationService
 	) {
 		// Initialize with a default chat
-		this.createNewChat();
+		// this.createNewChat();
 
 		// Load saved chats
 		this.loadChats();
@@ -181,6 +181,14 @@ export class DevSphereViewModel implements IDisposable {
 			const chats = await this.devSphereService.getAllChats();
 			this._allChats = chats;
 			this._onChatsChanged.fire();
+
+			if (chats.length > 0) {
+				// Load the first chat
+				await this.loadChat(chats[0].id);
+			} else {
+				// Create a new chat
+				await this.createNewChat();
+			}
 		} catch (error) {
 			this.notificationService.error(`Failed to load chats: ${error instanceof Error ? error.message : String(error)}`);
 		}
@@ -206,7 +214,7 @@ export class DevSphereViewModel implements IDisposable {
 
 		// Make sure we have a current chat
 		if (!this._currentChat) {
-			await this.createNewChat();
+			// await this.createNewChat();
 		}
 
 		try {
@@ -310,7 +318,7 @@ export class DevSphereViewModel implements IDisposable {
 	public addSystemMessage(content: string): void {
 		// Make sure we have a current chat
 		if (!this._currentChat) {
-			this.createNewChat();
+			// this.createNewChat();
 			return;
 		}
 
@@ -362,38 +370,45 @@ export class DevSphereViewModel implements IDisposable {
 
 	/**
 	 * Creates a new chat and makes it the current chat.
-	 * If force is false and there's already an empty chat,
+	 * If there's already an empty chat (current or in history),
 	 * it will use that instead of creating a new one.
-	 *
-	 * @param force - Whether to create a new chat even if an empty one exists
 	 */
-	public async createNewChat(force: boolean = false): Promise<void> {
-		// Check if we already have an empty chat that we can reuse
-		const emptyChat = this.hasEmptyChat();
+	public async createNewChat(): Promise<void> {
+		try {
+			// If current chat is empty, just return - use current empty chat
+			if (this._currentChat && this._currentChat.messages.length === 0) {
+				return;
+			}
 
-		if (!force && emptyChat) {
-			// Use the existing empty chat
-			this._currentChat = emptyChat;
-			this._messages = [...emptyChat.messages];
+			// Check if we have an empty chat in history
+			const emptyChat = this._allChats.find(chat => chat.messages.length === 0);
+
+			// If there's an empty chat in history, load it
+			if (emptyChat) {
+				// Use the existing empty chat
+				this._currentChat = emptyChat;
+				this._messages = [];
+
+				// Fire events
+				this._onCurrentChatChanged.fire();
+				this._onMessagesChanged.fire();
+
+				return;
+			}
+
+			// Only create a new chat if no empty chats exist
+			const newChat = this.devSphereService.createNewChat();
+
+			// Add to local state
+			this._allChats.unshift(newChat);
+			this._currentChat = newChat;
+			this._messages = [];
+
+			// Fire events
+			this._onChatsChanged.fire();
 			this._onCurrentChatChanged.fire();
 			this._onMessagesChanged.fire();
-			return;
-		}
 
-		// Create a new chat
-		const newChat = this.devSphereService.createNewChat();
-
-		// Add to local state
-		this._allChats.unshift(newChat);
-		this._currentChat = newChat;
-		this._messages = [];
-
-		// Fire events
-		this._onChatsChanged.fire();
-		this._onCurrentChatChanged.fire();
-		this._onMessagesChanged.fire();
-
-		try {
 			// Save the new chat
 			await this.devSphereService.saveChat(newChat);
 		} catch (error) {
@@ -409,7 +424,7 @@ export class DevSphereViewModel implements IDisposable {
 	public clearMessages(): void {
 		// If no current chat, create a new one
 		if (!this._currentChat) {
-			this.createNewChat();
+			// this.createNewChat();
 			return;
 		}
 
@@ -477,7 +492,7 @@ export class DevSphereViewModel implements IDisposable {
 					await this.loadChat(this._allChats[0].id);
 				} else {
 					// Create a new chat if no chats remain
-					await this.createNewChat();
+					// await this.createNewChat();
 				}
 			}
 

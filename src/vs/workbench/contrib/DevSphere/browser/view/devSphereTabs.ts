@@ -156,11 +156,7 @@ export class DevSphereTabs extends Disposable {
 
 		newChatTab.addEventListener('click', async () => {
 			// Create a new chat if we have a current chat with user messages
-			const currentChat = this.viewModel.currentChat;
-			const hasUserMessages = currentChat?.messages.some(msg => msg.role === 'user');
-
-			// Force new chat if we have user messages in current chat, otherwise reuse empty chats
-			await this.viewModel.createNewChat(hasUserMessages);
+			await this.viewModel.createNewChat();
 			this.onTabChange();
 		});
 
