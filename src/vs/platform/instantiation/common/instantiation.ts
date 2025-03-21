@@ -9,13 +9,29 @@ import { ServiceCollection } from './serviceCollection.js';
 
 // ------ internal util
 
+/**
+ * Internal utility namespace for service identifiers
+ */
 export namespace _util {
 
+	/**
+	 * Map of service identifiers
+	 */
 	export const serviceIds = new Map<string, ServiceIdentifier<any>>();
 
+	/**
+	 * DI target
+	 */
 	export const DI_TARGET = '$di$target';
+
+	/**
+	 * DI dependencies
+	 */
 	export const DI_DEPENDENCIES = '$di$dependencies';
 
+	/**
+	 * Get service dependencies
+	 */
 	export function getServiceDependencies(ctor: any): { id: ServiceIdentifier<any>; index: number }[] {
 		return ctor[DI_DEPENDENCIES] || [];
 	}
@@ -23,16 +39,28 @@ export namespace _util {
 
 // --- interfaces ------
 
+/**
+ * Branded service interface
+ */
 export type BrandedService = { _serviceBrand: undefined };
 
+/**
+ * Constructor signature interface
+ */
 export interface IConstructorSignature<T, Args extends any[] = []> {
 	new <Services extends BrandedService[]>(...args: [...Args, ...Services]): T;
 }
 
+/**
+ * Services accessor interface
+ */
 export interface ServicesAccessor {
 	get<T>(id: ServiceIdentifier<T>): T;
 }
 
+/**
+ * Instantiation service identifier
+ */
 export const IInstantiationService = createDecorator<IInstantiationService>('instantiationService');
 
 /**
@@ -45,7 +73,9 @@ export type GetLeadingNonServiceArgs<TArgs extends any[]> =
 	: TArgs;
 
 export interface IInstantiationService {
-
+	/**
+	 * Service brand
+	 */
 	readonly _serviceBrand: undefined;
 
 	/**
@@ -88,6 +118,9 @@ export interface ServiceIdentifier<T> {
 	type: T;
 }
 
+/**
+ * Store service dependency
+ */
 function storeServiceDependency(id: Function, target: Function, index: number): void {
 	if ((target as any)[_util.DI_TARGET] === target) {
 		(target as any)[_util.DI_DEPENDENCIES].push({ id, index });
@@ -106,6 +139,9 @@ export function createDecorator<T>(serviceId: string): ServiceIdentifier<T> {
 		return _util.serviceIds.get(serviceId)!;
 	}
 
+	/**
+	 * Create a service identifier decorator
+	 */
 	const id = <any>function (target: Function, key: string, index: number) {
 		if (arguments.length !== 3) {
 			throw new Error('@IServiceName-decorator can only be used to decorate a parameter');
@@ -119,6 +155,9 @@ export function createDecorator<T>(serviceId: string): ServiceIdentifier<T> {
 	return id;
 }
 
+/**
+ * Refine service decorator
+ */
 export function refineServiceDecorator<T1, T extends T1>(serviceIdentifier: ServiceIdentifier<T1>): ServiceIdentifier<T> {
 	return <ServiceIdentifier<T>>serviceIdentifier;
 }
