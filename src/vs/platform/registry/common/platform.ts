@@ -6,6 +6,9 @@
 import * as Assert from '../../../base/common/assert.js';
 import * as Types from '../../../base/common/types.js';
 
+/**
+ * Interface for the registry
+ */
 export interface IRegistry {
 
 	/**
@@ -17,7 +20,7 @@ export interface IRegistry {
 	add(id: string, data: any): void;
 
 	/**
-	 * Returns true iff there is an extension with the provided id.
+	 * Returns true if there is an extension with the provided id.
 	 * @param id an extension identifier
 	 */
 	knows(id: string): boolean;
@@ -29,6 +32,9 @@ export interface IRegistry {
 	as<T>(id: string): T;
 }
 
+/**
+ * Implementation of the registry
+ */
 class RegistryImpl implements IRegistry {
 
 	private readonly data = new Map<string, any>();
@@ -50,4 +56,7 @@ class RegistryImpl implements IRegistry {
 	}
 }
 
+/**
+ * Registry instance
+ */
 export const Registry: IRegistry = new RegistryImpl();
