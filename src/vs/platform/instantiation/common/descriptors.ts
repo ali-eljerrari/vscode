@@ -3,6 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * Descriptor for a synchronous instantiation of a class
+ * @template T The type of the class to instantiate
+ */
 export class SyncDescriptor<T> {
 
 	readonly ctor: any;
@@ -16,6 +20,10 @@ export class SyncDescriptor<T> {
 	}
 }
 
+/**
+ * Descriptor for a synchronous instantiation of a class with no arguments
+ * @template T The type of the class to instantiate
+ */
 export interface SyncDescriptor0<T> {
 	readonly ctor: new () => T;
 }
