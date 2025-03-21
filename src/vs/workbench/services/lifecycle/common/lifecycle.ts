@@ -7,10 +7,13 @@ import { CancellationToken } from '../../../../base/common/cancellation.js';
 import { Event } from '../../../../base/common/event.js';
 import { createDecorator } from '../../../../platform/instantiation/common/instantiation.js';
 
+/**
+ * Lifecycle service
+ */
 export const ILifecycleService = createDecorator<ILifecycleService>('lifecycleService');
 
 /**
- * An event that is send out when the window is about to close. Clients have a chance to veto
+ * An event that is sent out when the window is about to close. Clients have a chance to veto
  * the closing by either calling veto with a boolean "true" directly or with a promise that
  * resolves to a boolean. Returning a promise is useful in cases of long running operations
  * on shutdown.
@@ -29,12 +32,16 @@ export interface BeforeShutdownEvent {
 	 * Allows to veto the shutdown. The veto can be a long running operation but it
 	 * will block the application from closing.
 	 *
+	 * @param value The value to veto the shutdown.
 	 * @param id to identify the veto operation in case it takes very long or never
 	 * completes.
 	 */
 	veto(value: boolean | Promise<boolean>, id: string): void;
 }
 
+/**
+ * Internal before shutdown event
+ */
 export interface InternalBeforeShutdownEvent extends BeforeShutdownEvent {
 
 	/**
@@ -65,6 +72,9 @@ export interface BeforeShutdownErrorEvent {
 	readonly error: Error;
 }
 
+/**
+ * Will shutdown joiner order
+ */
 export enum WillShutdownJoinerOrder {
 
 	/**
@@ -81,16 +91,25 @@ export enum WillShutdownJoinerOrder {
 	Last
 }
 
+/**
+ * Will shutdown event joiner
+ */
 export interface IWillShutdownEventJoiner {
 	readonly id: string;
 	readonly label: string;
 	readonly order?: WillShutdownJoinerOrder;
 }
 
+/**
+ * Will shutdown event default joiner
+ */
 export interface IWillShutdownEventDefaultJoiner extends IWillShutdownEventJoiner {
 	readonly order?: WillShutdownJoinerOrder.Default;
 }
 
+/**
+ * Will shutdown event last joiner
+ */
 export interface IWillShutdownEventLastJoiner extends IWillShutdownEventJoiner {
 	readonly order: WillShutdownJoinerOrder.Last;
 }
@@ -148,6 +167,9 @@ export interface WillShutdownEvent {
 	force(): void;
 }
 
+/**
+ * Shutdown reason
+ */
 export const enum ShutdownReason {
 
 	/**
@@ -171,12 +193,18 @@ export const enum ShutdownReason {
 	LOAD
 }
 
+/**
+ * Startup kind
+ */
 export const enum StartupKind {
 	NewWindow = 1,
 	ReloadedWindow = 3,
 	ReopenedWindow = 4
 }
 
+/**
+ * Startup kind to string
+ */
 export function StartupKindToString(startupKind: StartupKind): string {
 	switch (startupKind) {
 		case StartupKind.NewWindow: return 'NewWindow';
@@ -185,6 +213,9 @@ export function StartupKindToString(startupKind: StartupKind): string {
 	}
 }
 
+/**
+ * Lifecycle phase
+ */
 export const enum LifecyclePhase {
 
 	/**
@@ -216,6 +247,9 @@ export const enum LifecyclePhase {
 	Eventually = 4
 }
 
+/**
+ * Lifecycle phase to string
+ */
 export function LifecyclePhaseToString(phase: LifecyclePhase): string {
 	switch (phase) {
 		case LifecyclePhase.Starting: return 'Starting';
@@ -231,6 +265,9 @@ export function LifecyclePhaseToString(phase: LifecyclePhase): string {
  */
 export interface ILifecycleService {
 
+	/**
+	 * Service brand
+	 */
 	readonly _serviceBrand: undefined;
 
 	/**
