@@ -268,23 +268,46 @@ class ViewContainersRegistryImpl extends Disposable implements IViewContainersRe
 		}
 	}
 
+	/**
+	 * Gets a view container by ID
+	 * @param id The container ID
+	 * @returns The container if found, undefined otherwise
+	 */
 	get(id: string): ViewContainer | undefined {
 		return this.all.filter(viewContainer => viewContainer.id === id)[0];
 	}
 
+	/**
+	 * Gets all view containers at a specific location
+	 * @param location The location to get containers for
+	 * @returns Array of containers at the location
+	 */
 	getViewContainers(location: ViewContainerLocation): ViewContainer[] {
 		return [...(this.viewContainers.get(location) || [])];
 	}
 
+	/**
+	 * Gets the location of a specific container
+	 * @param container The container to get location for
+	 * @returns The container's location
+	 */
 	getViewContainerLocation(container: ViewContainer): ViewContainerLocation {
 		return [...this.viewContainers.keys()].filter(location => this.getViewContainers(location).filter(viewContainer => viewContainer?.id === container.id).length > 0)[0];
 	}
 
+	/**
+	 * Gets the default view container for a specific location
+	 * @param location The location to get the default container for
+	 * @returns The default container if found, undefined otherwise
+	 */
 	getDefaultViewContainer(location: ViewContainerLocation): ViewContainer | undefined {
 		return this.defaultViewContainers.find(viewContainer => this.getViewContainerLocation(viewContainer) === location);
 	}
 }
 
+/**
+ * Registry for view containers
+ */
 Registry.add(Extensions.ViewContainersRegistry, new ViewContainersRegistryImpl());
 
 /**
