@@ -818,7 +818,6 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
 	 */
 	private showContextMenu(event: StandardMouseEvent): void {
 		for (const paneItem of this.paneItems) {
-			console.log('paneItem', paneItem.pane.element);
 			// Do not show context menu if target is coming from inside pane views
 			if (isAncestor(event.target, paneItem.pane.element)) {
 				return;
@@ -1206,6 +1205,9 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
 		}
 
 		store.add(CompositeDragAndDropObserver.INSTANCE.registerTarget(pane.dropTargetElement, {
+			/**
+			 * On drag enter
+			 */
 			onDragEnter: (e) => {
 				if (!overlay) {
 					const dropData = e.dragAndDropData.getData();
@@ -1231,13 +1233,22 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
 					}
 				}
 			},
+			/**
+			 * On drag over
+			 */
 			onDragOver: (e) => {
 				toggleDropEffect(e.eventData.dataTransfer, 'move', overlay !== undefined);
 			},
+			/**
+			 * On drag leave
+			 */
 			onDragLeave: (e) => {
 				overlay?.dispose();
 				overlay = undefined;
 			},
+			/**
+			 * On drop
+			 */
 			onDrop: (e) => {
 				if (overlay) {
 					const dropData = e.dragAndDropData.getData();
@@ -1327,6 +1338,9 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
 		}));
 	}
 
+	/**
+	 * Remove panes
+	 */
 	removePanes(panes: ViewPane[]): void {
 		const wasMerged = this.isViewMergedWithContainer();
 
