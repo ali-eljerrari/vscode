@@ -72,7 +72,7 @@ function getWebviewContent(text: string, fileName: string) {
 				margin: 0 auto;
 			}
 			.code-window {
-				background: #2d2d2d;
+				background: #1a1b26;
 				border-radius: 8px;
 				overflow: hidden;
 				margin-bottom: 20px;
@@ -134,21 +134,24 @@ function getWebviewContent(text: string, fileName: string) {
 				font-size: 14px;
 				line-height: 1.5;
 				white-space: pre-wrap;
-				background: #1e1e1e;
 				padding: 16px;
-				border: 1px solid #404040;
 				display: flex;
 				gap: 16px;
+				background: #1a1b26;
 			}
 			.line-numbers {
-				color: #666;
+				color: #565f89;
 				user-select: none;
 				text-align: right;
 				min-width: 40px;
+				background: #1a1b26;
+				padding-right: 8px;
 			}
 			.code-text {
 				flex: 1;
-				white-space: pre;
+				white-space: pre-wrap;
+				color: #a9b1d6;
+				word-break: break-word;
 			}
 			.copy-button {
 				background: #0e639c;
@@ -181,7 +184,97 @@ function getWebviewContent(text: string, fileName: string) {
 				display: flex;
 				gap: 8px;
 			}
+			/* Prism.js theme overrides - Tokyo Night */
+			pre[class*="language-"] {
+				background: #1a1b26 !important;
+				margin: 0 !important;
+				padding: 0 !important;
+				overflow: visible !important;
+			}
+			code[class*="language-"] {
+				font-family: 'SF Mono', 'Consolas', 'Monaco', 'Menlo', monospace !important;
+				font-size: 14px !important;
+				text-shadow: none !important;
+				background: #1a1b26 !important;
+				color: #a9b1d6 !important;
+			}
+			.token.comment,
+			.token.prolog,
+			.token.doctype,
+			.token.cdata {
+				color: #565f89 !important;
+			}
+			.token.punctuation {
+				color: #a9b1d6 !important;
+			}
+			.token.property,
+			.token.tag,
+			.token.boolean,
+			.token.number,
+			.token.constant,
+			.token.symbol {
+				color: #ff9e64 !important;
+			}
+			.token.selector,
+			.token.string,
+			.token.char,
+			.token.builtin {
+				color: #9ece6a !important;
+			}
+			.token.operator,
+			.token.entity,
+			.token.url,
+			.language-css .token.string,
+			.style .token.string {
+				color: #a9b1d6 !important;
+			}
+			.token.keyword,
+			.token.control,
+			.token.directive,
+			.token.unit {
+				color: #bb9af7 !important;
+			}
+			.token.function {
+				color: #7aa2f7 !important;
+			}
+			.token.statement,
+			.token.regex,
+			.token.atrule {
+				color: #f7768e !important;
+			}
+			.token.placeholder,
+			.token.variable {
+				color: #7dcfff !important;
+			}
+			.token.important {
+				color: #bb9af7 !important;
+				font-weight: bold !important;
+			}
+			/* Override Prism's default theme */
+			.token.class-name,
+			.token.attr-name {
+				color: #7aa2f7 !important;
+			}
+			.token.attr-value {
+				color: #9ece6a !important;
+			}
+			.token.parameter {
+				color: #7dcfff !important;
+			}
+			.token.interpolation {
+				color: #bb9af7 !important;
+			}
+			.token.attr-value .token.punctuation {
+				color: #9ece6a !important;
+			}
 		</style>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
 		<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 	</head>
 	<body>
@@ -197,7 +290,7 @@ function getWebviewContent(text: string, fileName: string) {
 				</div>
 				<div class="code-content">
 					<div class="line-numbers">${lineNumbers}</div>
-					<div class="code-text">${escapedText}</div>
+					<pre class="code-text"><code class="language-${getLanguageFromFileName(fileName)}">${escapedText}</code></pre>
 				</div>
 			</div>
 			<div class="button-container">
@@ -234,6 +327,24 @@ function getWebviewContent(text: string, fileName: string) {
 		</script>
 	</body>
 	</html>`;
+}
+
+function getLanguageFromFileName(fileName: string): string {
+	const extension = path.extname(fileName).toLowerCase();
+	switch (extension) {
+		case '.ts':
+		case '.tsx':
+			return 'tsx';
+		case '.js':
+		case '.jsx':
+			return 'jsx';
+		case '.css':
+			return 'css';
+		case '.json':
+			return 'json';
+		default:
+			return 'typescript';
+	}
 }
 
 export function deactivate() { }
