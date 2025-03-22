@@ -36,33 +36,33 @@ export default tseslint.config(
 			'header': pluginHeader,
 		},
 		rules: {
-			'constructor-super': 'warn',
-			'curly': 'warn',
-			'eqeqeq': 'warn',
+			'constructor-super': 'error',
+			'curly': 'error',
+			'eqeqeq': ['error', 'always'],
 			'prefer-const': [
-				'warn',
+				'error',
 				{
 					'destructuring': 'all'
 				}
 			],
-			'no-buffer-constructor': 'warn',
-			'no-caller': 'warn',
-			'no-case-declarations': 'warn',
-			'no-debugger': 'warn',
-			'no-duplicate-case': 'warn',
-			'no-duplicate-imports': 'warn',
-			'no-eval': 'warn',
-			'no-async-promise-executor': 'warn',
-			'no-extra-semi': 'warn',
-			'no-new-wrappers': 'warn',
-			'no-redeclare': 'off',
-			'no-sparse-arrays': 'warn',
-			'no-throw-literal': 'warn',
-			'no-unsafe-finally': 'warn',
-			'no-unused-labels': 'warn',
-			'no-misleading-character-class': 'warn',
+			'no-buffer-constructor': 'error',
+			'no-caller': 'error',
+			'no-case-declarations': 'error',
+			'no-debugger': 'error',
+			'no-duplicate-case': 'error',
+			'no-duplicate-imports': 'error',
+			'no-eval': 'error',
+			'no-async-promise-executor': 'error',
+			'no-extra-semi': 'error',
+			'no-new-wrappers': 'error',
+			'no-redeclare': 'error',
+			'no-sparse-arrays': 'error',
+			'no-throw-literal': 'error',
+			'no-unsafe-finally': 'error',
+			'no-unused-labels': 'error',
+			'no-misleading-character-class': 'error',
 			'no-restricted-globals': [
-				'warn',
+				'error',
 				'name',
 				'length',
 				'event',
@@ -72,19 +72,50 @@ export default tseslint.config(
 				'origin',
 				'orientation',
 				'context'
-			], // non-complete list of globals that are easy to access unintentionally
-			'no-var': 'warn',
-			'semi': 'off',
-			'local/code-translation-remind': 'warn',
-			'local/code-no-native-private': 'warn',
-			'local/code-parameter-properties-must-have-explicit-accessibility': 'warn',
-			'local/code-no-nls-in-standalone-editor': 'warn',
-			'local/code-no-potentially-unsafe-disposables': 'warn',
-			'local/code-no-dangerous-type-assertions': 'warn',
-			'local/code-no-standalone-editor': 'warn',
-			'local/code-no-unexternalized-strings': 'warn',
-			'local/code-must-use-super-dispose': 'warn',
-			'local/code-declare-service-brand': 'warn',
+			],
+			'no-var': 'error',
+			'semi': 'error',
+			'local/code-translation-remind': 'error',
+			'local/code-no-native-private': 'error',
+			'local/code-parameter-properties-must-have-explicit-accessibility': 'error',
+			'local/code-no-nls-in-standalone-editor': 'error',
+			'local/code-no-potentially-unsafe-disposables': 'error',
+			'local/code-no-dangerous-type-assertions': 'error',
+			'local/code-no-standalone-editor': 'error',
+			'local/code-no-unexternalized-strings': 'error',
+			'local/code-must-use-super-dispose': 'error',
+			'local/code-declare-service-brand': 'error',
+			'no-unused-vars': 'error',
+			'@typescript-eslint/no-unused-vars': ['error', {
+				'args': 'after-used',
+				'argsIgnorePattern': '^_',
+				'vars': 'all',
+				'varsIgnorePattern': '^_',
+				'ignoreRestSiblings': true
+			}],
+			'@typescript-eslint/no-explicit-any': 'error',
+			'@typescript-eslint/no-require-imports': 'error',
+			'@typescript-eslint/no-empty-object-type': 'error',
+			'@typescript-eslint/no-unsafe-member-access': 'error',
+			'@typescript-eslint/no-unsafe-assignment': 'error',
+			'@typescript-eslint/no-unsafe-call': 'error',
+			'@typescript-eslint/no-unsafe-argument': 'error',
+			'@typescript-eslint/no-unsafe-return': 'error',
+			'@typescript-eslint/no-unsafe-function-type': 'error',
+			'@typescript-eslint/explicit-function-return-type': 'error',
+			'@typescript-eslint/explicit-module-boundary-types': 'error',
+			'@typescript-eslint/no-floating-promises': 'error',
+			'@typescript-eslint/no-misused-promises': 'error',
+			'@typescript-eslint/no-non-null-assertion': 'error',
+			'@typescript-eslint/no-unnecessary-type-assertion': 'error',
+			'@typescript-eslint/prefer-as-const': 'error',
+			'@typescript-eslint/prefer-nullish-coalescing': 'error',
+			'@typescript-eslint/prefer-optional-chain': 'error',
+			'@typescript-eslint/prefer-readonly': 'error',
+			'@typescript-eslint/require-await': 'error',
+			'@typescript-eslint/restrict-plus-operands': 'error',
+			'@typescript-eslint/restrict-template-expressions': 'error',
+			'@typescript-eslint/unified-signatures': 'error',
 			'local/code-layering': [
 				'warn',
 				{
@@ -137,16 +168,51 @@ export default tseslint.config(
 			'jsdoc': pluginJsdoc,
 		},
 		rules: {
-			'@stylistic/ts/semi': 'warn',
-			'@stylistic/ts/member-delimiter-style': 'warn',
+			'@stylistic/ts/semi': 'error',
+			'@stylistic/ts/member-delimiter-style': 'error',
 			'local/code-no-unused-expressions': [
-				'warn',
+				'error',
 				{
 					'allowTernary': true
 				}
 			],
-			'jsdoc/no-types': 'warn',
-			'local/code-no-static-self-ref': 'warn'
+			'jsdoc/no-types': 'error',
+			'local/code-no-static-self-ref': 'error',
+			'@typescript-eslint/consistent-type-assertions': 'error',
+			'@typescript-eslint/consistent-type-definitions': 'error',
+			'@typescript-eslint/consistent-type-imports': 'error',
+			'@typescript-eslint/no-base-to-string': 'error',
+			'@typescript-eslint/no-confusing-non-null-assertion': 'error',
+			'@typescript-eslint/no-confusing-void-expression': 'error',
+			'@typescript-eslint/no-dynamic-delete': 'error',
+			'@typescript-eslint/no-extraneous-class': 'error',
+			'@typescript-eslint/no-for-in-array': 'error',
+			'@typescript-eslint/no-invalid-void-type': 'error',
+			'@typescript-eslint/no-misused-new': 'error',
+			'@typescript-eslint/no-unnecessary-boolean-literal-compare': 'error',
+			'@typescript-eslint/no-unnecessary-condition': 'error',
+			'@typescript-eslint/no-unnecessary-qualifier': 'error',
+			'@typescript-eslint/no-unnecessary-type-arguments': 'error',
+			'@typescript-eslint/no-unnecessary-type-constraint': 'error',
+			'@typescript-eslint/no-unsafe-enum-comparison': 'error',
+			'@typescript-eslint/no-var-requires': 'error',
+			'@typescript-eslint/prefer-enum-initializers': 'error',
+			'@typescript-eslint/prefer-for-of': 'error',
+			'@typescript-eslint/prefer-function-type': 'error',
+			'@typescript-eslint/prefer-includes': 'error',
+			'@typescript-eslint/prefer-literal-enum-member': 'error',
+			'@typescript-eslint/prefer-regexp-exec': 'error',
+			'@typescript-eslint/prefer-string-starts-ends-with': 'error',
+			'@typescript-eslint/prefer-ts-expect-error': 'error',
+			'@typescript-eslint/promise-function-async': 'error',
+			'@typescript-eslint/require-array-sort-compare': 'error',
+			'@typescript-eslint/restrict-template-expressions': 'error',
+			'@typescript-eslint/sort-type-union-intersection-members': 'error',
+			'@typescript-eslint/switch-exhaustiveness-check': 'error',
+			'@typescript-eslint/type-annotation-spacing': 'error',
+			'@typescript-eslint/unified-signatures': 'error',
+			'@typescript-eslint/use-unknown-in-catch-clause-variable': 'error',
+			'@typescript-eslint/void-return': 'error'
 		}
 	},
 	// vscode TS
@@ -162,14 +228,143 @@ export default tseslint.config(
 		},
 		rules: {
 			'@typescript-eslint/naming-convention': [
-				'warn',
+				'error',
 				{
 					'selector': 'class',
 					'format': [
 						'PascalCase'
 					]
+				},
+				{
+					'selector': 'interface',
+					'format': ['PascalCase'],
+					'prefix': ['I']
+				},
+				{
+					'selector': 'typeAlias',
+					'format': ['PascalCase']
+				},
+				{
+					'selector': 'enum',
+					'format': ['PascalCase']
+				},
+				{
+					'selector': 'enumMember',
+					'format': ['PascalCase', 'UPPER_CASE']
+				},
+				{
+					'selector': 'variable',
+					'format': ['camelCase', 'UPPER_CASE', 'PascalCase'],
+					'leadingUnderscore': 'forbid',
+					'trailingUnderscore': 'forbid'
+				},
+				{
+					'selector': 'function',
+					'format': ['camelCase', 'PascalCase'],
+					'leadingUnderscore': 'forbid',
+					'trailingUnderscore': 'forbid'
+				},
+				{
+					'selector': 'method',
+					'format': ['camelCase'],
+					'leadingUnderscore': 'forbid',
+					'trailingUnderscore': 'forbid'
+				},
+				{
+					'selector': 'property',
+					'format': ['camelCase'],
+					'leadingUnderscore': 'forbid',
+					'trailingUnderscore': 'forbid'
+				},
+				{
+					'selector': 'parameter',
+					'format': ['camelCase'],
+					'leadingUnderscore': 'forbid',
+					'trailingUnderscore': 'forbid'
 				}
-			]
+			],
+			'@typescript-eslint/no-unused-vars': ['error', {
+				'args': 'after-used',
+				'argsIgnorePattern': '^_',
+				'vars': 'all',
+				'varsIgnorePattern': '^_',
+				'ignoreRestSiblings': true
+			}],
+			'@typescript-eslint/explicit-function-return-type': ['error', {
+				'allowExpressions': true,
+				'allowTypedFunctionExpressions': true,
+				'allowHigherOrderFunctions': true,
+				'allowDirectConstAssertionInArrowFunctions': true,
+				'allowConciseArrowFunctionExpressionsStartingWithVoid': true
+			}],
+			'@typescript-eslint/no-explicit-any': ['error', {
+				'ignoreRestArgs': true,
+				'fixToUnknown': true
+			}],
+			'@typescript-eslint/no-floating-promises': ['error', {
+				'allowVoid': true,
+				'allowIIFE': true
+			}],
+			'@typescript-eslint/no-misused-promises': ['error', {
+				'checksVoidReturn': true,
+				'checksConditionals': true,
+				'checksSpreads': true,
+				'checksOverrides': true,
+				'checksExhaustive': true
+			}],
+			'@typescript-eslint/no-non-null-assertion': ['error', {
+				'ignoreChain': true
+			}],
+			'@typescript-eslint/no-unnecessary-type-assertion': ['error', {
+				'typesToIgnore': [''],
+				'ignoreRestSiblings': true
+			}],
+			'@typescript-eslint/prefer-as-const': ['error', {
+				'typeLiteral': true
+			}],
+			'@typescript-eslint/prefer-nullish-coalescing': ['error', {
+				'ignoreConditionalTests': true,
+				'ignoreMixedLogicalExpressions': true
+			}],
+			'@typescript-eslint/prefer-optional-chain': ['error', {
+				'checkAny': true,
+				'checkUnknown': true,
+				'checkString': true,
+				'checkNumber': true,
+				'checkBoolean': true,
+				'checkBigInt': true,
+				'checkSymbol': true,
+				'checkVoid': true,
+				'checkNullish': true,
+				'checkUndefined': true
+			}],
+			'@typescript-eslint/prefer-readonly': ['error', {
+				'onlyInlineLambdas': true
+			}],
+			'@typescript-eslint/require-await': ['error', {
+				'ignorePromiseReturningFunction': true
+			}],
+			'@typescript-eslint/restrict-plus-operands': ['error', {
+				'checkCompoundAssignments': true,
+				'allowAny': false,
+				'allowBoolean': false,
+				'allowNumber': true,
+				'allowRegExp': false,
+				'allowString': true,
+				'allowNullish': false,
+				'allowBigInt': true
+			}],
+			'@typescript-eslint/restrict-template-expressions': ['error', {
+				'allowNumber': true,
+				'allowBoolean': true,
+				'allowAny': false,
+				'allowRegExp': true,
+				'allowNullish': false,
+				'allowBigInt': true
+			}],
+			'@typescript-eslint/unified-signatures': ['error', {
+				'ignoreDifferentlyNamedParameters': true
+			}]
 		}
 	},
 	// Tests

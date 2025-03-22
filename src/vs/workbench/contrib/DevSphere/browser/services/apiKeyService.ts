@@ -129,5 +129,15 @@ export class ApiKeyService {
 	public async clearApiKey(providerType: ModelProviderType): Promise<void> {
 		const secretKey = this.getSecretKeyForProvider(providerType);
 		await this.secretStorageService.delete(secretKey);
+		this.notificationService.info(`API key for ${providerType} removed.`);
+	}
+
+	public async clearAllApiKeys(): Promise<void> {
+		const providerTypes: ModelProviderType[] = ['ChatgptModels', 'AnthropicModels', 'GoogleModels'];
+		for (const providerType of providerTypes) {
+			await this.clearApiKey(providerType);
+		}
+		this.notificationService.info('All API keys have been removed.');
 	}
 }
+

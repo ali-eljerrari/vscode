@@ -34,7 +34,7 @@ import { ViewPaneContainer } from '../../../browser/parts/views/viewPaneContaine
 import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
 import { DevSphereView } from './devSphereView.js';
 import { IDevSphereService } from './services/devSphereServiceInterface.js';
-import { DevSphereService } from './services/devSphereServiceImpl.js';
+import { DevSphereService } from './controller/devSphereServiceImpl.js';
 import { DEV_SPHERE_CONTAINER_ID, registerDevSphereActions } from './devSphereActionCommands.js';
 
 import { InstantiationType, registerSingleton } from '../../../../platform/instantiation/common/extensions.js';
@@ -83,7 +83,7 @@ Registry.as<IViewsRegistry>(ViewContainerExtensions.ViewsRegistry).registerViews
  */
 class DevSphereContribution implements IWorkbenchContribution {
 	constructor(
-		@IInstantiationService instantiationService: IInstantiationService
+		@IInstantiationService readonly instantiationService: IInstantiationService
 	) {
 		// Register all DevSphere-related commands and actions
 		registerDevSphereActions();

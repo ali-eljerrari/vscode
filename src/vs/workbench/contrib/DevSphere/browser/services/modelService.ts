@@ -4,8 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IStorageService, StorageScope, StorageTarget } from '../../../../../platform/storage/common/storage.js';
-import { DEFAULT_MODEL_ID, DEFAULT_MODEL_PROVIDER, OPENAI_MODELS, STORAGE_KEYS } from '../models/modelData.js';
+import { DevSphereErrorHandler } from '../devSphereErrorHandler.js';
+import { DEFAULT_MAX_TOKENS, DEFAULT_MODEL_ID, DEFAULT_MODEL_PROVIDER, OPENAI_MODELS, STORAGE_KEYS } from '../models/modelData.js';
 import { ModelInfo, ModelInfoWithProvider, ModelProviderType, ModelWithProvider, OpenAIModel } from '../models/types.js';
+import { ApiKeyService } from './apiKeyService.js';
+import { IAPIProvider } from './apiProviders/apiProviderInterface.js';
 
 /**
  * Service for managing models
@@ -32,9 +35,10 @@ export class ModelService {
 	private currentModelType: ModelProviderType = DEFAULT_MODEL_PROVIDER;
 
 	constructor(
-		private readonly storageService: IStorageService
+		private readonly storageService: IStorageService,
+		private readonly apiKeyService: ApiKeyService
 	) {
-		this.currentModel = OPENAI_MODELS[0];
+		this.currentModel = OPENAI_MODELS[0] as OpenAIModel;
 
 		// Initialize by loading saved model preference
 		this.loadSavedModel();
@@ -210,7 +214,7 @@ export class ModelService {
 			'cost-effective': ['cheap', 'affordable', 'cost', 'mini']
 		};
 
-		const keywords = keywordMap[capability];
+		const keywords = keywordMap[capability] as string[];
 
 		// Search all models across all providers
 		for (const model of OPENAI_MODELS) {
@@ -268,5 +272,46 @@ export class ModelService {
 			StorageScope.APPLICATION,
 			StorageTarget.MACHINE
 		);
+	}
+
+	/**
+	 * Gets the API key for the current provider
+	 */
+	public async getProviderAPIKey(): Promise<string | undefined> {
+		return this.apiKeyService.getApiKey(this.currentModelType);
+	}
+
+	public async fetchAI(prompt: string, modelId: string, providerName: string, apiKey: string, apiProvider: IAPIProvider): Promise<string> {
+
+		try {
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+			const requestBody = apiProvider.formatRequestBody(prompt, DEFAULT_MAX_TOKENS);
+
+			const response = await apiProvider.makeRequest(
+				this.getCurrentEndpoint(),
+				apiKey,
+				requestBody,
+				controller.signal
+			);
+
+			clearTimeout(timeoutId);
+
+			if (!response.ok) {
+				const processedError = DevSphereErrorHandler.processApiError('API request failed, please check your API key, or try again later', modelId, providerName);
+				return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
+			}
+
+			const data = await response.json();
+			return apiProvider.extractResponseContent(data);
+		} catch (error) {
+			console.error('Error in fetchAIResponse:', error);
+
+			const message: string = error instanceof Error ? error.message : 'An unknown error occurred';
+
+			const processedError = DevSphereErrorHandler.processApiError(message, modelId, providerName);
+			return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
+		}
 	}
 }

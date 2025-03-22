@@ -74,17 +74,18 @@ export class MarkdownFormatter {
 				// This is a code block
 				const pre = document.createElement('pre');
 				const code = document.createElement('code');
-				code.textContent = parts[i].trim();
+				const content = parts[i]?.trim() ?? '';
+				code.textContent = content;
 				pre.appendChild(code);
 				container.appendChild(pre);
 			} else if (parts[i]) {
 				// Process the non-code block content
 				// Split by line breaks
-				const lines = parts[i].split('\n');
+				const lines = (parts[i] ?? '').split('\n');
 
 				for (let j = 0; j < lines.length; j++) {
 					// Process line content (bold and inline code)
-					const line = lines[j];
+					const line = lines[j] ?? '';
 					const segments = MarkdownFormatter.processLineSegments(line);
 
 					// Add the processed segments
@@ -123,21 +124,21 @@ export class MarkdownFormatter {
 			if (i % 2 === 1) {
 				// This is inline code
 				const code = document.createElement('code');
-				code.textContent = codeParts[i];
+				code.textContent = codeParts[i] ?? '';
 				segments.push(code);
 			} else if (codeParts[i]) {
 				// Process bold text
-				const boldParts = codeParts[i].split(/\*\*([^*]+)\*\*/);
+				const boldParts = (codeParts[i] ?? '').split(/\*\*([^*]+)\*\*/);
 
 				for (let j = 0; j < boldParts.length; j++) {
 					if (j % 2 === 1) {
 						// This is bold text
 						const strong = document.createElement('strong');
-						strong.textContent = boldParts[j];
+						strong.textContent = boldParts[j] ?? '';
 						segments.push(strong);
 					} else if (boldParts[j]) {
 						// Regular text
-						const text = document.createTextNode(boldParts[j]);
+						const text = document.createTextNode(boldParts[j] ?? '');
 						segments.push(text);
 					}
 				}

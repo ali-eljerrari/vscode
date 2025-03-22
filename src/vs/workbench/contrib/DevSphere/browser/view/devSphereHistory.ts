@@ -254,7 +254,7 @@ export class DevSphereHistory extends Disposable {
 		metaElement.classList.add('dev-sphere-history-meta');
 
 		const count = chat.messages.length;
-		const model = chat.modelId ? chat.modelId.split('-')[0].toUpperCase() : 'AI'; // Simplified model display
+		const model = chat.modelId ? chat.modelId.split('-')[0]?.toUpperCase() : 'AI'; // Simplified model display
 
 		// Format time
 		const date = new Date(chat.lastModified);

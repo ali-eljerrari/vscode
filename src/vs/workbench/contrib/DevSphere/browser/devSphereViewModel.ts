@@ -184,7 +184,7 @@ export class DevSphereViewModel implements IDisposable {
 
 			if (chats.length > 0) {
 				// Load the first chat
-				await this.loadChat(chats[0].id);
+				await this.loadChat(chats[0]?.id ?? '');
 			} else {
 				// Create a new chat
 				await this.createNewChat();
@@ -489,7 +489,7 @@ export class DevSphereViewModel implements IDisposable {
 			if (this._currentChat && this._currentChat.id === chatId) {
 				if (this._allChats.length > 0) {
 					// Switch to the first available chat
-					await this.loadChat(this._allChats[0].id);
+					await this.loadChat(this._allChats[0]?.id ?? '');
 				} else {
 					// Create a new chat if no chats remain
 					// await this.createNewChat();
@@ -522,7 +522,7 @@ export class DevSphereViewModel implements IDisposable {
 		// Find the last user message
 		let lastUserMessage: Message | undefined;
 		for (let i = this._messages.length - 1; i >= 0; i--) {
-			if (this._messages[i].role === 'user') {
+			if (this._messages[i]?.role === 'user') {
 				lastUserMessage = this._messages[i];
 				break;
 			}

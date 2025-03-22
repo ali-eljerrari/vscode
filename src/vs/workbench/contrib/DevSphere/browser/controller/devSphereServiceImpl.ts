@@ -7,15 +7,14 @@ import { INotificationService } from '../../../../../platform/notification/commo
 import { IQuickInputService } from '../../../../../platform/quickinput/common/quickInput.js';
 import { ISecretStorageService } from '../../../../../platform/secrets/common/secrets.js';
 import { IStorageService } from '../../../../../platform/storage/common/storage.js';
-import { DevSphereErrorHandler } from '../devSphereErrorHandler.js';
-import { DEFAULT_MAX_TOKENS } from '../models/modelData.js';
 import { Chat, ModelInfoWithProvider, ModelProviderType, ModelWithProvider, OpenAIModel } from '../models/types.js';
-import { ApiKeyService } from './apiKeyService.js';
-import { ApiProviderFactory } from './apiProviders/apiProviderFactory.js';
-import { ChatService } from './chatService.js';
-import { CorsHandlerService } from './corsHandlerService.js';
-import { IDevSphereService } from './devSphereServiceInterface.js';
-import { ModelService } from './modelService.js';
+import { ApiKeyService } from '../services/apiKeyService.js';
+import { ApiProviderFactory } from '../services/apiProviders/apiProviderFactory.js';
+import { ChatService } from '../services/chatService.js';
+import { CorsHandlerService } from '../services/corsHandlerService.js';
+import { IDevSphereService } from '../services/devSphereServiceInterface.js';
+import { ModelService } from '../services/modelService.js';
+import { DevSphereErrorHandler } from '../devSphereErrorHandler.js';
 
 /**
  * Main service implementation for DevSphere.
@@ -51,18 +50,16 @@ export class DevSphereService implements IDevSphereService {
 	constructor(
 		@ISecretStorageService secretStorageService: ISecretStorageService,
 		@IQuickInputService quickInputService: IQuickInputService,
-		@INotificationService private readonly notificationService: INotificationService,
+		@INotificationService notificationService: INotificationService,
 		@IStorageService storageService: IStorageService
 	) {
 		// Initialize service components
 		this.corsHandler = new CorsHandlerService();
-		this.modelService = new ModelService(storageService);
-		this.apiKeyService = new ApiKeyService(secretStorageService, quickInputService, notificationService);
-		this.chatService = new ChatService(storageService, notificationService);
 		this.apiProviderFactory = new ApiProviderFactory(this.corsHandler);
+		this.apiKeyService = new ApiKeyService(secretStorageService, quickInputService, notificationService);
+		this.modelService = new ModelService(storageService, this.apiKeyService);
+		this.chatService = new ChatService(storageService, notificationService);
 	}
-
-	// #region Model Management
 
 	/**
 	 * Gets all available models across all providers.
@@ -156,10 +153,6 @@ export class DevSphereService implements IDevSphereService {
 		return this.modelService.findModelsByCapability(capability);
 	}
 
-	// #endregion
-
-	// #region Chat Management
-
 	/**
 	 * Saves a chat session.
 	 * @param chat - The chat to save
@@ -198,17 +191,18 @@ export class DevSphereService implements IDevSphereService {
 	 * @returns A new chat with default settings
 	 */
 	public createNewChat(): Chat {
+		const modelId = this.getCurrentModelId();
+		const modelType = this.modelService.getCurrentModelType() as ModelProviderType;
+		const providerName = this.getProviderNameFromType(modelType);
+		const modelName = this.getCurrentModelName();
+
 		return this.chatService.createNewChat(
-			this.getCurrentModelId(),
-			this.modelService.getCurrentModelType() as ModelProviderType,
-			this.getCurrentProviderName(),
-			this.getCurrentModelName()
+			modelId,
+			modelType,
+			providerName,
+			modelName
 		);
 	}
-
-	// #endregion
-
-	// #region API Key Management
 
 	/**
 	 * Gets the API key for the current provider.
@@ -253,19 +247,13 @@ export class DevSphereService implements IDevSphereService {
 	 */
 	public async removeAPIKeyForProvider(providerType: ModelProviderType): Promise<void> {
 		await this.apiKeyService.clearApiKey(providerType);
-		this.notificationService.info(`${this.getProviderNameFromType(providerType)} API key has been removed.`);
 	}
 
 	/**
 	 * Removes all API keys for all providers.
 	 */
 	public async removeAllAPIKeys(): Promise<void> {
-		// Clear API keys for all provider types
-		const providerTypes: ModelProviderType[] = ['ChatgptModels', 'AnthropicModels', 'GoogleModels'];
-		for (const providerType of providerTypes) {
-			await this.apiKeyService.clearApiKey(providerType);
-		}
-		this.notificationService.info('All API keys have been removed.');
+		await this.apiKeyService.clearAllApiKeys();
 	}
 
 	/**
@@ -284,43 +272,20 @@ export class DevSphereService implements IDevSphereService {
 	 */
 	public async fetchAIResponse(prompt: string): Promise<string> {
 		const modelType = this.modelService.getCurrentModelType() as ModelProviderType;
-		const providerName = this.getProviderNameFromType(modelType);
-		const modelId = this.getCurrentModelId();
+
+		const modelId = this.modelService.getCurrentModelId();
+
+		const providerName = this.modelService.getCurrentProviderName();
 
 		const apiKey = await this.getProviderAPIKey();
+
+		const apiProvider = this.apiProviderFactory.createProvider(modelType, modelId);
 
 		if (!apiKey) {
 			const processedError = DevSphereErrorHandler.processApiError('No API key found, please check your API key, or try again later', modelId, providerName);
 			return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
 		}
-		try {
-			const controller = new AbortController();
-			const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-			const apiProvider = this.apiProviderFactory.createProvider(modelType, modelId);
-			const requestBody = apiProvider.formatRequestBody(prompt, DEFAULT_MAX_TOKENS);
-
-			const response = await apiProvider.makeRequest(
-				this.modelService.getCurrentEndpoint(),
-				apiKey,
-				requestBody,
-				controller.signal
-			);
-
-			clearTimeout(timeoutId);
-
-			if (!response.ok) {
-				const processedError = DevSphereErrorHandler.processApiError('API request failed, please check your API key, or try again later', modelId, providerName);
-				return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
-			}
-
-			const data = await response.json();
-			return apiProvider.extractResponseContent(data);
-		} catch (error) {
-			console.error('Error in fetchAIResponse:', error);
-
-			const processedError = DevSphereErrorHandler.processApiError(error, modelId, providerName);
-			return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
-		}
+		return this.modelService.fetchAI(prompt, modelId, providerName, apiKey, apiProvider);
 	}
 }

@@ -84,29 +84,10 @@ export class DevSphereService implements IDevSphereService {
 		@IStorageService storageService: IStorageService
 	) {
 		this.corsHandler = new CorsHandlerService();
-		this.modelService = new ModelService(storageService);
 		this.apiKeyService = new ApiKeyService(secretStorageService, quickInputService, notificationService);
+		this.modelService = new ModelService(storageService, this.apiKeyService);
 		this.chatService = new ChatService(storageService, notificationService);
 		this.apiProviderFactory = new ApiProviderFactory(this.corsHandler);
-	}
-
-	/**
-	 * Removes the API key for a specific provider.
-	 *
-	 * @param providerType - The type of provider to remove the key for
-	 * @returns A promise that resolves when the key is removed
-	 */
-	removeAPIKeyForProvider(providerType: ModelProviderType): Promise<void> {
-		throw new Error('Method not implemented.');
-	}
-
-	/**
-	 * Removes all stored API keys from secure storage.
-	 *
-	 * @returns A promise that resolves when all keys are removed
-	 */
-	removeAllAPIKeys(): Promise<void> {
-		throw new Error('Method not implemented.');
 	}
 
 	// #region Model Management
@@ -318,6 +299,25 @@ export class DevSphereService implements IDevSphereService {
 		return !!apiKey;
 	}
 
+	/**
+	 * Removes the API key for a specific provider.
+	 *
+	 * @param providerType - The type of provider to remove the key for
+	 * @returns A promise that resolves when the key is removed
+	 */
+	public async removeAPIKeyForProvider(providerType: ModelProviderType): Promise<void> {
+		await this.apiKeyService.clearApiKey(providerType);
+	}
+
+	/**
+	 * Removes all stored API keys from secure storage.
+	 *
+	 * @returns A promise that resolves when all keys are removed
+	 */
+	public async removeAllAPIKeys(): Promise<void> {
+		await this.apiKeyService.clearAllApiKeys();
+	}
+
 	// #endregion
 
 	// #region API Interaction
@@ -387,8 +387,10 @@ export class DevSphereService implements IDevSphereService {
 			// Handle unexpected errors, including CORS errors
 			console.error('Error in fetchAIResponse:', error);
 
+			const message = error instanceof Error ? error.message : 'An unknown error occurred';
+
 			// Process other errors
-			const processedError = DevSphereErrorHandler.processApiError(error, modelId, providerName);
+			const processedError = DevSphereErrorHandler.processApiError(message, modelId, providerName);
 			return DevSphereErrorHandler.formatErrorAsSystemMessage(processedError);
 		}
 	}

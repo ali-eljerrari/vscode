@@ -98,7 +98,7 @@ export class DevSphereMessages extends Disposable {
 		this.viewModel.messageList.forEach(message => {
 			// Handle loading messages specially
 			if (message.role === 'loading') {
-				const loadingElement = this.renderLoadingMessage(message);
+				const loadingElement = this.renderLoadingMessage();
 				this.messagesContainer.appendChild(loadingElement);
 				return;
 			}
@@ -288,7 +288,7 @@ export class DevSphereMessages extends Disposable {
 	 * @param message - The loading message object
 	 * @returns The constructed loading indicator DOM element
 	 */
-	private renderLoadingMessage(message: Message): HTMLElement {
+	private renderLoadingMessage(): HTMLElement {
 		const element = document.createElement('div');
 		element.className = 'dev-sphere-message dev-sphere-message-loading';
 
@@ -383,7 +383,7 @@ export class DevSphereMessages extends Disposable {
 		let formattedText = text.replace(/\n/g, '<br/>');
 
 		// Process code blocks with triple backticks
-		formattedText = formattedText.replace(/```(.*?)<br\/>(.*?)<br\/>```/gs, (match, language, codeContent) => {
+		formattedText = formattedText.replace(/```(.*?)<br\/>(.*?)<br\/>```/gs, (language, codeContent) => {
 			// Split the code into lines
 			const lines = codeContent.split('<br/>');
 			let codeWithLines = '';
