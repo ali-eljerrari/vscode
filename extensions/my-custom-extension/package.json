@@ -1,0 +1,39 @@
+{
+    "name": "my-custom-extension",
+    "displayName": "My Custom Extension",
+    "description": "Built-in custom extension",
+    "publisher": "vscode",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.50.0"
+    },
+    "activationEvents": [
+        "*"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "my-custom-extension.getSelectedText",
+                "title": "Get Selected Text"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "my-custom-extension.getSelectedText",
+                "key": "ctrl+shift+s",
+                "mac": "cmd+shift+s",
+                "when": "editorHasSelection"
+            }
+        ]
+    },
+    "scripts": {
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile"
+    },
+    "devDependencies": {
+        "typescript": "^5.8.2",
+        "@types/vscode": "^1.50.0"
+    }
+}

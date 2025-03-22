@@ -3,6 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/**
+ * This module provides functionality to toggle the minimap in the editor.
+ * The minimap is a small preview of the entire file that appears on the right side of the editor.
+ */
+
 import { localize, localize2 } from '../../../../nls.js';
 import { Action2, MenuId, registerAction2 } from '../../../../platform/actions/common/actions.js';
 import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
@@ -10,6 +15,11 @@ import { ContextKeyExpr } from '../../../../platform/contextkey/common/contextke
 import { Categories } from '../../../../platform/action/common/actionCommonCategories.js';
 import { ServicesAccessor } from '../../../../platform/instantiation/common/instantiation.js';
 
+/**
+ * Action to toggle the visibility of the editor's minimap.
+ * This action can be triggered from the View menu or using the command palette.
+ * The minimap state is persisted in the user's settings.
+ */
 export class ToggleMinimapAction extends Action2 {
 
 	static readonly ID = 'editor.action.toggleMinimap';

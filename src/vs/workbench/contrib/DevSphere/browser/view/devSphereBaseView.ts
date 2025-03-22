@@ -231,40 +231,31 @@ export class DevSphereView extends ViewPane {
 	 * @param view - The view type that was selected
 	 */
 	private onViewTabChanged(view: DevSphereViewType): void {
-		console.log('DevSphere BaseView: View tab changed to', view);
 
 		// Hide all views first
 		if (this.chatContentContainer) {
 			this.chatContentContainer.style.display = 'none';
-			console.log('DevSphere BaseView: Hidden chat content container');
 		}
 
 		this.historyComponent?.setVisible(false);
-		console.log('DevSphere BaseView: Hidden history component');
 
 		this.apiKeysComponent?.setVisible(false);
-		console.log('DevSphere BaseView: Hidden API keys component');
 
 		// Hide/show header based on view type
 		if (this.headerComponent) {
 			this.headerComponent.setVisible(view === DevSphereViewType.Chat);
-			console.log(`DevSphere BaseView: ${view === DevSphereViewType.Chat ? 'Showing' : 'Hiding'} header`);
 		}
 
 		// Show the selected view
 		if (view === DevSphereViewType.Chat) {
-			console.log('DevSphere BaseView: Showing Chat view');
 			if (this.chatContentContainer) {
 				this.chatContentContainer.style.display = 'flex';
-				console.log('DevSphere BaseView: Displayed chat content container');
 			}
 			// Focus the input
 			setTimeout(() => this.focusInput(), 50);
 		} else if (view === DevSphereViewType.History) {
-			console.log('DevSphere BaseView: Showing History view');
 			this.historyComponent?.setVisible(true);
 		} else if (view === DevSphereViewType.APIKeys) {
-			console.log('DevSphere BaseView: Showing API Keys view');
 			this.apiKeysComponent?.setVisible(true);
 		} else {
 			console.error('DevSphere BaseView: Unknown view type', view);
