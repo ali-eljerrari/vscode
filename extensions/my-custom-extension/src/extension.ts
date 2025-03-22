@@ -23,9 +23,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 			panel.webview.onDidReceiveMessage(
 				message => {
-					if (message.command === 'copy') {
-						vscode.env.clipboard.writeText(text);
-						vscode.window.showInformationMessage('Text copied to clipboard!');
+					if (message.command === 'error') {
+						vscode.window.showErrorMessage(message.text);
 					}
 				},
 				undefined,
@@ -51,6 +50,9 @@ function getWebviewContent(text: string, fileName: string) {
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;')
 		.replace(/'/g, '&#039;');
+
+	const language = getLanguageFromFileName(fileName);
+	const prismScripts = getPrismScripts(language);
 
 	return `<!DOCTYPE html>
 	<html lang="en">
@@ -133,9 +135,9 @@ function getWebviewContent(text: string, fileName: string) {
 				font-family: 'SF Mono', 'Consolas', 'Monaco', 'Menlo', monospace;
 				font-size: 14px;
 				line-height: 1.5;
-				white-space: pre-wrap;
 				padding: 16px;
-				display: flex;
+				display: grid;
+				grid-template-columns: auto 1fr;
 				gap: 16px;
 				background: #1a1b26;
 			}
@@ -146,26 +148,20 @@ function getWebviewContent(text: string, fileName: string) {
 				min-width: 40px;
 				background: #1a1b26;
 				padding-right: 8px;
+				position: sticky;
+				left: 16px;
+				display: grid;
+				grid-auto-rows: minmax(1.5em, auto);
+			}
+			.line-numbers > div {
+				height: 1.5em;
+				line-height: 1.5;
 			}
 			.code-text {
-				flex: 1;
-				white-space: pre-wrap;
+				overflow-x: auto;
 				color: #a9b1d6;
-				word-break: break-word;
-			}
-			.copy-button {
-				background: #0e639c;
-				color: white;
-				border: none;
-				padding: 8px 16px;
-				border-radius: 4px;
-				cursor: pointer;
-				font-size: 13px;
-				transition: background 0.2s;
-				margin-right: 8px;
-			}
-			.copy-button:hover {
-				background: #1177bb;
+				display: grid;
+				grid-auto-rows: minmax(1.5em, auto);
 			}
 			.download-button {
 				background: #2ea043;
@@ -190,6 +186,9 @@ function getWebviewContent(text: string, fileName: string) {
 				margin: 0 !important;
 				padding: 0 !important;
 				overflow: visible !important;
+				white-space: pre-wrap !important;
+				display: grid !important;
+				grid-auto-rows: minmax(1.5em, auto) !important;
 			}
 			code[class*="language-"] {
 				font-family: 'SF Mono', 'Consolas', 'Monaco', 'Menlo', monospace !important;
@@ -197,6 +196,7 @@ function getWebviewContent(text: string, fileName: string) {
 				text-shadow: none !important;
 				background: #1a1b26 !important;
 				color: #a9b1d6 !important;
+				display: block !important;
 			}
 			.token.comment,
 			.token.prolog,
@@ -267,14 +267,15 @@ function getWebviewContent(text: string, fileName: string) {
 			.token.attr-value .token.punctuation {
 				color: #9ece6a !important;
 			}
+			.code-content > div:nth-child(1) {
+				grid-row: 1 / auto;
+			}
+			.code-content > div:nth-child(2) {
+				grid-row: 1 / auto;
+			}
 		</style>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+		${prismScripts}
 		<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 	</head>
 	<body>
@@ -289,22 +290,16 @@ function getWebviewContent(text: string, fileName: string) {
 					<div class="title">${fileName}</div>
 				</div>
 				<div class="code-content">
-					<div class="line-numbers">${lineNumbers}</div>
-					<pre class="code-text"><code class="language-${getLanguageFromFileName(fileName)}">${escapedText}</code></pre>
+					<div class="line-numbers">${lineNumbers.split('\n').map(num => `<div>${num}</div>`).join('')}</div>
+					<pre class="code-text"><code class="language-${language}">${escapedText}</code></pre>
 				</div>
 			</div>
 			<div class="button-container">
-				<button class="copy-button" onclick="copyText()">Copy to Clipboard</button>
 				<button class="download-button" onclick="downloadAsPNG()">Download as PNG</button>
 			</div>
 		</div>
 		<script>
 			const vscode = acquireVsCodeApi();
-			function copyText() {
-				vscode.postMessage({
-					command: 'copy'
-				});
-			}
 			async function downloadAsPNG() {
 				const codeWindow = document.querySelector('.code-window');
 				try {
@@ -329,19 +324,229 @@ function getWebviewContent(text: string, fileName: string) {
 	</html>`;
 }
 
+function getPrismScripts(language: string): string {
+	const baseUrl = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/';
+	const scripts: { [key: string]: string[] } = {
+		'tsx': ['prism-typescript.min.js', 'prism-jsx.min.js', 'prism-tsx.min.js'],
+		'jsx': ['prism-javascript.min.js', 'prism-jsx.min.js'],
+		'javascript': ['prism-javascript.min.js'],
+		'html': ['prism-markup.min.js', 'prism-css.min.js'],
+		'css': ['prism-css.min.js'],
+		'scss': ['prism-css.min.js', 'prism-scss.min.js'],
+		'sass': ['prism-css.min.js', 'prism-sass.min.js'],
+		'less': ['prism-css.min.js', 'prism-less.min.js'],
+		'json': ['prism-json.min.js'],
+		'jsonc': ['prism-json.min.js'],
+		'markdown': ['prism-markdown.min.js'],
+		'python': ['prism-python.min.js'],
+		'java': ['prism-java.min.js'],
+		'c': ['prism-c.min.js'],
+		'cpp': ['prism-cpp.min.js'],
+		'csharp': ['prism-csharp.min.js'],
+		'php': ['prism-php.min.js'],
+		'ruby': ['prism-ruby.min.js'],
+		'go': ['prism-go.min.js'],
+		'rust': ['prism-rust.min.js'],
+		'swift': ['prism-swift.min.js'],
+		'kotlin': ['prism-kotlin.min.js'],
+		'bash': ['prism-bash.min.js'],
+		'powershell': ['prism-powershell.min.js'],
+		'sql': ['prism-sql.min.js'],
+		'yaml': ['prism-yaml.min.js'],
+		'xml': ['prism-markup.min.js'],
+		'dockerfile': ['prism-dockerfile.min.js'],
+		'graphql': ['prism-graphql.min.js'],
+		'vue': ['prism-markup.min.js', 'prism-javascript.min.js', 'prism-css.min.js', 'prism-vue.min.js'],
+		'r': ['prism-r.min.js'],
+		'matlab': ['prism-matlab.min.js'],
+		'lua': ['prism-lua.min.js'],
+		'perl': ['prism-perl.min.js'],
+		'scala': ['prism-scala.min.js'],
+		'groovy': ['prism-groovy.min.js'],
+		'dart': ['prism-dart.min.js'],
+		'elixir': ['prism-elixir.min.js'],
+		'clojure': ['prism-clojure.min.js'],
+		'fsharp': ['prism-fsharp.min.js'],
+		'haskell': ['prism-haskell.min.js'],
+		'ocaml': ['prism-ocaml.min.js'],
+		'racket': ['prism-racket.min.js'],
+		'scheme': ['prism-scheme.min.js'],
+		'tcl': ['prism-tcl.min.js'],
+		'verilog': ['prism-verilog.min.js'],
+		'vhdl': ['prism-vhdl.min.js'],
+		'coffeescript': ['prism-coffeescript.min.js']
+	};
+
+	const requiredScripts = scripts[language] || ['prism-typescript.min.js'];
+	return requiredScripts.map(script => `<script src="${baseUrl}${script}"></script>`).join('\n\t\t');
+}
+
 function getLanguageFromFileName(fileName: string): string {
 	const extension = path.extname(fileName).toLowerCase();
 	switch (extension) {
+		// TypeScript/JavaScript
 		case '.ts':
 		case '.tsx':
 			return 'tsx';
 		case '.js':
 		case '.jsx':
 			return 'jsx';
+		case '.mjs':
+			return 'javascript';
+		case '.cjs':
+			return 'javascript';
+		// HTML
+		case '.html':
+		case '.htm':
+			return 'html';
+		// CSS
 		case '.css':
 			return 'css';
+		case '.scss':
+			return 'scss';
+		case '.sass':
+			return 'sass';
+		case '.less':
+			return 'less';
+		// JSON
 		case '.json':
 			return 'json';
+		case '.jsonc':
+			return 'jsonc';
+		// Markdown
+		case '.md':
+		case '.markdown':
+			return 'markdown';
+		// Python
+		case '.py':
+			return 'python';
+		// Java
+		case '.java':
+			return 'java';
+		// C/C++
+		case '.c':
+			return 'c';
+		case '.cpp':
+		case '.cc':
+		case '.cxx':
+			return 'cpp';
+		case '.h':
+		case '.hpp':
+			return 'cpp';
+		// C#
+		case '.cs':
+			return 'csharp';
+		// PHP
+		case '.php':
+			return 'php';
+		// Ruby
+		case '.rb':
+			return 'ruby';
+		// Go
+		case '.go':
+			return 'go';
+		// Rust
+		case '.rs':
+			return 'rust';
+		// Swift
+		case '.swift':
+			return 'swift';
+		// Kotlin
+		case '.kt':
+		case '.kts':
+			return 'kotlin';
+		// Shell
+		case '.sh':
+		case '.bash':
+			return 'bash';
+		case '.ps1':
+			return 'powershell';
+		case '.cmd':
+		case '.bat':
+			return 'batch';
+		// SQL
+		case '.sql':
+			return 'sql';
+		// YAML
+		case '.yml':
+		case '.yaml':
+			return 'yaml';
+		// XML
+		case '.xml':
+			return 'xml';
+		// Docker
+		case '.dockerfile':
+		case '.docker':
+			return 'dockerfile';
+		// GraphQL
+		case '.graphql':
+		case '.gql':
+			return 'graphql';
+		// Vue
+		case '.vue':
+			return 'vue';
+		// R
+		case '.r':
+			return 'r';
+		// MATLAB
+		case '.m':
+			return 'matlab';
+		// Lua
+		case '.lua':
+			return 'lua';
+		// Perl
+		case '.pl':
+		case '.pm':
+			return 'perl';
+		// Scala
+		case '.scala':
+			return 'scala';
+		// Groovy
+		case '.groovy':
+			return 'groovy';
+		// Dart
+		case '.dart':
+			return 'dart';
+		// Elixir
+		case '.ex':
+		case '.exs':
+			return 'elixir';
+		// Clojure
+		case '.clj':
+		case '.cljs':
+			return 'clojure';
+		// F#
+		case '.fs':
+		case '.fsx':
+			return 'fsharp';
+		// Haskell
+		case '.hs':
+			return 'haskell';
+		// OCaml
+		case '.ml':
+		case '.mli':
+			return 'ocaml';
+		// Racket
+		case '.rkt':
+			return 'racket';
+		// Scheme
+		case '.scm':
+			return 'scheme';
+		// Tcl
+		case '.tcl':
+			return 'tcl';
+		// Verilog
+		case '.v':
+		case '.vh':
+			return 'verilog';
+		// VHDL
+		case '.vhdl':
+		case '.vhd':
+			return 'vhdl';
+		// Coffeescript
+		case '.coffee':
+			return 'coffeescript';
+		// TypeScript
 		default:
 			return 'typescript';
 	}
