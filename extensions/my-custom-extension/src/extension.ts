@@ -9,6 +9,12 @@ export function activate(context: vscode.ExtensionContext) {
 			const text = editor.document.getText(selection);
 			const fileName = path.basename(editor.document.fileName);
 
+			// Get the starting line number for proper line numbering
+			const startLine = selection.start.line + 1;
+			// Get editor configuration
+			const tabSize = editor.options.tabSize as number;
+			const insertSpaces = editor.options.insertSpaces as boolean;
+
 			const panel = vscode.window.createWebviewPanel(
 				'selectedText',
 				'Selected Text Viewer',
@@ -19,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			);
 
-			panel.webview.html = getWebviewContent(text, fileName);
+			panel.webview.html = getWebviewContent(text, fileName, startLine, tabSize, insertSpaces);
 
 			panel.webview.onDidReceiveMessage(
 				message => {
@@ -40,11 +46,26 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 }
 
-function getWebviewContent(text: string, fileName: string) {
+function getWebviewContent(
+	text: string,
+	fileName: string,
+	startLine: number,
+	tabSize: number,
+	insertSpaces: boolean
+) {
 	const lines = text.split('\n');
-	const lineNumbers = lines.map((_, index) => index + 1).join('\n');
+	const lineNumbers = lines.map((_, index) => startLine + index).join('\n');
 
-	const escapedText = text
+	// Process the text to preserve indentation
+	const processedText = lines.map(line => {
+		// Replace tabs with spaces if insertSpaces is true
+		if (insertSpaces) {
+			return line.replace(/\t/g, ' '.repeat(tabSize));
+		}
+		return line;
+	}).join('\n');
+
+	const escapedText = processedText
 		.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
@@ -140,6 +161,8 @@ function getWebviewContent(text: string, fileName: string) {
 				grid-template-columns: auto 1fr;
 				gap: 16px;
 				background: #1a1b26;
+				tab-size: ${tabSize};
+				-moz-tab-size: ${tabSize};
 			}
 			.line-numbers {
 				color: #565f89;
